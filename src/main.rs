@@ -106,11 +106,7 @@ fn main() {
     let args = Args::parse();
     let config = load_config();
 
-    let api_base = resolve(
-        args.api_base,
-        config.api_base,
-        "https://api.openai.com/v1",
-    );
+    let api_base = resolve(args.api_base, config.api_base, "https://api.openai.com/v1");
     let api_key = resolve(args.api_key, config.api_key, "");
     let model = resolve(args.model, config.model, "gpt-4o-mini");
 
@@ -181,7 +177,11 @@ fn main() {
     let chat_resp: ChatResponse = match response.json() {
         Ok(r) => r,
         Err(e) => {
-            eprintln!("\n{} Failed to parse response: {}", "error:".red().bold(), e);
+            eprintln!(
+                "\n{} Failed to parse response: {}",
+                "error:".red().bold(),
+                e
+            );
             std::process::exit(1);
         }
     };
@@ -205,10 +205,7 @@ fn main() {
     }
 
     // --- Execute ---
-    let status = Command::new("bash")
-        .arg("-c")
-        .arg(&command)
-        .status();
+    let status = Command::new("bash").arg("-c").arg(&command).status();
 
     match status {
         Ok(s) => std::process::exit(s.code().unwrap_or(1)),

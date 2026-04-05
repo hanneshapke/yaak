@@ -4,7 +4,7 @@ version = "0.0.3"
 edition = "2021"
 description = "Translate natural language to bash commands using an OpenAI-compatible LLM"
 license = "Apache-2.0"
-homepage = "https://hanneshapke.com/yaak"
+homepage = "https://www.hanneshapke.com/yaak/"
 repository = "https://github.com/hanneshapke/yaak"
 
 [dependencies]

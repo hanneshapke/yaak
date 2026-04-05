@@ -5,6 +5,22 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.2] — 2026-04-05
+
+### Added
+- OS and shell detection injected into LLM system prompt for platform-appropriate commands
+- Config file lookup at `~/.config/yaak/config.toml` (XDG-style) with fallback to platform-native config dir
+
+### Changed
+- Commands now run in the user's actual shell (`$SHELL`) instead of hardcoded `bash`
+- Switched `reqwest` from `native-tls` to `rustls-tls` for easier cross-compilation
+
+### Fixed
+- Config file not found on macOS where `dirs::config_dir()` returns `~/Library/Application Support`
+- LLM generating GNU/Linux-specific flags (e.g. `find -printf`) on macOS
+
+---
+
 ## [0.0.1] — 2026-04-04
 
 ### Added

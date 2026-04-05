@@ -2,6 +2,7 @@ use clap::Parser;
 use colored::Colorize;
 use dialoguer::Confirm;
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::process::Command;
 
 /// yaak — translate natural language into bash commands using an OpenAI-compatible LLM
@@ -129,12 +130,19 @@ fn main() {
     let description = args.description.join(" ");
     let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
 
-    let system_prompt = concat!(
-        "You are a command-line assistant. The user will describe what they want to do ",
-        "and you must respond with ONLY the exact bash command to accomplish it. ",
-        "No explanation, no markdown fences, no commentary — just the raw command. ",
-        "If multiple commands are needed, join them with && or ;. ",
-        "Use common, portable tools when possible."
+    let os_name = env::consts::OS;
+    let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
+    let shell_name = shell.rsplit('/').next().unwrap_or("bash");
+
+    let system_prompt = format!(
+        "You are a command-line assistant. The user is running {} on {}. \
+         The user will describe what they want to do \
+         and you must respond with ONLY the exact shell command to accomplish it. \
+         No explanation, no markdown fences, no commentary — just the raw command. \
+         Only use flags and tools available on {}. \
+         If multiple commands are needed, join them with && or ;. \
+         Use common, portable tools when possible.",
+        shell_name, os_name, os_name
     );
 
     let request_body = ChatRequest {
@@ -142,7 +150,7 @@ fn main() {
         messages: vec![
             Message {
                 role: "system".into(),
-                content: system_prompt.into(),
+                content: system_prompt,
             },
             Message {
                 role: "user".into(),
@@ -213,7 +221,7 @@ fn main() {
     }
 
     // --- Execute ---
-    let status = Command::new("bash").arg("-c").arg(&command).status();
+    let status = Command::new(&shell).arg("-c").arg(&command).status();
 
     match status {
         Ok(s) => std::process::exit(s.code().unwrap_or(1)),

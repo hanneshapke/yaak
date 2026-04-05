@@ -195,7 +195,11 @@ fn main() {
     let api_base = resolve(args.api_base, config.api_base, "https://api.openai.com/v1");
     let api_key = resolve(args.api_key, config.api_key, "");
     let anthropic = is_anthropic(&api_base);
-    let default_model = if anthropic { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+    let default_model = if anthropic {
+        "claude-sonnet-4-6"
+    } else {
+        "gpt-4o-mini"
+    };
     let model = resolve(args.model, config.model, default_model);
 
     if api_key.is_empty() {
@@ -548,10 +552,7 @@ CAUTION: None for this command.";
 
     #[test]
     fn resolve_falls_back_to_config() {
-        assert_eq!(
-            resolve(None, Some("config".into()), "fallback"),
-            "config"
-        );
+        assert_eq!(resolve(None, Some("config".into()), "fallback"), "config");
     }
 
     #[test]
@@ -568,7 +569,10 @@ CAUTION: None for this command.";
 
     #[test]
     fn extract_strips_dollar_prefix() {
-        assert_eq!(extract_command("$ find . -name '*.rs'"), "find . -name '*.rs'");
+        assert_eq!(
+            extract_command("$ find . -name '*.rs'"),
+            "find . -name '*.rs'"
+        );
     }
 
     #[test]
@@ -620,7 +624,8 @@ CAUTION: None for this command.";
 
     #[test]
     fn anthropic_response_multiple_blocks() {
-        let json = r#"{"content":[{"type":"text","text":"first"},{"type":"text","text":"second"}]}"#;
+        let json =
+            r#"{"content":[{"type":"text","text":"first"},{"type":"text","text":"second"}]}"#;
         let resp: AnthropicResponse = serde_json::from_str(json).unwrap();
         assert_eq!(resp.content.len(), 2);
         assert_eq!(resp.content[0].text, "first");
@@ -634,8 +639,14 @@ CAUTION: None for this command.";
         let req = ChatRequest {
             model: "gpt-4o-mini".into(),
             messages: vec![
-                Message { role: "system".into(), content: "You are helpful.".into() },
-                Message { role: "user".into(), content: "list files".into() },
+                Message {
+                    role: "system".into(),
+                    content: "You are helpful.".into(),
+                },
+                Message {
+                    role: "user".into(),
+                    content: "list files".into(),
+                },
             ],
             temperature: 0.0,
         };
@@ -659,21 +670,33 @@ CAUTION: None for this command.";
     #[test]
     fn default_model_for_anthropic() {
         let api_base = "https://api.anthropic.com/v1";
-        let default_model = if is_anthropic(api_base) { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+        let default_model = if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else {
+            "gpt-4o-mini"
+        };
         assert_eq!(resolve(None, None, default_model), "claude-sonnet-4-6");
     }
 
     #[test]
     fn default_model_for_openai() {
         let api_base = "https://api.openai.com/v1";
-        let default_model = if is_anthropic(api_base) { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+        let default_model = if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else {
+            "gpt-4o-mini"
+        };
         assert_eq!(resolve(None, None, default_model), "gpt-4o-mini");
     }
 
     #[test]
     fn explicit_model_overrides_anthropic_default() {
         let api_base = "https://api.anthropic.com/v1";
-        let default_model = if is_anthropic(api_base) { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+        let default_model = if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else {
+            "gpt-4o-mini"
+        };
         assert_eq!(
             resolve(Some("claude-opus-4-6".into()), None, default_model),
             "claude-opus-4-6"

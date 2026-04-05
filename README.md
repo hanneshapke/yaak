@@ -82,4 +82,5 @@ yaak -u https://api.anthropic.com/v1 -k sk-ant-... find all large log files
 - **Together AI** — `https://api.together.xyz/v1`
 - **OpenRouter** — `https://openrouter.ai/api/v1`
 - **Groq** — `https://api.groq.com/openai/v1`
-- **vLLM / LocalAI / LM Studio** — your local URL
+- **LM Studio** — `http://localhost:1234/v1`
+- **vLLM / LocalAI** — your local URL

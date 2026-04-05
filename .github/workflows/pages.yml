@@ -2,8 +2,14 @@ name: Deploy Landing Site
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    paths:
+      - 'CHANGELOG.md'
+      - 'landing/**'
+      - 'scripts/build_changelog.py'
+      - '.github/workflows/pages.yml'
+  release:
+    types: [published]
 
 permissions:
   contents: read

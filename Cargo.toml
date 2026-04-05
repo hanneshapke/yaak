@@ -6,7 +6,7 @@ description = "Translate natural language to bash commands using an OpenAI-compa
 
 [dependencies]
 clap = { version = "4", features = ["derive", "env"] }
-reqwest = { version = "0.12", features = ["json", "blocking"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 colored = "2"

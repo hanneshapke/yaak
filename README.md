@@ -65,7 +65,17 @@ yaak -y count lines of code in src/
 
 ## Compatible providers
 
-Any service exposing an `/v1/chat/completions` endpoint works:
+yaak auto-detects the provider from the API base URL and uses the appropriate request format.
+
+**Anthropic (native Messages API):**
+
+- **Anthropic** — `https://api.anthropic.com/v1`
+
+```bash
+yaak -u https://api.anthropic.com/v1 -k sk-ant-... find all large log files
+```
+
+**OpenAI-compatible** (`/v1/chat/completions`):
 
 - **OpenAI** — `https://api.openai.com/v1`
 - **Ollama** — `http://localhost:11434/v1` (no key needed, use `-k none`)

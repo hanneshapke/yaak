@@ -39,6 +39,8 @@ struct Args {
     reverse: bool,
 }
 
+// --- OpenAI-compatible structs ---
+
 #[derive(Serialize)]
 struct ChatRequest {
     model: String,
@@ -65,6 +67,32 @@ struct Choice {
 #[derive(Deserialize)]
 struct MessageContent {
     content: String,
+}
+
+// --- Anthropic structs ---
+
+#[derive(Serialize)]
+struct AnthropicRequest {
+    model: String,
+    system: String,
+    messages: Vec<Message>,
+    max_tokens: u32,
+    temperature: f32,
+}
+
+#[derive(Deserialize)]
+struct AnthropicResponse {
+    content: Vec<AnthropicContent>,
+}
+
+#[derive(Deserialize)]
+struct AnthropicContent {
+    text: String,
+}
+
+/// Returns true if the API base URL points to Anthropic's API.
+fn is_anthropic(api_base: &str) -> bool {
+    api_base.contains("anthropic.com")
 }
 
 #[derive(Deserialize, Default)]
@@ -166,7 +194,9 @@ fn main() {
 
     let api_base = resolve(args.api_base, config.api_base, "https://api.openai.com/v1");
     let api_key = resolve(args.api_key, config.api_key, "");
-    let model = resolve(args.model, config.model, "gpt-4o-mini");
+    let anthropic = is_anthropic(&api_base);
+    let default_model = if anthropic { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+    let model = resolve(args.model, config.model, default_model);
 
     if api_key.is_empty() {
         eprintln!(
@@ -177,7 +207,6 @@ fn main() {
     }
 
     let description = args.description.join(" ");
-    let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
 
     let os_name = env::consts::OS;
     let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
@@ -214,21 +243,6 @@ fn main() {
         )
     };
 
-    let request_body = ChatRequest {
-        model: model.clone(),
-        messages: vec![
-            Message {
-                role: "system".into(),
-                content: system_prompt,
-            },
-            Message {
-                role: "user".into(),
-                content: description.clone(),
-            },
-        ],
-        temperature: 0.0,
-    };
-
     // --- Call the LLM ---
     if args.reverse {
         eprint!("{}", "Explaining... ".dimmed());
@@ -237,13 +251,51 @@ fn main() {
     }
 
     let client = reqwest::blocking::Client::new();
-    let response = match client
-        .post(&url)
-        .header("Authorization", format!("Bearer {}", api_key))
-        .header("Content-Type", "application/json")
-        .json(&request_body)
-        .send()
-    {
+
+    let response = if anthropic {
+        let url = format!("{}/messages", api_base.trim_end_matches('/'));
+        let request_body = AnthropicRequest {
+            model: model.clone(),
+            system: system_prompt,
+            messages: vec![Message {
+                role: "user".into(),
+                content: description.clone(),
+            }],
+            max_tokens: 1024,
+            temperature: 0.0,
+        };
+        client
+            .post(&url)
+            .header("x-api-key", &api_key)
+            .header("anthropic-version", "2023-06-01")
+            .header("Content-Type", "application/json")
+            .json(&request_body)
+            .send()
+    } else {
+        let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
+        let request_body = ChatRequest {
+            model: model.clone(),
+            messages: vec![
+                Message {
+                    role: "system".into(),
+                    content: system_prompt,
+                },
+                Message {
+                    role: "user".into(),
+                    content: description.clone(),
+                },
+            ],
+            temperature: 0.0,
+        };
+        client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", api_key))
+            .header("Content-Type", "application/json")
+            .json(&request_body)
+            .send()
+    };
+
+    let response = match response {
         Ok(r) => r,
         Err(e) => {
             eprintln!("\n{} Failed to reach API: {}", "error:".red().bold(), e);
@@ -263,28 +315,42 @@ fn main() {
         std::process::exit(1);
     }
 
-    let chat_resp: ChatResponse = match response.json() {
-        Ok(r) => r,
-        Err(e) => {
-            eprintln!(
-                "\n{} Failed to parse response: {}",
-                "error:".red().bold(),
-                e
-            );
-            std::process::exit(1);
-        }
+    let raw_content = if anthropic {
+        let resp: AnthropicResponse = match response.json() {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!(
+                    "\n{} Failed to parse response: {}",
+                    "error:".red().bold(),
+                    e
+                );
+                std::process::exit(1);
+            }
+        };
+        resp.content[0].text.clone()
+    } else {
+        let resp: ChatResponse = match response.json() {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!(
+                    "\n{} Failed to parse response: {}",
+                    "error:".red().bold(),
+                    e
+                );
+                std::process::exit(1);
+            }
+        };
+        resp.choices[0].message.content.clone()
     };
-
-    let raw_content = &chat_resp.choices[0].message.content;
 
     if args.reverse {
         // --- Reverse / Explain mode ---
         eprintln!("\r"); // clear "Thinking..."
-        render_explanation(&description, raw_content);
+        render_explanation(&description, &raw_content);
         std::process::exit(0);
     }
 
-    let command = extract_command(raw_content);
+    let command = extract_command(&raw_content);
 
     // --- Display and confirm ---
     eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
@@ -458,5 +524,13 @@ CAUTION: None for this command.";
     #[test]
     fn render_explanation_handles_minimal_input() {
         render_explanation("echo hello", "SUMMARY: Prints hello to stdout.");
+    }
+
+    #[test]
+    fn detects_anthropic_provider() {
+        assert!(is_anthropic("https://api.anthropic.com/v1"));
+        assert!(is_anthropic("https://api.anthropic.com"));
+        assert!(!is_anthropic("https://api.openai.com/v1"));
+        assert!(!is_anthropic("http://localhost:11434/v1"));
     }
 }

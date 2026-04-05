@@ -39,6 +39,8 @@ struct Args {
     reverse: bool,
 }
 
+// --- OpenAI-compatible structs ---
+
 #[derive(Serialize)]
 struct ChatRequest {
     model: String,
@@ -65,6 +67,32 @@ struct Choice {
 #[derive(Deserialize)]
 struct MessageContent {
     content: String,
+}
+
+// --- Anthropic structs ---
+
+#[derive(Serialize)]
+struct AnthropicRequest {
+    model: String,
+    system: String,
+    messages: Vec<Message>,
+    max_tokens: u32,
+    temperature: f32,
+}
+
+#[derive(Deserialize)]
+struct AnthropicResponse {
+    content: Vec<AnthropicContent>,
+}
+
+#[derive(Deserialize)]
+struct AnthropicContent {
+    text: String,
+}
+
+/// Returns true if the API base URL points to Anthropic's API.
+fn is_anthropic(api_base: &str) -> bool {
+    api_base.contains("anthropic.com")
 }
 
 #[derive(Deserialize, Default)]
@@ -166,7 +194,13 @@ fn main() {
 
     let api_base = resolve(args.api_base, config.api_base, "https://api.openai.com/v1");
     let api_key = resolve(args.api_key, config.api_key, "");
-    let model = resolve(args.model, config.model, "gpt-4o-mini");
+    let anthropic = is_anthropic(&api_base);
+    let default_model = if anthropic {
+        "claude-sonnet-4-6"
+    } else {
+        "gpt-4o-mini"
+    };
+    let model = resolve(args.model, config.model, default_model);
 
     if api_key.is_empty() {
         eprintln!(
@@ -177,7 +211,6 @@ fn main() {
     }
 
     let description = args.description.join(" ");
-    let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
 
     let os_name = env::consts::OS;
     let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
@@ -214,21 +247,6 @@ fn main() {
         )
     };
 
-    let request_body = ChatRequest {
-        model: model.clone(),
-        messages: vec![
-            Message {
-                role: "system".into(),
-                content: system_prompt,
-            },
-            Message {
-                role: "user".into(),
-                content: description.clone(),
-            },
-        ],
-        temperature: 0.0,
-    };
-
     // --- Call the LLM ---
     if args.reverse {
         eprint!("{}", "Explaining... ".dimmed());
@@ -237,13 +255,51 @@ fn main() {
     }
 
     let client = reqwest::blocking::Client::new();
-    let response = match client
-        .post(&url)
-        .header("Authorization", format!("Bearer {}", api_key))
-        .header("Content-Type", "application/json")
-        .json(&request_body)
-        .send()
-    {
+
+    let response = if anthropic {
+        let url = format!("{}/messages", api_base.trim_end_matches('/'));
+        let request_body = AnthropicRequest {
+            model: model.clone(),
+            system: system_prompt,
+            messages: vec![Message {
+                role: "user".into(),
+                content: description.clone(),
+            }],
+            max_tokens: 1024,
+            temperature: 0.0,
+        };
+        client
+            .post(&url)
+            .header("x-api-key", &api_key)
+            .header("anthropic-version", "2023-06-01")
+            .header("Content-Type", "application/json")
+            .json(&request_body)
+            .send()
+    } else {
+        let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
+        let request_body = ChatRequest {
+            model: model.clone(),
+            messages: vec![
+                Message {
+                    role: "system".into(),
+                    content: system_prompt,
+                },
+                Message {
+                    role: "user".into(),
+                    content: description.clone(),
+                },
+            ],
+            temperature: 0.0,
+        };
+        client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", api_key))
+            .header("Content-Type", "application/json")
+            .json(&request_body)
+            .send()
+    };
+
+    let response = match response {
         Ok(r) => r,
         Err(e) => {
             eprintln!("\n{} Failed to reach API: {}", "error:".red().bold(), e);
@@ -263,28 +319,42 @@ fn main() {
         std::process::exit(1);
     }
 
-    let chat_resp: ChatResponse = match response.json() {
-        Ok(r) => r,
-        Err(e) => {
-            eprintln!(
-                "\n{} Failed to parse response: {}",
-                "error:".red().bold(),
-                e
-            );
-            std::process::exit(1);
-        }
+    let raw_content = if anthropic {
+        let resp: AnthropicResponse = match response.json() {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!(
+                    "\n{} Failed to parse response: {}",
+                    "error:".red().bold(),
+                    e
+                );
+                std::process::exit(1);
+            }
+        };
+        resp.content[0].text.clone()
+    } else {
+        let resp: ChatResponse = match response.json() {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!(
+                    "\n{} Failed to parse response: {}",
+                    "error:".red().bold(),
+                    e
+                );
+                std::process::exit(1);
+            }
+        };
+        resp.choices[0].message.content.clone()
     };
-
-    let raw_content = &chat_resp.choices[0].message.content;
 
     if args.reverse {
         // --- Reverse / Explain mode ---
         eprintln!("\r"); // clear "Thinking..."
-        render_explanation(&description, raw_content);
+        render_explanation(&description, &raw_content);
         std::process::exit(0);
     }
 
-    let command = extract_command(raw_content);
+    let command = extract_command(&raw_content);
 
     // --- Display and confirm ---
     eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
@@ -458,5 +528,178 @@ CAUTION: None for this command.";
     #[test]
     fn render_explanation_handles_minimal_input() {
         render_explanation("echo hello", "SUMMARY: Prints hello to stdout.");
+    }
+
+    #[test]
+    fn detects_anthropic_provider() {
+        assert!(is_anthropic("https://api.anthropic.com/v1"));
+        assert!(is_anthropic("https://api.anthropic.com"));
+        assert!(!is_anthropic("https://api.openai.com/v1"));
+        assert!(!is_anthropic("http://localhost:11434/v1"));
+        assert!(!is_anthropic("http://localhost:1234/v1"));
+        assert!(!is_anthropic("https://api.together.xyz/v1"));
+    }
+
+    // --- resolve tests ---
+
+    #[test]
+    fn resolve_prefers_cli() {
+        assert_eq!(
+            resolve(Some("cli".into()), Some("config".into()), "fallback"),
+            "cli"
+        );
+    }
+
+    #[test]
+    fn resolve_falls_back_to_config() {
+        assert_eq!(resolve(None, Some("config".into()), "fallback"), "config");
+    }
+
+    #[test]
+    fn resolve_falls_back_to_default() {
+        assert_eq!(resolve(None, None, "fallback"), "fallback");
+    }
+
+    // --- extract_command tests ---
+
+    #[test]
+    fn extract_plain_command() {
+        assert_eq!(extract_command("ls -la"), "ls -la");
+    }
+
+    #[test]
+    fn extract_strips_dollar_prefix() {
+        assert_eq!(
+            extract_command("$ find . -name '*.rs'"),
+            "find . -name '*.rs'"
+        );
+    }
+
+    #[test]
+    fn extract_from_fenced_code_block() {
+        let raw = "```bash\nfind . -name '*.rs'\n```";
+        assert_eq!(extract_command(raw), "find . -name '*.rs'");
+    }
+
+    #[test]
+    fn extract_from_unlabeled_fence() {
+        let raw = "```\necho hello\n```";
+        assert_eq!(extract_command(raw), "echo hello");
+    }
+
+    #[test]
+    fn extract_trims_whitespace() {
+        assert_eq!(extract_command("  ls -la  "), "ls -la");
+    }
+
+    // --- Anthropic serialization tests ---
+
+    #[test]
+    fn anthropic_request_serializes_correctly() {
+        let req = AnthropicRequest {
+            model: "claude-sonnet-4-6".into(),
+            system: "You are helpful.".into(),
+            messages: vec![Message {
+                role: "user".into(),
+                content: "list files".into(),
+            }],
+            max_tokens: 1024,
+            temperature: 0.0,
+        };
+        let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["model"], "claude-sonnet-4-6");
+        assert_eq!(json["system"], "You are helpful.");
+        assert_eq!(json["max_tokens"], 1024);
+        assert_eq!(json["messages"].as_array().unwrap().len(), 1);
+        assert_eq!(json["messages"][0]["role"], "user");
+        assert_eq!(json["messages"][0]["content"], "list files");
+    }
+
+    #[test]
+    fn anthropic_response_deserializes_correctly() {
+        let json = r#"{"content":[{"type":"text","text":"ls -la"}]}"#;
+        let resp: AnthropicResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.content[0].text, "ls -la");
+    }
+
+    #[test]
+    fn anthropic_response_multiple_blocks() {
+        let json =
+            r#"{"content":[{"type":"text","text":"first"},{"type":"text","text":"second"}]}"#;
+        let resp: AnthropicResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.content.len(), 2);
+        assert_eq!(resp.content[0].text, "first");
+        assert_eq!(resp.content[1].text, "second");
+    }
+
+    // --- OpenAI serialization tests ---
+
+    #[test]
+    fn openai_request_serializes_correctly() {
+        let req = ChatRequest {
+            model: "gpt-4o-mini".into(),
+            messages: vec![
+                Message {
+                    role: "system".into(),
+                    content: "You are helpful.".into(),
+                },
+                Message {
+                    role: "user".into(),
+                    content: "list files".into(),
+                },
+            ],
+            temperature: 0.0,
+        };
+        let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["model"], "gpt-4o-mini");
+        assert_eq!(json["messages"].as_array().unwrap().len(), 2);
+        assert_eq!(json["messages"][0]["role"], "system");
+        // Should NOT have a "system" top-level field
+        assert!(json.get("system").is_none());
+    }
+
+    #[test]
+    fn openai_response_deserializes_correctly() {
+        let json = r#"{"choices":[{"message":{"content":"ls -la"}}]}"#;
+        let resp: ChatResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.choices[0].message.content, "ls -la");
+    }
+
+    // --- Default model selection ---
+
+    #[test]
+    fn default_model_for_anthropic() {
+        let api_base = "https://api.anthropic.com/v1";
+        let default_model = if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else {
+            "gpt-4o-mini"
+        };
+        assert_eq!(resolve(None, None, default_model), "claude-sonnet-4-6");
+    }
+
+    #[test]
+    fn default_model_for_openai() {
+        let api_base = "https://api.openai.com/v1";
+        let default_model = if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else {
+            "gpt-4o-mini"
+        };
+        assert_eq!(resolve(None, None, default_model), "gpt-4o-mini");
+    }
+
+    #[test]
+    fn explicit_model_overrides_anthropic_default() {
+        let api_base = "https://api.anthropic.com/v1";
+        let default_model = if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else {
+            "gpt-4o-mini"
+        };
+        assert_eq!(
+            resolve(Some("claude-opus-4-6".into()), None, default_model),
+            "claude-opus-4-6"
+        );
     }
 }

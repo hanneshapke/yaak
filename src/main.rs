@@ -532,5 +532,151 @@ CAUTION: None for this command.";
         assert!(is_anthropic("https://api.anthropic.com"));
         assert!(!is_anthropic("https://api.openai.com/v1"));
         assert!(!is_anthropic("http://localhost:11434/v1"));
+        assert!(!is_anthropic("http://localhost:1234/v1"));
+        assert!(!is_anthropic("https://api.together.xyz/v1"));
+    }
+
+    // --- resolve tests ---
+
+    #[test]
+    fn resolve_prefers_cli() {
+        assert_eq!(
+            resolve(Some("cli".into()), Some("config".into()), "fallback"),
+            "cli"
+        );
+    }
+
+    #[test]
+    fn resolve_falls_back_to_config() {
+        assert_eq!(
+            resolve(None, Some("config".into()), "fallback"),
+            "config"
+        );
+    }
+
+    #[test]
+    fn resolve_falls_back_to_default() {
+        assert_eq!(resolve(None, None, "fallback"), "fallback");
+    }
+
+    // --- extract_command tests ---
+
+    #[test]
+    fn extract_plain_command() {
+        assert_eq!(extract_command("ls -la"), "ls -la");
+    }
+
+    #[test]
+    fn extract_strips_dollar_prefix() {
+        assert_eq!(extract_command("$ find . -name '*.rs'"), "find . -name '*.rs'");
+    }
+
+    #[test]
+    fn extract_from_fenced_code_block() {
+        let raw = "```bash\nfind . -name '*.rs'\n```";
+        assert_eq!(extract_command(raw), "find . -name '*.rs'");
+    }
+
+    #[test]
+    fn extract_from_unlabeled_fence() {
+        let raw = "```\necho hello\n```";
+        assert_eq!(extract_command(raw), "echo hello");
+    }
+
+    #[test]
+    fn extract_trims_whitespace() {
+        assert_eq!(extract_command("  ls -la  "), "ls -la");
+    }
+
+    // --- Anthropic serialization tests ---
+
+    #[test]
+    fn anthropic_request_serializes_correctly() {
+        let req = AnthropicRequest {
+            model: "claude-sonnet-4-6".into(),
+            system: "You are helpful.".into(),
+            messages: vec![Message {
+                role: "user".into(),
+                content: "list files".into(),
+            }],
+            max_tokens: 1024,
+            temperature: 0.0,
+        };
+        let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["model"], "claude-sonnet-4-6");
+        assert_eq!(json["system"], "You are helpful.");
+        assert_eq!(json["max_tokens"], 1024);
+        assert_eq!(json["messages"].as_array().unwrap().len(), 1);
+        assert_eq!(json["messages"][0]["role"], "user");
+        assert_eq!(json["messages"][0]["content"], "list files");
+    }
+
+    #[test]
+    fn anthropic_response_deserializes_correctly() {
+        let json = r#"{"content":[{"type":"text","text":"ls -la"}]}"#;
+        let resp: AnthropicResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.content[0].text, "ls -la");
+    }
+
+    #[test]
+    fn anthropic_response_multiple_blocks() {
+        let json = r#"{"content":[{"type":"text","text":"first"},{"type":"text","text":"second"}]}"#;
+        let resp: AnthropicResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.content.len(), 2);
+        assert_eq!(resp.content[0].text, "first");
+        assert_eq!(resp.content[1].text, "second");
+    }
+
+    // --- OpenAI serialization tests ---
+
+    #[test]
+    fn openai_request_serializes_correctly() {
+        let req = ChatRequest {
+            model: "gpt-4o-mini".into(),
+            messages: vec![
+                Message { role: "system".into(), content: "You are helpful.".into() },
+                Message { role: "user".into(), content: "list files".into() },
+            ],
+            temperature: 0.0,
+        };
+        let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["model"], "gpt-4o-mini");
+        assert_eq!(json["messages"].as_array().unwrap().len(), 2);
+        assert_eq!(json["messages"][0]["role"], "system");
+        // Should NOT have a "system" top-level field
+        assert!(json.get("system").is_none());
+    }
+
+    #[test]
+    fn openai_response_deserializes_correctly() {
+        let json = r#"{"choices":[{"message":{"content":"ls -la"}}]}"#;
+        let resp: ChatResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.choices[0].message.content, "ls -la");
+    }
+
+    // --- Default model selection ---
+
+    #[test]
+    fn default_model_for_anthropic() {
+        let api_base = "https://api.anthropic.com/v1";
+        let default_model = if is_anthropic(api_base) { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+        assert_eq!(resolve(None, None, default_model), "claude-sonnet-4-6");
+    }
+
+    #[test]
+    fn default_model_for_openai() {
+        let api_base = "https://api.openai.com/v1";
+        let default_model = if is_anthropic(api_base) { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+        assert_eq!(resolve(None, None, default_model), "gpt-4o-mini");
+    }
+
+    #[test]
+    fn explicit_model_overrides_anthropic_default() {
+        let api_base = "https://api.anthropic.com/v1";
+        let default_model = if is_anthropic(api_base) { "claude-sonnet-4-6" } else { "gpt-4o-mini" };
+        assert_eq!(
+            resolve(Some("claude-opus-4-6".into()), None, default_model),
+            "claude-opus-4-6"
+        );
     }
 }

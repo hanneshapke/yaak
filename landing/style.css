@@ -1,0 +1,128 @@
+/* ============ VARIABLES ============ */
+:root {
+  --paper: #f6f1eb;
+  --paper-dark: #ede6dc;
+  --ink: #1a1615;
+  --ink-light: #3d3633;
+  --ink-dim: #7a706a;
+  --ink-faint: #b0a79f;
+  --red: #c4423a;
+  --red-light: #d9605a;
+  --cream: #faf7f3;
+  --rule: #d1c9c0;
+  --rule-dark: #a89e95;
+  --code-bg: #1a1615;
+  --code-fg: #f6f1eb;
+  --code-green: #7ec87e;
+  --code-amber: #e0b44a;
+}
+
+/* ============ RESET ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Paper texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+::selection { background: var(--red); color: white; }
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ============ NAV ============ */
+nav {
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+}
+
+.nav-brand {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-right a {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: color 0.2s;
+}
+.nav-right a:hover { color: var(--red); }
+.nav-right a.active { color: var(--red); }
+
+.nav-gh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--ink);
+  color: var(--paper) !important;
+  border-radius: 4px;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  transition: background 0.2s !important;
+}
+.nav-gh:hover { background: var(--red) !important; color: white !important; }
+
+/* ============ FOOTER ============ */
+footer {
+  padding: 28px 32px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-faint);
+}
+footer a { color: var(--ink-dim); text-decoration: none; }
+footer a:hover { color: var(--red); }
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ RESPONSIVE (shared) ============ */
+@media (max-width: 768px) {
+  nav { flex-wrap: wrap; gap: 12px; }
+  .nav-right { gap: 16px; }
+  footer { flex-direction: column; gap: 8px; text-align: center; }
+}

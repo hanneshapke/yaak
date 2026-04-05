@@ -28,6 +28,15 @@ struct Args {
     /// Skip confirmation prompt
     #[arg(short = 'y', long)]
     yes: bool,
+
+    /// Reverse mode: explain a command instead of generating one
+    #[arg(
+        short = 'r',
+        long = "reverse",
+        visible_short_alias = 'e',
+        visible_alias = "explain"
+    )]
+    reverse: bool,
 }
 
 #[derive(Serialize)]
@@ -174,16 +183,36 @@ fn main() {
     let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
     let shell_name = shell.rsplit('/').next().unwrap_or("bash");
 
-    let system_prompt = format!(
-        "You are a command-line assistant. The user is running {} on {}. \
-         The user will describe what they want to do \
-         and you must respond with ONLY the exact shell command to accomplish it. \
-         No explanation, no markdown fences, no commentary — just the raw command. \
-         Only use flags and tools available on {}. \
-         If multiple commands are needed, join them with && or ;. \
-         Use common, portable tools when possible.",
-        shell_name, os_name, os_name
-    );
+    let system_prompt = if args.reverse {
+        format!(
+            "You are a command-line teacher. The user is running {} on {}. \
+             The user will give you a shell command and you must explain it in detail.\n\n\
+             Format your response EXACTLY as follows (use these exact section headers):\n\
+             SUMMARY: A single-sentence plain-English summary of what the command does.\n\n\
+             BREAKDOWN:\n\
+             For each part of the command, output a line like:\n\
+             PART: <token> | <explanation>\n\
+             Include the base command, every flag, every argument, operators (|, &&, >, etc.), \
+             and subcommands. Each on its own PART line.\n\n\
+             EXAMPLES:\n\
+             Provide 1-2 short related example variations, each on a line starting with EXAMPLE: <command> | <description>\n\n\
+             CAUTION: (only if the command is dangerous or has side effects, otherwise omit this section entirely)\n\
+             A short warning about what could go wrong.\n\n\
+             Do NOT use markdown. Do NOT use code fences. Use the exact format above.",
+            shell_name, os_name
+        )
+    } else {
+        format!(
+            "You are a command-line assistant. The user is running {} on {}. \
+             The user will describe what they want to do \
+             and you must respond with ONLY the exact shell command to accomplish it. \
+             No explanation, no markdown fences, no commentary — just the raw command. \
+             Only use flags and tools available on {}. \
+             If multiple commands are needed, join them with && or ;. \
+             Use common, portable tools when possible.",
+            shell_name, os_name, os_name
+        )
+    };
 
     let request_body = ChatRequest {
         model: model.clone(),
@@ -201,7 +230,11 @@ fn main() {
     };
 
     // --- Call the LLM ---
-    eprint!("{}", "Thinking... ".dimmed());
+    if args.reverse {
+        eprint!("{}", "Explaining... ".dimmed());
+    } else {
+        eprint!("{}", "Thinking... ".dimmed());
+    }
 
     let client = reqwest::blocking::Client::new();
     let response = match client
@@ -243,6 +276,14 @@ fn main() {
     };
 
     let raw_content = &chat_resp.choices[0].message.content;
+
+    if args.reverse {
+        // --- Reverse / Explain mode ---
+        eprintln!("\r"); // clear "Thinking..."
+        render_explanation(&description, raw_content);
+        std::process::exit(0);
+    }
+
     let command = extract_command(raw_content);
 
     // --- Display and confirm ---
@@ -282,6 +323,82 @@ fn main() {
     }
 }
 
+/// Render a richly formatted explanation of a command in the terminal.
+fn render_explanation(command: &str, raw: &str) {
+    let separator = "─".repeat(60);
+
+    // Header: the command being explained
+    eprintln!("{}", separator.dimmed());
+    eprintln!("  {} {}", "⟩".cyan().bold(), command.green().bold());
+    eprintln!("{}", separator.dimmed());
+
+    let mut in_breakdown = false;
+    let mut in_examples = false;
+
+    for line in raw.lines() {
+        let trimmed = line.trim();
+
+        if let Some(summary) = trimmed.strip_prefix("SUMMARY:") {
+            eprintln!();
+            eprintln!("  {} {}", "💡".bold(), summary.trim().bold());
+            eprintln!();
+            in_breakdown = false;
+            in_examples = false;
+        } else if trimmed == "BREAKDOWN:" {
+            eprintln!("  {}", "BREAKDOWN".cyan().bold().underline());
+            in_breakdown = true;
+            in_examples = false;
+        } else if trimmed == "EXAMPLES:" {
+            eprintln!();
+            eprintln!("  {}", "EXAMPLES".cyan().bold().underline());
+            in_breakdown = false;
+            in_examples = true;
+        } else if let Some(caution) = trimmed.strip_prefix("CAUTION:") {
+            eprintln!();
+            eprintln!(
+                "  {} {}",
+                "⚠  CAUTION:".yellow().bold(),
+                caution.trim().yellow()
+            );
+            in_breakdown = false;
+            in_examples = false;
+        } else if let Some(part_body) = trimmed.strip_prefix("PART:") {
+            if in_breakdown {
+                if let Some((token, explanation)) = part_body.split_once('|') {
+                    eprintln!(
+                        "    {} {:<20} {} {}",
+                        "│".dimmed(),
+                        token.trim().green().bold(),
+                        "→".dimmed(),
+                        explanation.trim()
+                    );
+                } else {
+                    eprintln!("    {} {}", "│".dimmed(), part_body.trim());
+                }
+            }
+        } else if let Some(ex_body) = trimmed.strip_prefix("EXAMPLE:") {
+            if in_examples {
+                if let Some((cmd, desc)) = ex_body.split_once('|') {
+                    eprintln!(
+                        "    {} {}  {}",
+                        "$".dimmed(),
+                        cmd.trim().green(),
+                        desc.trim().dimmed()
+                    );
+                } else {
+                    eprintln!("    {} {}", "$".dimmed(), ex_body.trim().green());
+                }
+            }
+        } else if !trimmed.is_empty() && !in_breakdown && !in_examples {
+            // Fallback for lines that don't match structured format
+            eprintln!("  {}", trimmed);
+        }
+    }
+
+    eprintln!();
+    eprintln!("{}", separator.dimmed());
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -316,5 +433,30 @@ mod tests {
         assert!(detect_destructive("cat file.txt").is_none());
         assert!(detect_destructive("grep -r pattern .").is_none());
         assert!(detect_destructive("echo remove").is_none());
+    }
+
+    #[test]
+    fn render_explanation_does_not_panic() {
+        let raw = "\
+SUMMARY: Lists all files in the current directory including hidden ones.
+
+BREAKDOWN:
+PART: ls | List directory contents
+PART: -la | Show long format and include hidden files
+PART: /tmp | Target directory
+
+EXAMPLES:
+EXAMPLE: ls -lah | Include human-readable file sizes
+EXAMPLE: ls -lt | Sort by modification time
+
+CAUTION: None for this command.";
+
+        // Should not panic; output goes to stderr
+        render_explanation("ls -la /tmp", raw);
+    }
+
+    #[test]
+    fn render_explanation_handles_minimal_input() {
+        render_explanation("echo hello", "SUMMARY: Prints hello to stdout.");
     }
 }

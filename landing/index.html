@@ -196,6 +196,7 @@
   .t-dim { color: #777; }
   .t-bold { font-weight: 500; color: #fff; }
   .t-red { color: var(--red-light); }
+  .t-cyan { color: #6ec2d6; }
 
   .terminal-line {
     opacity: 0;
@@ -621,8 +622,8 @@
       </div>
       <div class="why-cell">
         <span class="cell-number">vi</span>
-        <h3>Composable by design</h3>
-        <p>Pipe it into scripts. Use <code>-y</code> in CI. Chain it with other tools. It respects exit codes like a good Unix citizen.</p>
+        <h3>Reverse mode</h3>
+        <p>Found a cryptic command? Run <code>yaak --reverse</code> to get a visual, token-by-token breakdown. Learn while you work.</p>
       </div>
     </div>
   </div>
@@ -766,6 +767,24 @@ const demos = [
       { text: '<span class="t-dim">  Command:</span> <span class="t-green">lsof -ti:3000 | xargs kill -9</span>', delay: 900 },
       { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 600 },
       { text: '<span class="t-green">$</span> <span class="cursor-blink"></span>', delay: 400 },
+    ]
+  },
+  {
+    lines: [
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak --reverse</span> <span class="t-dim">find . -name "*.log" -mtime +30 -delete</span>', delay: 300 },
+      { text: '<span class="t-dim">Explaining...</span>', delay: 500, replace: true },
+      { text: '<span class="t-dim">────────────────────────────────────────────</span>', delay: 400 },
+      { text: '  <span class="t-bold">💡 Delete all .log files older than 30 days.</span>', delay: 400 },
+      { text: '', delay: 200 },
+      { text: '  <span class="t-cyan" style="text-decoration:underline">BREAKDOWN</span>', delay: 300 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">find</span>              <span class="t-dim">→</span> Search for files and directories', delay: 200 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">.</span>                 <span class="t-dim">→</span> Start from current directory', delay: 150 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">-name "*.log"</span>     <span class="t-dim">→</span> Match files ending in .log', delay: 150 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">-mtime +30</span>        <span class="t-dim">→</span> Only those modified 30+ days ago', delay: 150 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">-delete</span>           <span class="t-dim">→</span> Remove each matched file', delay: 150 },
+      { text: '', delay: 200 },
+      { text: '  <span class="t-amber">⚠  CAUTION:</span> <span class="t-amber">-delete is permanent — no trash, no undo.</span>', delay: 400 },
+      { text: '<span class="t-dim">────────────────────────────────────────────</span>', delay: 300 },
     ]
   }
 ];

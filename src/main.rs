@@ -150,7 +150,7 @@ fn main() {
         messages: vec![
             Message {
                 role: "system".into(),
-                content: system_prompt.into(),
+                content: system_prompt,
             },
             Message {
                 role: "user".into(),

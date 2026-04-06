@@ -210,7 +210,11 @@ const PROVIDERS: &[Provider] = &[
         name: "Anthropic",
         api_base: "https://api.anthropic.com/v1",
         needs_api_key: true,
-        suggested_models: &["claude-sonnet-4-6", "claude-haiku-4-5-20251001", "claude-opus-4-6"],
+        suggested_models: &[
+            "claude-sonnet-4-6",
+            "claude-haiku-4-5-20251001",
+            "claude-opus-4-6",
+        ],
     },
     Provider {
         name: "Ollama",
@@ -222,19 +226,30 @@ const PROVIDERS: &[Provider] = &[
         name: "Groq",
         api_base: "https://api.groq.com/openai/v1",
         needs_api_key: true,
-        suggested_models: &["llama-3.3-70b-versatile", "gemma2-9b-it", "mixtral-8x7b-32768"],
+        suggested_models: &[
+            "llama-3.3-70b-versatile",
+            "gemma2-9b-it",
+            "mixtral-8x7b-32768",
+        ],
     },
     Provider {
         name: "Together AI",
         api_base: "https://api.together.xyz/v1",
         needs_api_key: true,
-        suggested_models: &["meta-llama/Llama-3-70b-chat-hf", "mistralai/Mixtral-8x7B-Instruct-v0.1"],
+        suggested_models: &[
+            "meta-llama/Llama-3-70b-chat-hf",
+            "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        ],
     },
     Provider {
         name: "OpenRouter",
         api_base: "https://openrouter.ai/api/v1",
         needs_api_key: true,
-        suggested_models: &["openai/gpt-4o-mini", "anthropic/claude-sonnet-4-6", "meta-llama/llama-3-70b-instruct"],
+        suggested_models: &[
+            "openai/gpt-4o-mini",
+            "anthropic/claude-sonnet-4-6",
+            "meta-llama/llama-3-70b-instruct",
+        ],
     },
     Provider {
         name: "LM Studio",
@@ -397,11 +412,7 @@ fn run_config_wizard() {
     }
 
     if let Err(e) = std::fs::write(&path, &config_content) {
-        eprintln!(
-            "{} Failed to write config: {}",
-            "error:".red().bold(),
-            e
-        );
+        eprintln!("{} Failed to write config: {}", "error:".red().bold(), e);
         std::process::exit(1);
     }
 
@@ -411,11 +422,7 @@ fn run_config_wizard() {
         "✓".green().bold(),
         path.display().to_string().bold()
     );
-    eprintln!(
-        "  {} {}",
-        "Provider:".dimmed(),
-        provider.name.bold()
-    );
+    eprintln!("  {} {}", "Provider:".dimmed(), provider.name.bold());
     eprintln!("  {} {}", "Model:".dimmed(), model.bold());
     if api_key.is_some() {
         eprintln!("  {} {}", "API key:".dimmed(), "••••••••".dimmed());
@@ -423,8 +430,7 @@ fn run_config_wizard() {
     eprintln!();
     eprintln!(
         "{}",
-        "You're all set! Try: yaak list files in current directory"
-            .green()
+        "You're all set! Try: yaak list files in current directory".green()
     );
 }
 

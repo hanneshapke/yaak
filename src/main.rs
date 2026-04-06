@@ -2,6 +2,7 @@ mod api;
 mod command;
 mod config;
 mod explain;
+mod history;
 mod wizard;
 
 use api::{AnthropicRequest, AnthropicResponse, ChatRequest, ChatResponse, Message};
@@ -50,6 +51,22 @@ struct Args {
         visible_alias = "explain"
     )]
     reverse: bool,
+
+    /// Show recent command history
+    #[arg(short = 'H', long, exclusive = true)]
+    history: bool,
+
+    /// Re-execute the most recent generated command
+    #[arg(short = 'l', long, exclusive = true)]
+    last: bool,
+
+    /// Search command history by keyword
+    #[arg(short = 's', long, exclusive = true)]
+    search: Option<String>,
+
+    /// Number of history entries to show (default: 20)
+    #[arg(long, default_value = "20")]
+    limit: usize,
 }
 
 fn main() {
@@ -58,6 +75,50 @@ fn main() {
     if args.config {
         wizard::run_config_wizard();
         std::process::exit(0);
+    }
+
+    // --- History commands (no API key needed) ---
+    if args.history {
+        history::show_history(args.limit);
+        std::process::exit(0);
+    }
+
+    if let Some(query) = &args.search {
+        history::search_history(query);
+        std::process::exit(0);
+    }
+
+    if args.last {
+        let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
+        match history::get_last() {
+            Some(entry) => {
+                eprintln!(
+                    "{}{}", "  Command: ".bold(), entry.command.green().bold()
+                );
+                let should_run = args.yes
+                    || Confirm::new()
+                        .with_prompt("Execute?")
+                        .default(true)
+                        .interact()
+                        .unwrap_or(false);
+                if !should_run {
+                    eprintln!("{}", "Aborted.".dimmed());
+                    std::process::exit(0);
+                }
+                let status = Command::new(&shell).arg("-c").arg(&entry.command).status();
+                match status {
+                    Ok(s) => std::process::exit(s.code().unwrap_or(1)),
+                    Err(e) => {
+                        eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
+                        std::process::exit(1);
+                    }
+                }
+            }
+            None => {
+                eprintln!("{} No history entries yet.", "info:".dimmed());
+                std::process::exit(0);
+            }
+        }
     }
 
     if args.description.is_empty() {
@@ -233,6 +294,9 @@ fn main() {
     }
 
     let command = extract_command(&raw_content);
+
+    // --- Save to history ---
+    history::save_entry(&description, &command, &model);
 
     // --- Display and confirm ---
     eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());

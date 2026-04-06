@@ -18,7 +18,10 @@ pub fn history_path() -> PathBuf {
     if let Some(data_dir) = dirs::data_local_dir() {
         data_dir.join("yaak").join("history.jsonl")
     } else if let Some(home) = dirs::home_dir() {
-        home.join(".local").join("share").join("yaak").join("history.jsonl")
+        home.join(".local")
+            .join("share")
+            .join("yaak")
+            .join("history.jsonl")
     } else {
         PathBuf::from("history.jsonl")
     }
@@ -90,11 +93,7 @@ pub fn show_history(limit: usize) {
             time.to_string().dimmed(),
             entry.command.green()
         );
-        eprintln!(
-            "        {} {}",
-            "⟩".dimmed(),
-            entry.description.dimmed()
-        );
+        eprintln!("        {} {}", "⟩".dimmed(), entry.description.dimmed());
     }
     eprintln!("{}", "─".repeat(60).dimmed());
     eprintln!(
@@ -134,11 +133,7 @@ pub fn search_history(query: &str) {
     }
 
     eprintln!("{}", "─".repeat(60).dimmed());
-    eprintln!(
-        "  {} \"{}\"",
-        "Search results for".bold(),
-        query.bold()
-    );
+    eprintln!("  {} \"{}\"", "Search results for".bold(), query.bold());
     eprintln!("{}", "─".repeat(60).dimmed());
 
     for (idx, entry) in &matches {
@@ -149,11 +144,7 @@ pub fn search_history(query: &str) {
             time.to_string().dimmed(),
             entry.command.green()
         );
-        eprintln!(
-            "        {} {}",
-            "⟩".dimmed(),
-            entry.description.dimmed()
-        );
+        eprintln!("        {} {}", "⟩".dimmed(), entry.description.dimmed());
     }
     eprintln!("{}", "─".repeat(60).dimmed());
     eprintln!("  {} matches", matches.len().to_string().bold());

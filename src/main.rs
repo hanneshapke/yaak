@@ -92,9 +92,7 @@ fn main() {
         let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
         match history::get_last() {
             Some(entry) => {
-                eprintln!(
-                    "{}{}", "  Command: ".bold(), entry.command.green().bold()
-                );
+                eprintln!("{}{}", "  Command: ".bold(), entry.command.green().bold());
                 let should_run = args.yes
                     || Confirm::new()
                         .with_prompt("Execute?")

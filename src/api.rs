@@ -7,6 +7,7 @@ pub struct ChatRequest {
     pub model: String,
     pub messages: Vec<Message>,
     pub temperature: f32,
+    pub stream: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -15,16 +16,20 @@ pub struct Message {
     pub content: String,
 }
 
+// Non-streaming response structs (retained for tests)
+#[cfg(test)]
 #[derive(Deserialize)]
 pub struct ChatResponse {
     pub choices: Vec<Choice>,
 }
 
+#[cfg(test)]
 #[derive(Deserialize)]
 pub struct Choice {
     pub message: MessageContent,
 }
 
+#[cfg(test)]
 #[derive(Deserialize)]
 pub struct MessageContent {
     pub content: String,
@@ -39,13 +44,17 @@ pub struct AnthropicRequest {
     pub messages: Vec<Message>,
     pub max_tokens: u32,
     pub temperature: f32,
+    pub stream: bool,
 }
 
+// Non-streaming response structs (retained for tests)
+#[cfg(test)]
 #[derive(Deserialize)]
 pub struct AnthropicResponse {
     pub content: Vec<AnthropicContent>,
 }
 
+#[cfg(test)]
 #[derive(Deserialize)]
 pub struct AnthropicContent {
     pub text: String,
@@ -81,6 +90,7 @@ mod tests {
             }],
             max_tokens: 1024,
             temperature: 0.0,
+            stream: true,
         };
         let json = serde_json::to_value(&req).unwrap();
         assert_eq!(json["model"], "claude-sonnet-4-6");
@@ -123,6 +133,7 @@ mod tests {
                 },
             ],
             temperature: 0.0,
+            stream: true,
         };
         let json = serde_json::to_value(&req).unwrap();
         assert_eq!(json["model"], "gpt-4o-mini");

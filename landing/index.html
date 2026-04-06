@@ -825,29 +825,28 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function playDemo(demo) {
   const body = document.getElementById('terminal-body');
   body.innerHTML = '';
-  const els = [];
+  let replaceTarget = null;
 
   for (const step of demo.lines) {
     await sleep(step.delay || 300);
-    if (step.replace && els.length) {
-      // next line will replace this one
+    if (step.replace) {
+      // This line will be replaced by the next one
       const placeholder = document.createElement('div');
       placeholder.className = 'terminal-line';
       placeholder.innerHTML = step.text;
       body.appendChild(placeholder);
-      els.push(placeholder);
+      replaceTarget = placeholder;
       continue;
     }
-    // Check if previous was a replaceable
-    if (els.length && demo.lines[els.length - 1]?.replace) {
-      els[els.length - 1].innerHTML = step.text;
+    if (replaceTarget) {
+      replaceTarget.innerHTML = step.text;
+      replaceTarget = null;
       continue;
     }
     const div = document.createElement('div');
     div.className = 'terminal-line';
     div.innerHTML = step.text;
     body.appendChild(div);
-    els.push(div);
   }
 
   await sleep(2800);

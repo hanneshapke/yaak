@@ -1,4 +1,4 @@
-# yaak
+# yaak — Yet Another AI for the Kommandozeile
 
 Translate natural language into bash commands using any OpenAI-compatible LLM.
 

@@ -549,8 +549,13 @@
       </div>
       <div class="hero-divider"></div>
       <div class="hero-install-area">
-        <div class="install-label">Get started</div>
-        <div class="install-cmd" onclick="copyCmd(this)">
+        <div class="install-label">Install via Homebrew</div>
+        <div class="install-cmd" onclick="copyCmd(this, 'brew tap hanneshapke/yaak && brew install yaak')">
+          <span><span class="prompt">$</span> brew tap hanneshapke/yaak && brew install yaak</span>
+          <button class="copy-btn">Copy</button>
+        </div>
+        <div class="install-label" style="margin-top: 12px;">Or via Cargo</div>
+        <div class="install-cmd" onclick="copyCmd(this, 'cargo install yaak')">
           <span><span class="prompt">$</span> cargo install yaak</span>
           <button class="copy-btn">Copy</button>
         </div>
@@ -716,9 +721,9 @@
     <div class="reveal">
       <div class="cta-ornament">&#10045;</div>
       <h2 class="cta-headline">Stop searching.<br>Start <em>yaaking.</em></h2>
-      <p class="cta-body">One cargo install. One environment variable. Then just describe what you want.</p>
-      <button class="cta-button" onclick="copyCmd(this)">
-        $ cargo install yaak
+      <p class="cta-body">One brew install. One environment variable. Then just describe what you want.</p>
+      <button class="cta-button" onclick="copyCmd(this, 'brew tap hanneshapke/yaak && brew install yaak')">
+        $ brew install yaak
       </button>
     </div>
   </div>
@@ -731,8 +736,8 @@
 </footer>
 
 <script>
-function copyCmd(el) {
-  navigator.clipboard.writeText('cargo install yaak');
+function copyCmd(el, cmd) {
+  navigator.clipboard.writeText(cmd || 'cargo install yaak');
   const btn = el.querySelector('.copy-btn') || el;
   const orig = btn.textContent;
   btn.textContent = 'Copied!';

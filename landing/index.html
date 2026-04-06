@@ -157,6 +157,8 @@
     background: var(--code-bg);
     border-radius: 10px;
     overflow: hidden;
+    width: 640px;
+    max-width: 100%;
     box-shadow:
       0 25px 60px rgba(26, 22, 21, 0.2),
       0 2px 4px rgba(26, 22, 21, 0.1);
@@ -187,7 +189,8 @@
     font-family: 'DM Mono', monospace;
     font-size: 13px;
     line-height: 1.9;
-    min-height: 220px;
+    height: 480px;
+    overflow-y: auto;
     color: var(--code-fg);
   }
 
@@ -748,70 +751,70 @@ function copyCmd(el, cmd) {
 const demos = [
   {
     lines: [
-      { text: '<span class="t-green">$</span> <span class="t-bold">yaak --config</span>', delay: 400 },
-      { text: '<span class="t-bold">yaak configuration wizard</span>', delay: 300 },
-      { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 200 },
-      { text: '', delay: 100 },
-      { text: '<span class="t-amber">? Select your API provider:</span>', delay: 300 },
-      { text: '  <span class="t-dim">1.</span> OpenAI', delay: 100 },
-      { text: '  <span class="t-dim">2.</span> Anthropic', delay: 100 },
-      { text: '<span class="t-green">❯ 3.</span> <span class="t-bold">Ollama</span>', delay: 100 },
-      { text: '  <span class="t-dim">4.</span> Groq', delay: 100 },
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak --config</span>', delay: 800 },
+      { text: '<span class="t-bold">yaak configuration wizard</span>', delay: 600 },
+      { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 400 },
+      { text: '', delay: 200 },
+      { text: '<span class="t-amber">? Select your API provider:</span>', delay: 600 },
+      { text: '  <span class="t-dim">1.</span> OpenAI', delay: 200 },
+      { text: '  <span class="t-dim">2.</span> Anthropic', delay: 200 },
+      { text: '<span class="t-green">❯ 3.</span> <span class="t-bold">Ollama</span>', delay: 200 },
+      { text: '  <span class="t-dim">4.</span> Groq', delay: 200 },
+      { text: '', delay: 800 },
+      { text: '<span class="t-amber">? Select a model:</span> <span class="t-green">gemma3:4b</span>', delay: 1000 },
       { text: '', delay: 400 },
-      { text: '<span class="t-amber">? Select a model:</span> <span class="t-green">gemma3:4b</span>', delay: 500 },
-      { text: '', delay: 200 },
-      { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 200 },
-      { text: '<span class="t-green">✓</span> <span class="t-bold">Config written to ~/.config/yaak/config.toml</span>', delay: 400 },
-      { text: '  <span class="t-dim">Provider:</span> <span class="t-bold">Ollama</span>    <span class="t-dim">Model:</span> <span class="t-bold">gemma3:4b</span>', delay: 300 },
-      { text: '', delay: 200 },
-      { text: '<span class="t-green">You\'re all set! Try: yaak list files in current directory</span>', delay: 400 },
+      { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 400 },
+      { text: '<span class="t-green">✓</span> <span class="t-bold">Config written to ~/.config/yaak/config.toml</span>', delay: 800 },
+      { text: '  <span class="t-dim">Provider:</span> <span class="t-bold">Ollama</span>    <span class="t-dim">Model:</span> <span class="t-bold">gemma3:4b</span>', delay: 600 },
+      { text: '', delay: 400 },
+      { text: '<span class="t-green">You\'re all set! Try: yaak list files in current directory</span>', delay: 800 },
     ]
   },
   {
     lines: [
-      { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">compress all png files in this directory</span>', delay: 300 },
-      { text: '<span class="t-dim">Thinking...</span>', delay: 500, replace: true },
-      { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -maxdepth 1 -name "*.png" -exec pngquant --force --ext .png {} \\;</span>', delay: 900 },
-      { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 600 },
-      { text: '<span class="t-dim">  compressed 14 files, saved 2.3 MB</span>', delay: 500 },
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">compress all png files in this directory</span>', delay: 600 },
+      { text: '<span class="t-dim">Thinking...</span>', delay: 1000, replace: true },
+      { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -maxdepth 1 -name "*.png" -exec pngquant --force --ext .png {} \\;</span>', delay: 1800 },
+      { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 1200 },
+      { text: '<span class="t-dim">  compressed 14 files, saved 2.3 MB</span>', delay: 1000 },
     ]
   },
   {
     lines: [
-      { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">show the 5 largest files in this repo</span>', delay: 300 },
-      { text: '<span class="t-dim">Thinking...</span>', delay: 500, replace: true },
-      { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -type f -exec du -h {} + | sort -rh | head -5</span>', delay: 900 },
-      { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 600 },
-      { text: '<span class="t-dim">  12M  ./assets/demo.mp4</span>', delay: 200 },
-      { text: '<span class="t-dim">  4.2M ./target/release/yaak</span>', delay: 150 },
-      { text: '<span class="t-dim">  1.1M ./docs/screenshot.png</span>', delay: 150 },
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">show the 5 largest files in this repo</span>', delay: 600 },
+      { text: '<span class="t-dim">Thinking...</span>', delay: 1000, replace: true },
+      { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -type f -exec du -h {} + | sort -rh | head -5</span>', delay: 1800 },
+      { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 1200 },
+      { text: '<span class="t-dim">  12M  ./assets/demo.mp4</span>', delay: 400 },
+      { text: '<span class="t-dim">  4.2M ./target/release/yaak</span>', delay: 300 },
+      { text: '<span class="t-dim">  1.1M ./docs/screenshot.png</span>', delay: 300 },
     ]
   },
   {
     lines: [
-      { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">kill whatever is using port 3000</span>', delay: 300 },
-      { text: '<span class="t-dim">Thinking...</span>', delay: 500, replace: true },
-      { text: '<span class="t-dim">  Command:</span> <span class="t-green">lsof -ti:3000 | xargs kill -9</span>', delay: 900 },
-      { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 600 },
-      { text: '<span class="t-green">$</span> <span class="cursor-blink"></span>', delay: 400 },
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">kill whatever is using port 3000</span>', delay: 600 },
+      { text: '<span class="t-dim">Thinking...</span>', delay: 1000, replace: true },
+      { text: '<span class="t-dim">  Command:</span> <span class="t-green">lsof -ti:3000 | xargs kill -9</span>', delay: 1800 },
+      { text: '<span class="t-amber">Execute? [Y/n]</span> <span class="t-bold">y</span>', delay: 1200 },
+      { text: '<span class="t-green">$</span> <span class="cursor-blink"></span>', delay: 800 },
     ]
   },
   {
     lines: [
-      { text: '<span class="t-green">$</span> <span class="t-bold">yaak --reverse</span> <span class="t-dim">find . -name "*.log" -mtime +30 -delete</span>', delay: 300 },
-      { text: '<span class="t-dim">Explaining...</span>', delay: 500, replace: true },
-      { text: '<span class="t-dim">────────────────────────────────────────────</span>', delay: 400 },
-      { text: '  <span class="t-bold">💡 Delete all .log files older than 30 days.</span>', delay: 400 },
-      { text: '', delay: 200 },
-      { text: '  <span class="t-cyan" style="text-decoration:underline">BREAKDOWN</span>', delay: 300 },
-      { text: '    <span class="t-dim">│</span> <span class="t-green">find</span>              <span class="t-dim">→</span> Search for files and directories', delay: 200 },
-      { text: '    <span class="t-dim">│</span> <span class="t-green">.</span>                 <span class="t-dim">→</span> Start from current directory', delay: 150 },
-      { text: '    <span class="t-dim">│</span> <span class="t-green">-name "*.log"</span>     <span class="t-dim">→</span> Match files ending in .log', delay: 150 },
-      { text: '    <span class="t-dim">│</span> <span class="t-green">-mtime +30</span>        <span class="t-dim">→</span> Only those modified 30+ days ago', delay: 150 },
-      { text: '    <span class="t-dim">│</span> <span class="t-green">-delete</span>           <span class="t-dim">→</span> Remove each matched file', delay: 150 },
-      { text: '', delay: 200 },
-      { text: '  <span class="t-amber">⚠  CAUTION:</span> <span class="t-amber">-delete is permanent — no trash, no undo.</span>', delay: 400 },
-      { text: '<span class="t-dim">────────────────────────────────────────────</span>', delay: 300 },
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak --reverse</span> <span class="t-dim">find . -name "*.log" -mtime +30 -delete</span>', delay: 600 },
+      { text: '<span class="t-dim">Explaining...</span>', delay: 1000, replace: true },
+      { text: '<span class="t-dim">────────────────────────────────────────────</span>', delay: 800 },
+      { text: '  <span class="t-bold">💡 Delete all .log files older than 30 days.</span>', delay: 800 },
+      { text: '', delay: 400 },
+      { text: '  <span class="t-cyan" style="text-decoration:underline">BREAKDOWN</span>', delay: 600 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">find</span>              <span class="t-dim">→</span> Search for files and directories', delay: 400 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">.</span>                 <span class="t-dim">→</span> Start from current directory', delay: 300 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">-name "*.log"</span>     <span class="t-dim">→</span> Match files ending in .log', delay: 300 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">-mtime +30</span>        <span class="t-dim">→</span> Only those modified 30+ days ago', delay: 300 },
+      { text: '    <span class="t-dim">│</span> <span class="t-green">-delete</span>           <span class="t-dim">→</span> Remove each matched file', delay: 300 },
+      { text: '', delay: 400 },
+      { text: '  <span class="t-amber">⚠  CAUTION:</span> <span class="t-amber">-delete is permanent — no trash, no undo.</span>', delay: 800 },
+      { text: '<span class="t-dim">────────────────────────────────────────────</span>', delay: 600 },
     ]
   }
 ];
@@ -847,7 +850,7 @@ async function playDemo(demo) {
     els.push(div);
   }
 
-  await sleep(2800);
+  await sleep(4000);
   demoIdx = (demoIdx + 1) % demos.length;
   playDemo(demos[demoIdx]);
 }

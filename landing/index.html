@@ -748,6 +748,27 @@ function copyCmd(el, cmd) {
 const demos = [
   {
     lines: [
+      { text: '<span class="t-green">$</span> <span class="t-bold">yaak --config</span>', delay: 400 },
+      { text: '<span class="t-bold">yaak configuration wizard</span>', delay: 300 },
+      { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 200 },
+      { text: '', delay: 100 },
+      { text: '<span class="t-amber">? Select your API provider:</span>', delay: 300 },
+      { text: '  <span class="t-dim">1.</span> OpenAI', delay: 100 },
+      { text: '  <span class="t-dim">2.</span> Anthropic', delay: 100 },
+      { text: '<span class="t-green">❯ 3.</span> <span class="t-bold">Ollama</span>', delay: 100 },
+      { text: '  <span class="t-dim">4.</span> Groq', delay: 100 },
+      { text: '', delay: 400 },
+      { text: '<span class="t-amber">? Select a model:</span> <span class="t-green">gemma3:4b</span>', delay: 500 },
+      { text: '', delay: 200 },
+      { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 200 },
+      { text: '<span class="t-green">✓</span> <span class="t-bold">Config written to ~/.config/yaak/config.toml</span>', delay: 400 },
+      { text: '  <span class="t-dim">Provider:</span> <span class="t-bold">Ollama</span>    <span class="t-dim">Model:</span> <span class="t-bold">gemma3:4b</span>', delay: 300 },
+      { text: '', delay: 200 },
+      { text: '<span class="t-green">You\'re all set! Try: yaak list files in current directory</span>', delay: 400 },
+    ]
+  },
+  {
+    lines: [
       { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">compress all png files in this directory</span>', delay: 300 },
       { text: '<span class="t-dim">Thinking...</span>', delay: 500, replace: true },
       { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -maxdepth 1 -name "*.png" -exec pngquant --force --ext .png {} \\;</span>', delay: 900 },

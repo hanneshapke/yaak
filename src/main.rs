@@ -3,9 +3,10 @@ mod command;
 mod config;
 mod explain;
 mod history;
+mod streaming;
 mod wizard;
 
-use api::{AnthropicRequest, AnthropicResponse, ChatRequest, ChatResponse, Message};
+use api::{AnthropicRequest, ChatRequest, Message};
 use clap::Parser;
 use colored::Colorize;
 use command::{detect_destructive, extract_command};
@@ -13,6 +14,7 @@ use config::{load_config, resolve};
 use dialoguer::Confirm;
 use explain::render_explanation;
 use std::env;
+use std::io::Write;
 use std::process::Command;
 
 /// yaak — translate natural language into bash commands using an OpenAI-compatible LLM
@@ -184,13 +186,7 @@ fn main() {
         )
     };
 
-    // --- Call the LLM ---
-    if args.reverse {
-        eprint!("{}", "Explaining... ".dimmed());
-    } else {
-        eprint!("{}", "Thinking... ".dimmed());
-    }
-
+    // --- Call the LLM (streaming) ---
     let client = reqwest::blocking::Client::new();
 
     let response = if anthropic {
@@ -204,6 +200,7 @@ fn main() {
             }],
             max_tokens: 1024,
             temperature: 0.0,
+            stream: true,
         };
         client
             .post(&url)
@@ -227,6 +224,7 @@ fn main() {
                 },
             ],
             temperature: 0.0,
+            stream: true,
         };
         client
             .post(&url)
@@ -239,7 +237,7 @@ fn main() {
     let response = match response {
         Ok(r) => r,
         Err(e) => {
-            eprintln!("\n{} Failed to reach API: {}", "error:".red().bold(), e);
+            eprintln!("{} Failed to reach API: {}", "error:".red().bold(), e);
             std::process::exit(1);
         }
     };
@@ -248,7 +246,7 @@ fn main() {
         let status = response.status();
         let body = response.text().unwrap_or_default();
         eprintln!(
-            "\n{} API returned {} — {}",
+            "{} API returned {} — {}",
             "error:".red().bold(),
             status,
             body
@@ -256,37 +254,41 @@ fn main() {
         std::process::exit(1);
     }
 
-    let raw_content = if anthropic {
-        let resp: AnthropicResponse = match response.json() {
-            Ok(r) => r,
-            Err(e) => {
-                eprintln!(
-                    "\n{} Failed to parse response: {}",
-                    "error:".red().bold(),
-                    e
-                );
-                std::process::exit(1);
+    // --- Stream and collect tokens ---
+    let raw_content = if args.reverse {
+        // Explain mode: stream tokens to stderr for real-time feedback
+        let mut collected = String::new();
+        let mut first_token = true;
+        streaming::stream_tokens(response, anthropic, |token| {
+            if first_token {
+                // Clear the line and print header before first token
+                eprint!("\r\x1b[K");
+                first_token = false;
             }
-        };
-        resp.content[0].text.clone()
+            eprint!("{}", token);
+            let _ = std::io::stderr().flush();
+            collected.push_str(token);
+        });
+        eprintln!();
+        collected
     } else {
-        let resp: ChatResponse = match response.json() {
-            Ok(r) => r,
-            Err(e) => {
-                eprintln!(
-                    "\n{} Failed to parse response: {}",
-                    "error:".red().bold(),
-                    e
-                );
-                std::process::exit(1);
+        // Generate mode: collect tokens silently, show a dot progress indicator
+        eprint!("{}", "Thinking ".dimmed());
+        let mut collected = String::new();
+        let mut token_count = 0usize;
+        streaming::stream_tokens(response, anthropic, |token| {
+            collected.push_str(token);
+            token_count += 1;
+            if token_count.is_multiple_of(4) {
+                eprint!("{}", ".".dimmed());
+                let _ = std::io::stderr().flush();
             }
-        };
-        resp.choices[0].message.content.clone()
+        });
+        eprint!("\r\x1b[K"); // clear progress line
+        collected
     };
 
     if args.reverse {
-        // --- Reverse / Explain mode ---
-        eprintln!("\r"); // clear "Thinking..."
         render_explanation(&description, &raw_content);
         std::process::exit(0);
     }

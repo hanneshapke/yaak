@@ -1,6 +1,7 @@
 mod api;
 mod command;
 mod config;
+mod context;
 mod explain;
 mod history;
 mod streaming;
@@ -58,6 +59,10 @@ struct Args {
     /// Copy the generated command to clipboard instead of executing
     #[arg(short = 'C', long)]
     copy: bool,
+
+    /// Include working directory context (project type, file listing) in the prompt
+    #[arg(long)]
+    context: bool,
 
     /// Generate shell completions and print to stdout
     #[arg(long, exclusive = true, value_name = "SHELL")]
@@ -200,6 +205,14 @@ fn main() {
         )
     };
 
+    // --- Build user message (with optional context) ---
+    let user_message = if args.context {
+        let ctx = context::gather_context();
+        format!("{}\n\nContext:\n{}", description, ctx)
+    } else {
+        description.clone()
+    };
+
     // --- Call the LLM (streaming) ---
     let client = reqwest::blocking::Client::new();
 
@@ -210,7 +223,7 @@ fn main() {
             system: system_prompt,
             messages: vec![Message {
                 role: "user".into(),
-                content: description.clone(),
+                content: user_message.clone(),
             }],
             max_tokens: 1024,
             temperature: 0.0,
@@ -234,7 +247,7 @@ fn main() {
                 },
                 Message {
                     role: "user".into(),
-                    content: description.clone(),
+                    content: user_message.clone(),
                 },
             ],
             temperature: 0.0,

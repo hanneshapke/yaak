@@ -168,7 +168,8 @@ fn main() {
     };
     let model = resolve(args.model, config.model, default_model);
 
-    if api_key.is_empty() {
+    let needs_api_key = !api_base.contains("localhost") && !api_base.contains("127.0.0.1");
+    if needs_api_key && api_key.is_empty() {
         eprintln!(
             "{} No API key found. Set YAAK_API_KEY, pass --api-key, or add it to ~/.config/yaak/config.toml",
             "error:".red().bold()

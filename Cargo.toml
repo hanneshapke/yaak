@@ -16,3 +16,8 @@ colored = "2"
 dialoguer = "0.11"
 dirs = "5"
 toml = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+tempfile = { version = "3", optional = true }
+
+[dev-dependencies]
+tempfile = "3"

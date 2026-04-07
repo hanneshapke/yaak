@@ -513,8 +513,9 @@
     .demo-section { padding: 40px 16px 60px; }
     .demo-columns { grid-template-columns: 1fr; }
     .demo-aside { position: static; }
-    .terminal { width: 100%; }
-    .terminal-body { padding: 16px; font-size: 12px; height: 360px; }
+    .terminal { width: 100%; min-width: 0; }
+    .terminal-body { padding: 16px; font-size: 11px; height: 360px; overflow-x: auto; word-break: break-all; }
+    .terminal-line { white-space: pre-wrap; word-break: break-all; }
     .section-header { grid-template-columns: 1fr; gap: 16px; }
     .section-number { font-size: 80px; letter-spacing: -4px; }
     .why-section { padding: 40px 16px 60px; }
@@ -526,6 +527,7 @@
     .step-code-area { padding: 0 16px 20px; }
     .step-code { font-size: 11px; overflow-x: auto; }
     .providers-section { padding: 40px 16px 60px; }
+    .provider-tag { font-size: 11px; padding: 8px 14px; }
     .cta-section { padding: 60px 16px 80px; }
     .nav-right { display: none; }
     .hamburger { display: flex; }

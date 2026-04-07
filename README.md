@@ -12,6 +12,9 @@ $ yaak list all rust files larger than 1MB
 ## Install
 
 ```bash
+# Quick install (macOS / Linux)
+curl -fsSL https://getyaak.ai/install.sh | bash
+
 # Homebrew (macOS/Linux)
 brew tap hanneshapke/yaak
 brew install yaak

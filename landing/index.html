@@ -505,21 +505,114 @@
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 768px) {
+    .hero { padding: 60px 16px 60px; }
+    .container { padding: 0 16px; }
     .hero-row { grid-template-columns: 1fr; gap: 32px; }
     .hero-divider { display: none; }
+    .install-cmd { font-size: 11px; padding: 12px 14px; overflow-x: auto; white-space: nowrap; }
+    .demo-section { padding: 40px 16px 60px; }
     .demo-columns { grid-template-columns: 1fr; }
     .demo-aside { position: static; }
     .terminal { width: 100%; }
     .terminal-body { padding: 16px; font-size: 12px; height: 360px; }
     .section-header { grid-template-columns: 1fr; gap: 16px; }
     .section-number { font-size: 80px; letter-spacing: -4px; }
+    .why-section { padding: 40px 16px 60px; }
     .why-grid { grid-template-columns: 1fr; }
+    .how-section { padding: 40px 16px 60px; }
     .step { grid-template-columns: 1fr; }
-    .step-label { border-right: none; border-bottom: 1px solid var(--rule); padding: 20px 24px; }
-    .step-desc { border-right: none; padding: 20px 24px; }
-    .step-code-area { padding: 0 24px 24px; }
-    .nav-right a:not(.nav-gh) { display: none; }
+    .step-label { border-right: none; border-bottom: 1px solid var(--rule); padding: 20px 16px; }
+    .step-desc { border-right: none; padding: 20px 16px; }
+    .step-code-area { padding: 0 16px 20px; }
+    .step-code { font-size: 11px; overflow-x: auto; }
+    .providers-section { padding: 40px 16px 60px; }
+    .cta-section { padding: 60px 16px 80px; }
+    .nav-right { display: none; }
+    .hamburger { display: flex; }
   }
+
+  /* ============ HAMBURGER BUTTON ============ */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 1001;
+    order: 2;
+    margin-left: auto;
+  }
+  .hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 1px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .hamburger.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* ============ MOBILE MENU OVERLAY ============ */
+  .mobile-menu {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--paper);
+    z-index: 1000;
+    padding: 80px 32px 32px;
+    overflow-y: auto;
+  }
+  .mobile-menu.open {
+    display: flex;
+  }
+  .mobile-menu-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+    width: 100%;
+    text-align: center;
+    transition: color 0.2s;
+  }
+  .mobile-menu-link:hover { color: var(--red); }
+  .mobile-menu-link.nav-gh {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 24px;
+    padding: 12px 24px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    border-bottom: none;
+    width: auto;
+    font-size: 11px;
+  }
+  .mobile-menu-link.nav-gh:hover { background: var(--red); color: white; }
 </style>
 </head>
 <body>
@@ -527,6 +620,9 @@
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-brand">yaak</a>
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
   <div class="nav-right">
     <a href="#why">Why</a>
     <a href="#how">How it works</a>
@@ -539,6 +635,19 @@
     </a>
   </div>
 </nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#why" class="mobile-menu-link">Why</a>
+  <a href="#how" class="mobile-menu-link">How it works</a>
+  <a href="#providers" class="mobile-menu-link">Providers</a>
+  <a href="docs.html" class="mobile-menu-link">Docs</a>
+  <a href="changelog.html" class="mobile-menu-link">Changelog</a>
+  <a href="https://github.com/hanneshapke/yaak" class="mobile-menu-link nav-gh">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    Star on GitHub
+  </a>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -742,6 +851,27 @@
 </footer>
 
 <script>
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('active');
+  hamburger.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+
+// Close mobile menu when a link is clicked
+mobileMenu.querySelectorAll('.mobile-menu-link').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  });
+});
+
 function copyCmd(el, cmd) {
   navigator.clipboard.writeText(cmd || 'cargo install yaak');
   const btn = el.querySelector('.copy-btn') || el;

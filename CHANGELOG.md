@@ -5,6 +5,19 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7] — 2026-04-06
+
+### Added
+- Streaming LLM output with real-time token display and dot progress indicator
+- Command history with `--history` / `-H`, `--last` / `-l`, and `--search` / `-s` for recall, re-execution, and keyword search
+- Shell completion generation (`--completions <bash|zsh|fish>`) via `clap_complete`
+- Clipboard integration (`--copy` / `-C`) to copy generated commands; interactive prompt now offers Execute / Copy / Abort
+
+### Fixed
+- Terminal demo animation bug where all lines after "Thinking..." overwrote the same element
+
+---
+
 ## [0.0.6] — 2026-04-06
 
 ### Added

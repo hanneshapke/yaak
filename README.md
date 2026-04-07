@@ -4,8 +4,9 @@ Translate natural language into bash commands using any OpenAI-compatible LLM.
 
 ```
 $ yaak list all rust files larger than 1MB
+  Thinking ....
   Command: find . -name "*.rs" -size +1M -ls
-Execute? [Y/n] y
+? What next?: Execute
 ```
 
 ## Install
@@ -75,15 +76,20 @@ yaak <description of what you want to do>
 
 ### Options
 
-| Flag              | Short | Description                              |
-|-------------------|-------|------------------------------------------|
-| `--config`        | `-c`  | Interactive configuration wizard         |
-| `--api-base URL`  | `-u`  | API base URL                             |
-| `--api-key KEY`   | `-k`  | API key                                  |
-| `--model NAME`    | `-m`  | Model name                               |
-| `--yes`           | `-y`  | Skip confirmation prompt                 |
-| `--reverse`       | `-r`  | Explain a command instead of generating  |
-| `--explain`       | `-e`  | Alias for --reverse                      |
+| Flag                    | Short | Description                              |
+|-------------------------|-------|------------------------------------------|
+| `--config`              | `-c`  | Interactive configuration wizard         |
+| `--api-base URL`        | `-u`  | API base URL                             |
+| `--api-key KEY`         | `-k`  | API key                                  |
+| `--model NAME`          | `-m`  | Model name                               |
+| `--yes`                 | `-y`  | Skip confirmation prompt                 |
+| `--reverse`             | `-r`  | Explain a command instead of generating  |
+| `--explain`             | `-e`  | Alias for --reverse                      |
+| `--copy`                | `-C`  | Copy generated command to clipboard      |
+| `--history`             | `-H`  | Show recent command history              |
+| `--last`                | `-l`  | Re-execute the most recent command       |
+| `--search KEYWORD`      | `-s`  | Search command history by keyword        |
+| `--completions SHELL`   |       | Generate shell completions (bash/zsh/fish)|
 
 ### Examples
 
@@ -97,8 +103,35 @@ yaak -u http://localhost:11434/v1 -m llama3 show disk usage by directory
 # Pipe-friendly (skip confirmation)
 yaak -y count lines of code in src/
 
+# Copy to clipboard instead of executing
+yaak --copy compress all png files in this directory
+
 # Explain a command
 yaak --explain 'find . -name "*.log" -mtime +30 -delete'
+
+# View command history
+yaak --history
+
+# Re-run the last generated command
+yaak --last
+
+# Search history
+yaak --search "docker"
+```
+
+### Shell completions
+
+Generate completions for your shell:
+
+```bash
+# Bash
+yaak --completions bash > ~/.bash_completion.d/yaak
+
+# Zsh
+yaak --completions zsh > ~/.zfunc/_yaak
+
+# Fish
+yaak --completions fish > ~/.config/fish/completions/yaak.fish
 ```
 
 ### Safety

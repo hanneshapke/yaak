@@ -164,5 +164,9 @@ case ":$PATH:" in
 esac
 
 bold ""
-bold "  Run 'yaak --config' to get started."
-bold ""
+printf '  Run yaak --config to get started? [Y/n] '
+read -r REPLY < /dev/tty 2>/dev/null || REPLY=""
+case "$REPLY" in
+  [nN]*) ;;
+  *)     "$INSTALL_DIR/yaak" --config ;;
+esac

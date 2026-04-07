@@ -6,7 +6,8 @@ mod streaming;
 mod wizard;
 
 use api::{AnthropicRequest, ChatRequest, Message};
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::{generate, Shell};
 use colored::Colorize;
 use command::{detect_destructive, extract_command};
 use config::{load_config, resolve};
@@ -52,10 +53,20 @@ struct Args {
         visible_alias = "explain"
     )]
     reverse: bool,
+
+    /// Generate shell completions and print to stdout
+    #[arg(long, exclusive = true, value_name = "SHELL")]
+    completions: Option<Shell>,
 }
 
 fn main() {
     let args = Args::parse();
+
+    if let Some(shell) = args.completions {
+        let mut cmd = Args::command();
+        generate(shell, &mut cmd, "yaak", &mut std::io::stdout());
+        std::process::exit(0);
+    }
 
     if args.config {
         wizard::run_config_wizard();

@@ -22,8 +22,12 @@ use std::process::Command;
 
 /// yaak — translate natural language into bash commands using an OpenAI-compatible LLM
 #[derive(Parser, Debug)]
-#[command(name = "yaak", version, about)]
+#[command(name = "yaak", about)]
 struct Args {
+    /// Print version
+    #[arg(short = 'v', long)]
+    version: bool,
+
     /// The natural language description of the command you want
     #[arg(trailing_var_arg = true)]
     description: Vec<String>,
@@ -94,6 +98,11 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+
+    if args.version {
+        println!("yaak {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
 
     if let Some(shell) = args.completions {
         let mut cmd = Args::command();

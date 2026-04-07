@@ -75,8 +75,8 @@ if [ -n "${YAAK_VERSION:-}" ]; then
   VERSION="$YAAK_VERSION"
   info "Using pinned version: $VERSION"
 else
-  info "Resolving latest version…"
-  VERSION="$(curl -fsSL -o /dev/null -w '%{redirect_url}' \
+  info "Resolving latest version..."
+  VERSION="$(curl -fsS -o /dev/null -w '%{redirect_url}' \
     "https://github.com/$REPO/releases/latest" \
     | sed 's|.*/||')"
   if [ -z "$VERSION" ]; then
@@ -93,13 +93,13 @@ URL="https://github.com/$REPO/releases/download/${VERSION}/${ARCHIVE}"
 SUMS_URL="https://github.com/$REPO/releases/download/${VERSION}/SHA256SUMS.txt"
 
 TMPDIR_YAAK="$(mktemp -d)"
-info "Downloading $ARCHIVE…"
+info "Downloading $ARCHIVE..."
 curl -fSL -o "$TMPDIR_YAAK/$ARCHIVE" "$URL"
 curl -fSL -o "$TMPDIR_YAAK/SHA256SUMS.txt" "$SUMS_URL"
 
 # ── verify checksum ──────────────────────────────────────────────────
 
-info "Verifying checksum…"
+info "Verifying checksum..."
 
 if command -v sha256sum >/dev/null 2>&1; then
   ACTUAL="$(sha256sum "$TMPDIR_YAAK/$ARCHIVE" | cut -d' ' -f1)"

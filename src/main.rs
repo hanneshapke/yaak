@@ -1,4 +1,5 @@
 mod api;
+mod cache;
 mod command;
 mod config;
 mod explain;
@@ -58,6 +59,14 @@ struct Args {
     /// Copy the generated command to clipboard instead of executing
     #[arg(short = 'C', long)]
     copy: bool,
+
+    /// Use cached result for identical descriptions (skips API call)
+    #[arg(long)]
+    cache: bool,
+
+    /// Force a fresh API call, ignoring any cached result
+    #[arg(long)]
+    no_cache: bool,
 
     /// Generate shell completions and print to stdout
     #[arg(long, exclusive = true, value_name = "SHELL")]
@@ -200,6 +209,63 @@ fn main() {
         )
     };
 
+    // --- Check cache (generate mode only) ---
+    if !args.reverse && args.cache && !args.no_cache {
+        if let Some(cached) = cache::get(&description, &model) {
+            eprintln!("{}", "(cached)".dimmed());
+            let command = extract_command(&cached.command);
+
+            history::save_entry(&description, &command, &model);
+
+            eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
+
+            if let Some(keyword) = detect_destructive(&command) {
+                eprintln!(
+                    "{} Destructive command blocked: `{}` is not allowed.",
+                    "blocked:".red().bold(),
+                    keyword
+                );
+                std::process::exit(1);
+            }
+
+            if args.copy {
+                copy_to_clipboard(&command);
+                std::process::exit(0);
+            }
+
+            if !args.yes {
+                let choices = &["Execute", "Copy to clipboard", "Abort"];
+                let selection = Select::new()
+                    .with_prompt("What next?")
+                    .items(choices)
+                    .default(0)
+                    .interact()
+                    .unwrap_or(2);
+
+                match selection {
+                    0 => {}
+                    1 => {
+                        copy_to_clipboard(&command);
+                        std::process::exit(0);
+                    }
+                    _ => {
+                        eprintln!("{}", "Aborted.".dimmed());
+                        std::process::exit(0);
+                    }
+                }
+            }
+
+            let status = Command::new(&shell).arg("-c").arg(&command).status();
+            match status {
+                Ok(s) => std::process::exit(s.code().unwrap_or(1)),
+                Err(e) => {
+                    eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
+
     // --- Call the LLM (streaming) ---
     let client = reqwest::blocking::Client::new();
 
@@ -308,6 +374,11 @@ fn main() {
     }
 
     let command = extract_command(&raw_content);
+
+    // --- Save to cache ---
+    if !args.no_cache {
+        cache::put(&description, &model, &command);
+    }
 
     // --- Save to history ---
     history::save_entry(&description, &command, &model);

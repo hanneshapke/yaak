@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>yaak &mdash; documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ============ HERO ============ */
+  .page-hero {
+    padding: 80px 32px 48px;
+    border-bottom: 3px double var(--rule);
+  }
+
+  .page-hero-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+  }
+
+  .page-kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 16px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(40px, 7vw, 72px);
+    line-height: 0.95;
+    letter-spacing: -2px;
+    animation: fadeIn 0.5s ease 0.05s both;
+  }
+  .page-title em { font-style: italic; font-weight: 400; color: var(--red); }
+
+  .page-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    letter-spacing: 0.5px;
+    line-height: 1.8;
+    animation: fadeIn 0.5s ease 0.1s both;
+  }
+
+  /* ============ DOCS LAYOUT ============ */
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    padding: 48px 32px 100px;
+  }
+
+  .toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    animation: fadeIn 0.5s ease 0.15s both;
+  }
+
+  .toc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--ink-faint);
+    margin-bottom: 16px;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .toc-item a {
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    transition: color 0.2s;
+  }
+  .toc-item a:hover { color: var(--red); }
+  .toc-item:first-child a { border-top: 1px solid var(--rule); }
+
+  /* ============ CONTENT ============ */
+  .docs-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .doc-section {
+    border-bottom: 1px solid var(--rule);
+    padding: 40px 0;
+    animation: fadeIn 0.5s ease both;
+  }
+  .doc-section:first-child { padding-top: 0; }
+
+  .doc-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+  }
+  .doc-section h2 em { font-style: italic; font-weight: 400; color: var(--red); }
+
+  .doc-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+  }
+
+  .doc-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-light);
+    font-weight: 300;
+    max-width: 640px;
+    margin-bottom: 16px;
+  }
+
+  .doc-section code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    color: var(--code-green);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .doc-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 18px 22px;
+    border-radius: 6px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+  .doc-code .t-green { color: var(--code-green); }
+  .doc-code .t-dim { color: #777; }
+  .doc-code .t-amber { color: var(--code-amber); }
+
+  .flag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .flag-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ink-faint);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .flag-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(209, 201, 192, 0.4);
+    color: var(--ink-light);
+    font-weight: 300;
+    vertical-align: top;
+  }
+  .flag-table td:first-child {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .flag-table td:nth-child(2) {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  /* Stagger sections */
+  .doc-section:nth-child(1) { animation-delay: 0.15s; }
+  .doc-section:nth-child(2) { animation-delay: 0.20s; }
+  .doc-section:nth-child(3) { animation-delay: 0.25s; }
+  .doc-section:nth-child(4) { animation-delay: 0.30s; }
+  .doc-section:nth-child(5) { animation-delay: 0.35s; }
+  .doc-section:nth-child(6) { animation-delay: 0.40s; }
+  .doc-section:nth-child(7) { animation-delay: 0.45s; }
+  .doc-section:nth-child(8) { animation-delay: 0.50s; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .docs-layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .toc { position: static; }
+    .page-hero-inner { grid-template-columns: 1fr; }
+    .page-meta { text-align: left; }
+    .flag-table { font-size: 13px; }
+    .nav-right a:not(.nav-gh):not(.active) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">yaak</a>
+  <div class="nav-right">
+    <a href="index.html">Home</a>
+    <a href="docs.html" class="active">Docs</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="https://github.com/hanneshapke/yaak" class="nav-gh">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Star on GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-inner">
+      <div>
+        <div class="page-kicker">Reference</div>
+        <h1 class="page-title">Docu<em>mentation</em></h1>
+      </div>
+      <div class="page-meta">
+        CLI version: 0.0.8<br>
+        License: Apache-2.0
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="container">
+  <div class="docs-layout">
+
+    <!-- TOC -->
+    <aside class="toc">
+      <div class="toc-label">Sections</div>
+      <ul class="toc-list">
+        <li class="toc-item"><a href="#install">Installation</a></li>
+        <li class="toc-item"><a href="#config">Configuration</a></li>
+        <li class="toc-item"><a href="#usage">Usage</a></li>
+        <li class="toc-item"><a href="#flags">All flags</a></li>
+        <li class="toc-item"><a href="#context">Context mode</a></li>
+        <li class="toc-item"><a href="#cache">Cache mode</a></li>
+        <li class="toc-item"><a href="#safety">Safety</a></li>
+        <li class="toc-item"><a href="#providers">Providers</a></li>
+      </ul>
+    </aside>
+
+    <!-- DOCS -->
+    <main class="docs-content">
+
+      <!-- INSTALL -->
+      <section class="doc-section" id="install">
+        <h2>Install<em>ation</em></h2>
+        <h3>Homebrew (macOS / Linux)</h3>
+        <div class="doc-code">
+          <span class="t-green">$</span> brew tap hanneshapke/yaak && brew install yaak
+        </div>
+        <h3>Cargo</h3>
+        <div class="doc-code">
+          <span class="t-green">$</span> cargo install yaak
+        </div>
+        <p>Prebuilt binaries are also available on the <a href="https://github.com/hanneshapke/yaak/releases">GitHub Releases</a> page for Linux (x86_64), macOS (x86_64, aarch64), and Windows (x86_64).</p>
+      </section>
+
+      <!-- CONFIG -->
+      <section class="doc-section" id="config">
+        <h2>Config<em>uration</em></h2>
+        <p>yaak resolves settings in this priority order: <strong>CLI flags &rarr; environment variables &rarr; config file &rarr; defaults</strong>.</p>
+
+        <h3>Interactive wizard</h3>
+        <p>The fastest way to get started. Run <code>yaak --config</code> to pick a provider, model, and enter your API key.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak --config
+        </div>
+
+        <h3>Config file</h3>
+        <p>Stored at <code>~/.config/yaak/config.toml</code>. On macOS, <code>~/Library/Application Support/yaak/config.toml</code> is also checked.</p>
+        <div class="doc-code">
+          <span class="t-dim"># ~/.config/yaak/config.toml</span><br>
+          api_base = <span class="t-green">"https://api.openai.com/v1"</span><br>
+          api_key = <span class="t-green">"sk-..."</span><br>
+          model = <span class="t-green">"gpt-4o-mini"</span>
+        </div>
+
+        <h3>Environment variables</h3>
+        <div class="doc-code">
+          <span class="t-green">$</span> export YAAK_API_BASE="https://api.openai.com/v1"<br>
+          <span class="t-green">$</span> export YAAK_API_KEY="sk-..."<br>
+          <span class="t-green">$</span> export YAAK_MODEL="gpt-4o-mini"
+        </div>
+      </section>
+
+      <!-- USAGE -->
+      <section class="doc-section" id="usage">
+        <h2>Us<em>age</em></h2>
+        <p>Describe what you want in plain English. yaak sends it to your LLM, shows you the generated command, and lets you execute, copy, or abort.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak find all rust files modified this week<br>
+          <span class="t-dim">Thinking ....</span><br>
+          <span class="t-dim">  Command:</span> <span class="t-green">find . -name "*.rs" -mtime -7</span><br>
+          <span class="t-amber">? What next?:</span> Execute / Copy / Abort
+        </div>
+
+        <h3>Reverse / Explain mode</h3>
+        <p>Pass <code>--reverse</code> or <code>--explain</code> to get a detailed, token-by-token breakdown of any command.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak --explain 'find . -name "*.log" -mtime +30 -delete'
+        </div>
+
+        <h3>Copy to clipboard</h3>
+        <p>Use <code>--copy</code> to send the generated command straight to your clipboard without executing.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak --copy compress all png files in this directory
+        </div>
+
+        <h3>Command history</h3>
+        <p>yaak saves every generated command. Browse, search, or re-run from history.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak --history <span class="t-dim"># show recent commands</span><br>
+          <span class="t-green">$</span> yaak --last <span class="t-dim"># re-execute the last command</span><br>
+          <span class="t-green">$</span> yaak --search "docker" <span class="t-dim"># search by keyword</span>
+        </div>
+
+        <h3>Shell completions</h3>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak --completions bash > ~/.bash_completion.d/yaak<br>
+          <span class="t-green">$</span> yaak --completions zsh > ~/.zfunc/_yaak<br>
+          <span class="t-green">$</span> yaak --completions fish > ~/.config/fish/completions/yaak.fish
+        </div>
+      </section>
+
+      <!-- FLAGS -->
+      <section class="doc-section" id="flags">
+        <h2>All <em>flags</em></h2>
+        <table class="flag-table">
+          <thead>
+            <tr><th>Flag</th><th>Short</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--config</code></td><td><code>-c</code></td><td>Interactive configuration wizard</td></tr>
+            <tr><td><code>--api-base</code></td><td><code>-u</code></td><td>API base URL</td></tr>
+            <tr><td><code>--api-key</code></td><td><code>-k</code></td><td>API key</td></tr>
+            <tr><td><code>--model</code></td><td><code>-m</code></td><td>Model name</td></tr>
+            <tr><td><code>--yes</code></td><td><code>-y</code></td><td>Skip confirmation prompt</td></tr>
+            <tr><td><code>--reverse</code></td><td><code>-r</code></td><td>Explain a command instead of generating</td></tr>
+            <tr><td><code>--explain</code></td><td><code>-e</code></td><td>Alias for --reverse</td></tr>
+            <tr><td><code>--copy</code></td><td><code>-C</code></td><td>Copy generated command to clipboard</td></tr>
+            <tr><td><code>--context</code></td><td></td><td>Include project type and file listing in prompt</td></tr>
+            <tr><td><code>--cache</code></td><td></td><td>Reuse cached result for identical queries</td></tr>
+            <tr><td><code>--no-cache</code></td><td></td><td>Force fresh API call, ignore cache</td></tr>
+            <tr><td><code>--history</code></td><td><code>-H</code></td><td>Show recent command history</td></tr>
+            <tr><td><code>--last</code></td><td><code>-l</code></td><td>Re-execute the most recent command</td></tr>
+            <tr><td><code>--search</code></td><td><code>-s</code></td><td>Search command history by keyword</td></tr>
+            <tr><td><code>--completions</code></td><td></td><td>Generate shell completions (bash/zsh/fish)</td></tr>
+            <tr><td><code>--limit</code></td><td></td><td>Number of history entries to show (default: 20)</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CONTEXT -->
+      <section class="doc-section" id="context">
+        <h2>Context <em>mode</em></h2>
+        <p>yaak always includes your current working directory in the system prompt. For richer context, pass <code>--context</code> to also include:</p>
+        <p><strong>Project type detection</strong> &mdash; Cargo.toml, package.json, go.mod, Makefile, Dockerfile, and 15+ other markers.</p>
+        <p><strong>Git branch</strong> &mdash; if you're in a git repository.</p>
+        <p><strong>File listing</strong> &mdash; top-level non-hidden files (up to 30).</p>
+        <div class="doc-code">
+          <span class="t-dim"># Without --context: LLM guesses how to build</span><br>
+          <span class="t-green">$</span> yaak build the project<br><br>
+          <span class="t-dim"># With --context: LLM knows it's a Rust project</span><br>
+          <span class="t-green">$</span> yaak --context build the project<br>
+          <span class="t-dim">  Command:</span> <span class="t-green">cargo build --release</span>
+        </div>
+        <p>Context is opt-in to avoid leaking sensitive filenames to the LLM provider.</p>
+      </section>
+
+      <!-- CACHE -->
+      <section class="doc-section" id="cache">
+        <h2>Cache <em>mode</em></h2>
+        <p>Every generated command is saved to <code>~/.config/yaak/cache.json</code>, keyed by model and description. Use <code>--cache</code> to skip the API call for repeated queries.</p>
+        <div class="doc-code">
+          <span class="t-dim"># First call hits the API</span><br>
+          <span class="t-green">$</span> yaak list all docker containers<br><br>
+          <span class="t-dim"># Second identical call returns instantly</span><br>
+          <span class="t-green">$</span> yaak --cache list all docker containers<br>
+          <span class="t-dim">(cached)</span><br>
+          <span class="t-dim">  Command:</span> <span class="t-green">docker ps -a</span>
+        </div>
+        <p>Use <code>--no-cache</code> to force a fresh API call and skip saving the result.</p>
+      </section>
+
+      <!-- SAFETY -->
+      <section class="doc-section" id="safety">
+        <h2>Safe<em>ty</em></h2>
+        <p>yaak blocks destructive commands before execution. The following patterns are detected and rejected, including <code>sudo</code> variants and piped/chained sequences:</p>
+        <div class="doc-code">
+          rm &nbsp;&bull;&nbsp; rmdir &nbsp;&bull;&nbsp; mkfs &nbsp;&bull;&nbsp; dd &nbsp;&bull;&nbsp; shred &nbsp;&bull;&nbsp; wipefs<br>
+          > /dev/ &nbsp;&bull;&nbsp; chmod 000 &nbsp;&bull;&nbsp; :(){ :|:& };:
+        </div>
+        <p>If a destructive command is detected, yaak prints a warning and exits without executing.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak delete all files in this directory<br>
+          <span class="t-dim">  Command:</span> rm -rf ./*<br>
+          <span style="color: var(--red-light);">blocked:</span> Destructive command blocked: `rm` is not allowed.
+        </div>
+      </section>
+
+      <!-- PROVIDERS -->
+      <section class="doc-section" id="providers">
+        <h2>Compatible <em>providers</em></h2>
+        <p>yaak auto-detects the provider from the API base URL and uses the appropriate request format.</p>
+
+        <h3>Anthropic (native Messages API)</h3>
+        <p>Detected when the API base contains <code>anthropic.com</code>. Uses the Messages API with streaming.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak -u https://api.anthropic.com/v1 -k sk-ant-... find large log files
+        </div>
+
+        <h3>OpenAI-compatible</h3>
+        <p>All other providers use the <code>/v1/chat/completions</code> endpoint with streaming.</p>
+        <table class="flag-table">
+          <thead>
+            <tr><th>Provider</th><th>API base</th><th>Key required</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>OpenAI</td><td><code>https://api.openai.com/v1</code></td><td>Yes</td></tr>
+            <tr><td>Ollama</td><td><code>http://localhost:11434/v1</code></td><td>No</td></tr>
+            <tr><td>Groq</td><td><code>https://api.groq.com/openai/v1</code></td><td>Yes</td></tr>
+            <tr><td>Together AI</td><td><code>https://api.together.xyz/v1</code></td><td>Yes</td></tr>
+            <tr><td>OpenRouter</td><td><code>https://openrouter.ai/api/v1</code></td><td>Yes</td></tr>
+            <tr><td>LM Studio</td><td><code>http://localhost:1234/v1</code></td><td>No</td></tr>
+            <tr><td>vLLM</td><td><code>http://localhost:8000/v1</code></td><td>No</td></tr>
+            <tr><td>LocalAI</td><td><code>http://localhost:8080/v1</code></td><td>No</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>yaak &mdash; open source, Apache-2.0 licensed</span>
+  <span>Built with Rust &amp; <a href="#">your favorite LLM</a></span>
+</footer>
+
+</body>
+</html>

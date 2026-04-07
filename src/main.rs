@@ -12,7 +12,7 @@ use clap_complete::{generate, Shell};
 use colored::Colorize;
 use command::{detect_destructive, extract_command};
 use config::{load_config, resolve};
-use dialoguer::Confirm;
+use dialoguer::{Confirm, Select};
 use explain::render_explanation;
 use std::env;
 use std::io::Write;
@@ -54,6 +54,10 @@ struct Args {
         visible_alias = "explain"
     )]
     reverse: bool,
+
+    /// Copy the generated command to clipboard instead of executing
+    #[arg(short = 'C', long)]
+    copy: bool,
 
     /// Generate shell completions and print to stdout
     #[arg(long, exclusive = true, value_name = "SHELL")]
@@ -321,16 +325,35 @@ fn main() {
         std::process::exit(1);
     }
 
-    let should_run = args.yes
-        || Confirm::new()
-            .with_prompt("Execute?")
-            .default(true)
-            .interact()
-            .unwrap_or(false);
-
-    if !should_run {
-        eprintln!("{}", "Aborted.".dimmed());
+    // --- Copy-only mode ---
+    if args.copy {
+        copy_to_clipboard(&command);
         std::process::exit(0);
+    }
+
+    // --- Confirm: Execute / Copy / Abort ---
+    if args.yes {
+        // Skip prompt, execute directly
+    } else {
+        let choices = &["Execute", "Copy to clipboard", "Abort"];
+        let selection = Select::new()
+            .with_prompt("What next?")
+            .items(choices)
+            .default(0)
+            .interact()
+            .unwrap_or(2);
+
+        match selection {
+            0 => {} // execute below
+            1 => {
+                copy_to_clipboard(&command);
+                std::process::exit(0);
+            }
+            _ => {
+                eprintln!("{}", "Aborted.".dimmed());
+                std::process::exit(0);
+            }
+        }
     }
 
     // --- Execute ---
@@ -341,6 +364,45 @@ fn main() {
         Err(e) => {
             eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
             std::process::exit(1);
+        }
+    }
+}
+
+fn copy_to_clipboard(text: &str) {
+    let (cmd, args): (&str, &[&str]) = if cfg!(target_os = "macos") {
+        ("pbcopy", &[])
+    } else if cfg!(target_os = "windows") {
+        ("clip", &[])
+    } else {
+        // Linux: try wl-copy (Wayland) first, fall back to xclip (X11)
+        if Command::new("wl-copy").arg("--version").output().is_ok() {
+            ("wl-copy", &[])
+        } else {
+            ("xclip", &["-selection", "clipboard"])
+        }
+    };
+
+    let result = Command::new(cmd)
+        .args(args)
+        .stdin(std::process::Stdio::piped())
+        .spawn()
+        .and_then(|mut child| {
+            if let Some(stdin) = child.stdin.as_mut() {
+                stdin.write_all(text.as_bytes())?;
+            }
+            child.wait()
+        });
+
+    match result {
+        Ok(status) if status.success() => {
+            eprintln!("{} Command copied to clipboard", "✓".green().bold());
+        }
+        _ => {
+            eprintln!(
+                "{} Failed to copy — printing command instead:",
+                "warning:".yellow().bold()
+            );
+            println!("{}", text);
         }
     }
 }

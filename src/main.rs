@@ -168,10 +168,14 @@ fn main() {
     let os_name = env::consts::OS;
     let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
     let shell_name = shell.rsplit('/').next().unwrap_or("bash");
+    let cwd = env::current_dir()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| ".".to_string());
 
     let system_prompt = if args.reverse {
         format!(
             "You are a command-line teacher. The user is running {} on {}. \
+             Their current working directory is {}. \
              The user will give you a shell command and you must explain it in detail.\n\n\
              Format your response EXACTLY as follows (use these exact section headers):\n\
              SUMMARY: A single-sentence plain-English summary of what the command does.\n\n\
@@ -185,18 +189,19 @@ fn main() {
              CAUTION: (only if the command is dangerous or has side effects, otherwise omit this section entirely)\n\
              A short warning about what could go wrong.\n\n\
              Do NOT use markdown. Do NOT use code fences. Use the exact format above.",
-            shell_name, os_name
+            shell_name, os_name, cwd
         )
     } else {
         format!(
             "You are a command-line assistant. The user is running {} on {}. \
+             Their current working directory is {}. \
              The user will describe what they want to do \
              and you must respond with ONLY the exact shell command to accomplish it. \
              No explanation, no markdown fences, no commentary — just the raw command. \
              Only use flags and tools available on {}. \
              If multiple commands are needed, join them with && or ;. \
              Use common, portable tools when possible.",
-            shell_name, os_name, os_name
+            shell_name, os_name, cwd, os_name
         )
     };
 

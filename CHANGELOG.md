@@ -5,6 +5,18 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8] — 2026-04-07
+
+### Added
+- Contextual awareness (`--context`) — auto-detects project type, git branch, and file listing to enrich LLM prompts
+- Current working directory always included in system prompt for path-aware commands
+- Offline cache mode (`--cache` / `--no-cache`) — reuse cached results for identical descriptions, skip API calls
+
+### Fixed
+- Landing page footer license corrected from MIT to Apache-2.0
+
+---
+
 ## [0.0.7] — 2026-04-06
 
 ### Added

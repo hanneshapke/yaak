@@ -2,6 +2,7 @@ mod api;
 mod cache;
 mod command;
 mod config;
+mod context;
 mod explain;
 mod history;
 mod streaming;
@@ -60,6 +61,9 @@ struct Args {
     #[arg(short = 'C', long)]
     copy: bool,
 
+    /// Include working directory context (project type, file listing) in the prompt
+    #[arg(long)]
+    context: bool,
     /// Use cached result for identical descriptions (skips API call)
     #[arg(long)]
     cache: bool,
@@ -214,6 +218,13 @@ fn main() {
         )
     };
 
+    // --- Build user message (with optional context) ---
+    let user_message = if args.context {
+        let ctx = context::gather_context();
+        format!("{}\n\nContext:\n{}", description, ctx)
+    } else {
+        description.clone()
+    };
     // --- Check cache (generate mode only) ---
     if !args.reverse && args.cache && !args.no_cache {
         if let Some(cached) = cache::get(&description, &model) {
@@ -281,7 +292,7 @@ fn main() {
             system: system_prompt,
             messages: vec![Message {
                 role: "user".into(),
-                content: description.clone(),
+                content: user_message.clone(),
             }],
             max_tokens: 1024,
             temperature: 0.0,
@@ -305,7 +316,7 @@ fn main() {
                 },
                 Message {
                     role: "user".into(),
-                    content: description.clone(),
+                    content: user_message.clone(),
                 },
             ],
             temperature: 0.0,

@@ -98,6 +98,89 @@ nav {
 }
 .nav-gh:hover { background: var(--red) !important; color: white !important; }
 
+/* ============ HAMBURGER BUTTON ============ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 1001;
+  order: 2;
+  margin-left: auto;
+}
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 1px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.hamburger.active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ============ MOBILE MENU OVERLAY ============ */
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--paper);
+  z-index: 1000;
+  padding: 80px 32px 32px;
+  overflow-y: auto;
+}
+.mobile-menu.open {
+  display: flex;
+}
+.mobile-menu-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  width: 100%;
+  text-align: center;
+  transition: color 0.2s;
+}
+.mobile-menu-link:hover { color: var(--red); }
+.mobile-menu-link.nav-gh {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 4px;
+  border-bottom: none;
+  width: auto;
+  font-size: 11px;
+}
+.mobile-menu-link.nav-gh:hover { background: var(--red); color: white; }
+
 /* ============ FOOTER ============ */
 footer {
   padding: 28px 32px;
@@ -123,6 +206,7 @@ footer a:hover { color: var(--red); }
 /* ============ RESPONSIVE (shared) ============ */
 @media (max-width: 768px) {
   nav { flex-wrap: wrap; gap: 12px; padding: 16px; }
-  .nav-right { gap: 16px; }
+  .nav-right { display: none; }
+  .hamburger { display: flex; }
   footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px 16px; }
 }

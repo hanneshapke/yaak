@@ -1,4 +1,5 @@
 mod api;
+mod cache;
 mod command;
 mod config;
 mod context;
@@ -63,6 +64,13 @@ struct Args {
     /// Include working directory context (project type, file listing) in the prompt
     #[arg(long)]
     context: bool,
+    /// Use cached result for identical descriptions (skips API call)
+    #[arg(long)]
+    cache: bool,
+
+    /// Force a fresh API call, ignoring any cached result
+    #[arg(long)]
+    no_cache: bool,
 
     /// Generate shell completions and print to stdout
     #[arg(long, exclusive = true, value_name = "SHELL")]
@@ -173,10 +181,14 @@ fn main() {
     let os_name = env::consts::OS;
     let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
     let shell_name = shell.rsplit('/').next().unwrap_or("bash");
+    let cwd = env::current_dir()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| ".".to_string());
 
     let system_prompt = if args.reverse {
         format!(
             "You are a command-line teacher. The user is running {} on {}. \
+             Their current working directory is {}. \
              The user will give you a shell command and you must explain it in detail.\n\n\
              Format your response EXACTLY as follows (use these exact section headers):\n\
              SUMMARY: A single-sentence plain-English summary of what the command does.\n\n\
@@ -190,18 +202,19 @@ fn main() {
              CAUTION: (only if the command is dangerous or has side effects, otherwise omit this section entirely)\n\
              A short warning about what could go wrong.\n\n\
              Do NOT use markdown. Do NOT use code fences. Use the exact format above.",
-            shell_name, os_name
+            shell_name, os_name, cwd
         )
     } else {
         format!(
             "You are a command-line assistant. The user is running {} on {}. \
+             Their current working directory is {}. \
              The user will describe what they want to do \
              and you must respond with ONLY the exact shell command to accomplish it. \
              No explanation, no markdown fences, no commentary — just the raw command. \
              Only use flags and tools available on {}. \
              If multiple commands are needed, join them with && or ;. \
              Use common, portable tools when possible.",
-            shell_name, os_name, os_name
+            shell_name, os_name, cwd, os_name
         )
     };
 
@@ -212,6 +225,62 @@ fn main() {
     } else {
         description.clone()
     };
+    // --- Check cache (generate mode only) ---
+    if !args.reverse && args.cache && !args.no_cache {
+        if let Some(cached) = cache::get(&description, &model) {
+            eprintln!("{}", "(cached)".dimmed());
+            let command = extract_command(&cached.command);
+
+            history::save_entry(&description, &command, &model);
+
+            eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
+
+            if let Some(keyword) = detect_destructive(&command) {
+                eprintln!(
+                    "{} Destructive command blocked: `{}` is not allowed.",
+                    "blocked:".red().bold(),
+                    keyword
+                );
+                std::process::exit(1);
+            }
+
+            if args.copy {
+                copy_to_clipboard(&command);
+                std::process::exit(0);
+            }
+
+            if !args.yes {
+                let choices = &["Execute", "Copy to clipboard", "Abort"];
+                let selection = Select::new()
+                    .with_prompt("What next?")
+                    .items(choices)
+                    .default(0)
+                    .interact()
+                    .unwrap_or(2);
+
+                match selection {
+                    0 => {}
+                    1 => {
+                        copy_to_clipboard(&command);
+                        std::process::exit(0);
+                    }
+                    _ => {
+                        eprintln!("{}", "Aborted.".dimmed());
+                        std::process::exit(0);
+                    }
+                }
+            }
+
+            let status = Command::new(&shell).arg("-c").arg(&command).status();
+            match status {
+                Ok(s) => std::process::exit(s.code().unwrap_or(1)),
+                Err(e) => {
+                    eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
+                    std::process::exit(1);
+                }
+            }
+        }
+    }
 
     // --- Call the LLM (streaming) ---
     let client = reqwest::blocking::Client::new();
@@ -321,6 +390,11 @@ fn main() {
     }
 
     let command = extract_command(&raw_content);
+
+    // --- Save to cache ---
+    if !args.no_cache {
+        cache::put(&description, &model, &command);
+    }
 
     // --- Save to history ---
     history::save_entry(&description, &command, &model);

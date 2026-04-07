@@ -424,7 +424,6 @@ def render_html(releases: list[dict]) -> str:
     .page-hero-inner {{ grid-template-columns: 1fr; }}
     .page-meta {{ text-align: left; }}
     .release-header {{ flex-direction: column; gap: 8px; }}
-    .nav-right a:not(.nav-gh):not(.active) {{ display: none; }}
   }}
 </style>
 </head>
@@ -433,6 +432,9 @@ def render_html(releases: list[dict]) -> str:
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-brand">yaak</a>
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
   <div class="nav-right">
     <a href="index.html">Home</a>
     <a href="docs.html">Docs</a>
@@ -443,6 +445,17 @@ def render_html(releases: list[dict]) -> str:
     </a>
   </div>
 </nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" class="mobile-menu-link">Home</a>
+  <a href="docs.html" class="mobile-menu-link">Docs</a>
+  <a href="changelog.html" class="mobile-menu-link">Changelog</a>
+  <a href="https://github.com/hanneshapke/yaak" class="mobile-menu-link nav-gh">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    Star on GitHub
+  </a>
+</div>
 
 <!-- PAGE HERO -->
 <section class="page-hero">
@@ -486,6 +499,28 @@ def render_html(releases: list[dict]) -> str:
   <span>yaak &mdash; open source, MIT licensed</span>
   <span>Built with Rust &amp; <a href="#">your favorite LLM</a></span>
 </footer>
+
+<script>
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {{
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('active');
+  hamburger.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}});
+
+mobileMenu.querySelectorAll('.mobile-menu-link').forEach(link => {{
+  link.addEventListener('click', () => {{
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }});
+}});
+</script>
 
 </body>
 </html>

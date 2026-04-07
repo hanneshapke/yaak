@@ -276,6 +276,16 @@
       <!-- INSTALL -->
       <section class="doc-section" id="install">
         <h2>Install<em>ation</em></h2>
+        <h3>Quick install (macOS / Linux)</h3>
+        <div class="doc-code">
+          <span class="t-green">$</span> curl -fsSL https://getyaak.ai/install.sh | bash
+        </div>
+        <p>Downloads the latest release binary, verifies the SHA256 checksum, and installs to <code>~/.local/bin</code>.</p>
+        <p>Pin a specific version or change the install directory:</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> YAAK_VERSION=v0.0.8 curl -fsSL https://getyaak.ai/install.sh | bash<br>
+          <span class="t-green">$</span> YAAK_INSTALL_DIR=/usr/local/bin curl -fsSL https://getyaak.ai/install.sh | bash
+        </div>
         <h3>Homebrew (macOS / Linux)</h3>
         <div class="doc-code">
           <span class="t-green">$</span> brew tap hanneshapke/yaak && brew install yaak

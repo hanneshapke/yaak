@@ -145,6 +145,7 @@ case ":$PATH:" in
     info "$INSTALL_DIR is not in your PATH. Add it with:"
     bold ""
     SHELL_NAME="$(basename "${SHELL:-/bin/sh}")"
+    # shellcheck disable=SC2016
     case "$SHELL_NAME" in
       zsh)
         printf '    echo '\''export PATH="%s:$PATH"'\'' >> ~/.zshrc\n' "$INSTALL_DIR"

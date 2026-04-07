@@ -86,6 +86,9 @@ yaak <description of what you want to do>
 | `--reverse`             | `-r`  | Explain a command instead of generating  |
 | `--explain`             | `-e`  | Alias for --reverse                      |
 | `--copy`                | `-C`  | Copy generated command to clipboard      |
+| `--context`             |       | Include project type and file listing in prompt |
+| `--cache`               |       | Reuse cached result for identical queries |
+| `--no-cache`            |       | Force fresh API call, ignore cache       |
 | `--history`             | `-H`  | Show recent command history              |
 | `--last`                | `-l`  | Re-execute the most recent command       |
 | `--search KEYWORD`      | `-s`  | Search command history by keyword        |
@@ -117,6 +120,12 @@ yaak --last
 
 # Search history
 yaak --search "docker"
+
+# Include project context for smarter results
+yaak --context build the project
+
+# Reuse a cached result (no API call)
+yaak --cache list all docker containers
 ```
 
 ### Shell completions

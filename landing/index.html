@@ -505,19 +505,28 @@
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 768px) {
+    .hero { padding: 60px 16px 60px; }
+    .container { padding: 0 16px; }
     .hero-row { grid-template-columns: 1fr; gap: 32px; }
     .hero-divider { display: none; }
+    .install-cmd { font-size: 11px; padding: 12px 14px; overflow-x: auto; white-space: nowrap; }
+    .demo-section { padding: 40px 16px 60px; }
     .demo-columns { grid-template-columns: 1fr; }
     .demo-aside { position: static; }
     .terminal { width: 100%; }
     .terminal-body { padding: 16px; font-size: 12px; height: 360px; }
     .section-header { grid-template-columns: 1fr; gap: 16px; }
     .section-number { font-size: 80px; letter-spacing: -4px; }
+    .why-section { padding: 40px 16px 60px; }
     .why-grid { grid-template-columns: 1fr; }
+    .how-section { padding: 40px 16px 60px; }
     .step { grid-template-columns: 1fr; }
-    .step-label { border-right: none; border-bottom: 1px solid var(--rule); padding: 20px 24px; }
-    .step-desc { border-right: none; padding: 20px 24px; }
-    .step-code-area { padding: 0 24px 24px; }
+    .step-label { border-right: none; border-bottom: 1px solid var(--rule); padding: 20px 16px; }
+    .step-desc { border-right: none; padding: 20px 16px; }
+    .step-code-area { padding: 0 16px 20px; }
+    .step-code { font-size: 11px; overflow-x: auto; }
+    .providers-section { padding: 40px 16px 60px; }
+    .cta-section { padding: 60px 16px 80px; }
     .nav-right { display: none; }
     .hamburger { display: flex; }
   }

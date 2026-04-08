@@ -496,6 +496,29 @@
     box-shadow: 0 8px 24px rgba(26, 22, 21, 0.15);
   }
 
+  .cta-alt {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  .cta-button--secondary {
+    display: inline-flex;
+    margin-top: 10px;
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--rule);
+    font-size: 13px;
+    padding: 12px 24px;
+  }
+  .cta-button--secondary:hover {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+
   .reveal {
     opacity: 0;
     transform: translateY(20px);
@@ -755,10 +778,16 @@
     <div class="reveal">
       <div class="cta-ornament">&#10045;</div>
       <h2 class="cta-headline">Stop searching.<br>Start <em>yaaking.</em></h2>
-      <p class="cta-body">One brew install. One environment variable. Then just describe what you want.</p>
-      <button class="cta-button" onclick="copyCmd(this, 'brew tap hanneshapke/yaak && brew install yaak')">
-        $ brew install yaak
+      <p class="cta-body">One curl command. One environment variable. Then just describe what you want.</p>
+      <button class="cta-button" onclick="copyCmd(this, 'curl -fsSL https://getyaak.ai/install.sh | bash')">
+        $ curl -fsSL https://getyaak.ai/install.sh | bash
       </button>
+      <div class="cta-alt">
+        or via Homebrew:
+        <button class="cta-button cta-button--secondary" onclick="copyCmd(this, 'brew tap hanneshapke/yaak && brew install yaak')">
+          $ brew install yaak
+        </button>
+      </div>
     </div>
   </div>
 </section>

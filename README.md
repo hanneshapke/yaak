@@ -139,6 +139,7 @@ yaak <description of what you want to do>
 | `--search KEYWORD`      | `-s`  | Search command history by keyword        |
 | `--language LANG`       | `-L`  | UI language: en, de, es, fr, pt, zh, ja, ko |
 | `--version`             | `-v`  | Print version number                     |
+| `--update`              | `-U`  | Update yaak to the latest version        |
 | `--feedback`            |       | Open the feedback page in your browser   |
 | `--completions SHELL`   |       | Generate shell completions (bash/zsh/fish)|
 

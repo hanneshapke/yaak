@@ -112,6 +112,10 @@ struct Args {
     /// Open the feedback page in your browser
     #[arg(long, exclusive = true)]
     feedback: bool,
+
+    /// Update yaak to the latest version
+    #[arg(short = 'U', long, exclusive = true)]
+    update: bool,
 }
 
 fn main() {
@@ -133,6 +137,11 @@ fn main() {
         );
         eprintln!("{} Opening feedback page...", "✓".green().bold());
         open_url(&url);
+        return;
+    }
+
+    if args.update {
+        self_update();
         return;
     }
 
@@ -667,6 +676,91 @@ fn open_url(url: &str) {
         command.arg(arg);
     }
     let _ = command.arg(url).spawn();
+}
+
+fn self_update() {
+    let current = env!("CARGO_PKG_VERSION");
+    eprintln!(
+        "{} Current version: {}",
+        "info:".bold(),
+        format!("v{}", current).dimmed()
+    );
+
+    // Check latest version via GitHub redirect
+    eprintln!("{} Checking for updates...", "info:".bold());
+    let output = Command::new("curl")
+        .args([
+            "-fsS",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{redirect_url}",
+            "https://github.com/hanneshapke/yaak/releases/latest",
+        ])
+        .output();
+
+    let latest = match output {
+        Ok(o) => {
+            let url = String::from_utf8_lossy(&o.stdout).to_string();
+            url.rsplit('/').next().unwrap_or("").to_string()
+        }
+        Err(e) => {
+            eprintln!(
+                "{} Failed to check for updates: {}",
+                "error:".red().bold(),
+                e
+            );
+            std::process::exit(1);
+        }
+    };
+
+    if latest.is_empty() {
+        eprintln!(
+            "{} Could not determine latest version",
+            "error:".red().bold()
+        );
+        std::process::exit(1);
+    }
+
+    let latest_trimmed = latest.trim_start_matches('v');
+    if latest_trimmed == current {
+        eprintln!(
+            "{} Already up to date ({})",
+            "✓".green().bold(),
+            format!("v{}", current).bold()
+        );
+        return;
+    }
+
+    eprintln!(
+        "{} Updating v{} → {}...",
+        "info:".bold(),
+        current,
+        latest.bold()
+    );
+
+    // Run the install script to perform the update
+    let status = Command::new("bash")
+        .args(["-c", "curl -fsSL https://getyaak.ai/install.sh | bash"])
+        .status();
+
+    match status {
+        Ok(s) if s.success() => {
+            eprintln!("{} Updated to {}", "✓".green().bold(), latest.bold());
+        }
+        Ok(s) => {
+            eprintln!(
+                "{} Update failed (exit code {})",
+                "error:".red().bold(),
+                s.code().unwrap_or(1)
+            );
+            std::process::exit(1);
+        }
+        Err(e) => {
+            eprintln!("{} Update failed: {}", "error:".red().bold(), e);
+            std::process::exit(1);
+        }
+    }
 }
 
 #[cfg(test)]

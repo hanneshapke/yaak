@@ -411,8 +411,10 @@ fn main() {
                             eprintln!("{}", "Aborted.".dimmed());
                             std::process::exit(0);
                         });
-                    current_description =
-                        format!("{}\n\nRefinement: {}", current_description, refinement);
+                    current_description = format!(
+                        "{}\n\nYou previously suggested: {}\nThe user wants this change: {}",
+                        current_description, command, refinement
+                    );
                     current_user_message = if args.context {
                         let ctx = context::gather_context();
                         format!("{}\n\nContext:\n{}", current_description, ctx)

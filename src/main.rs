@@ -14,7 +14,7 @@ use clap_complete::{generate, Shell};
 use colored::Colorize;
 use command::{detect_destructive, extract_command};
 use config::{load_config, resolve};
-use dialoguer::{Confirm, Select};
+use dialoguer::{Confirm, Input, Select};
 use explain::render_explanation;
 use std::env;
 use std::io::Write;
@@ -235,232 +235,212 @@ fn main() {
     } else {
         description.clone()
     };
-    // --- Check cache (generate mode only) ---
-    if !args.reverse && args.cache && !args.no_cache {
-        if let Some(cached) = cache::get(&description, &model) {
-            eprintln!("{}", "(cached)".dimmed());
-            let command = extract_command(&cached.command);
+    let client = reqwest::blocking::Client::new();
+    let mut current_description = description.clone();
+    let mut current_user_message = user_message.clone();
 
-            history::save_entry(&description, &command, &model);
+    loop {
+        // --- Check cache (generate mode only) ---
+        let command = if !args.reverse && args.cache && !args.no_cache {
+            if let Some(cached) = cache::get(&current_description, &model) {
+                eprintln!("{}", "(cached)".dimmed());
+                Some(extract_command(&cached.command))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
 
-            eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
+        let command = if let Some(cmd) = command {
+            cmd
+        } else {
+            // --- Call the LLM (streaming) ---
+            let response = if anthropic {
+                let url = format!("{}/messages", api_base.trim_end_matches('/'));
+                let request_body = AnthropicRequest {
+                    model: model.clone(),
+                    system: system_prompt.clone(),
+                    messages: vec![Message {
+                        role: "user".into(),
+                        content: current_user_message.clone(),
+                    }],
+                    max_tokens: 1024,
+                    temperature: 0.0,
+                    stream: true,
+                };
+                client
+                    .post(&url)
+                    .header("x-api-key", &api_key)
+                    .header("anthropic-version", "2023-06-01")
+                    .header("Content-Type", "application/json")
+                    .json(&request_body)
+                    .send()
+            } else {
+                let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
+                let request_body = ChatRequest {
+                    model: model.clone(),
+                    messages: vec![
+                        Message {
+                            role: "system".into(),
+                            content: system_prompt.clone(),
+                        },
+                        Message {
+                            role: "user".into(),
+                            content: current_user_message.clone(),
+                        },
+                    ],
+                    temperature: 0.0,
+                    stream: true,
+                };
+                client
+                    .post(&url)
+                    .header("Authorization", format!("Bearer {}", api_key))
+                    .header("Content-Type", "application/json")
+                    .json(&request_body)
+                    .send()
+            };
 
-            if let Some(keyword) = detect_destructive(&command) {
+            let response = match response {
+                Ok(r) => r,
+                Err(e) => {
+                    eprintln!("{} Failed to reach API: {}", "error:".red().bold(), e);
+                    std::process::exit(1);
+                }
+            };
+
+            if !response.status().is_success() {
+                let status = response.status();
+                let body = response.text().unwrap_or_default();
                 eprintln!(
-                    "{} Destructive command blocked: `{}` is not allowed.",
-                    "blocked:".red().bold(),
-                    keyword
+                    "{} API returned {} — {}",
+                    "error:".red().bold(),
+                    status,
+                    body
                 );
                 std::process::exit(1);
             }
 
-            if args.copy {
-                copy_to_clipboard(&command);
-                std::process::exit(0);
-            }
-
-            if !args.yes {
-                let choices = &["Execute", "Copy to clipboard", "Abort"];
-                let selection = Select::new()
-                    .with_prompt("What next?")
-                    .items(choices)
-                    .default(0)
-                    .interact()
-                    .unwrap_or(2);
-
-                match selection {
-                    0 => {}
-                    1 => {
-                        copy_to_clipboard(&command);
-                        std::process::exit(0);
+            // --- Stream and collect tokens ---
+            let raw_content = if args.reverse {
+                let mut collected = String::new();
+                let mut first_token = true;
+                streaming::stream_tokens(response, anthropic, |token| {
+                    if first_token {
+                        eprint!("\r\x1b[K");
+                        first_token = false;
                     }
-                    _ => {
-                        eprintln!("{}", "Aborted.".dimmed());
-                        std::process::exit(0);
+                    eprint!("{}", token);
+                    let _ = std::io::stderr().flush();
+                    collected.push_str(token);
+                });
+                eprintln!();
+                collected
+            } else {
+                eprint!("{}", "Thinking ".dimmed());
+                let mut collected = String::new();
+                let mut token_count = 0usize;
+                streaming::stream_tokens(response, anthropic, |token| {
+                    collected.push_str(token);
+                    token_count += 1;
+                    if token_count.is_multiple_of(4) {
+                        eprint!("{}", ".".dimmed());
+                        let _ = std::io::stderr().flush();
                     }
-                }
-            }
-
-            let status = Command::new(&shell).arg("-c").arg(&command).status();
-            match status {
-                Ok(s) => std::process::exit(s.code().unwrap_or(1)),
-                Err(e) => {
-                    eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
-                    std::process::exit(1);
-                }
-            }
-        }
-    }
-
-    // --- Call the LLM (streaming) ---
-    let client = reqwest::blocking::Client::new();
-
-    let response = if anthropic {
-        let url = format!("{}/messages", api_base.trim_end_matches('/'));
-        let request_body = AnthropicRequest {
-            model: model.clone(),
-            system: system_prompt,
-            messages: vec![Message {
-                role: "user".into(),
-                content: user_message.clone(),
-            }],
-            max_tokens: 1024,
-            temperature: 0.0,
-            stream: true,
-        };
-        client
-            .post(&url)
-            .header("x-api-key", &api_key)
-            .header("anthropic-version", "2023-06-01")
-            .header("Content-Type", "application/json")
-            .json(&request_body)
-            .send()
-    } else {
-        let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
-        let request_body = ChatRequest {
-            model: model.clone(),
-            messages: vec![
-                Message {
-                    role: "system".into(),
-                    content: system_prompt,
-                },
-                Message {
-                    role: "user".into(),
-                    content: user_message.clone(),
-                },
-            ],
-            temperature: 0.0,
-            stream: true,
-        };
-        client
-            .post(&url)
-            .header("Authorization", format!("Bearer {}", api_key))
-            .header("Content-Type", "application/json")
-            .json(&request_body)
-            .send()
-    };
-
-    let response = match response {
-        Ok(r) => r,
-        Err(e) => {
-            eprintln!("{} Failed to reach API: {}", "error:".red().bold(), e);
-            std::process::exit(1);
-        }
-    };
-
-    if !response.status().is_success() {
-        let status = response.status();
-        let body = response.text().unwrap_or_default();
-        eprintln!(
-            "{} API returned {} — {}",
-            "error:".red().bold(),
-            status,
-            body
-        );
-        std::process::exit(1);
-    }
-
-    // --- Stream and collect tokens ---
-    let raw_content = if args.reverse {
-        // Explain mode: stream tokens to stderr for real-time feedback
-        let mut collected = String::new();
-        let mut first_token = true;
-        streaming::stream_tokens(response, anthropic, |token| {
-            if first_token {
-                // Clear the line and print header before first token
+                });
                 eprint!("\r\x1b[K");
-                first_token = false;
-            }
-            eprint!("{}", token);
-            let _ = std::io::stderr().flush();
-            collected.push_str(token);
-        });
-        eprintln!();
-        collected
-    } else {
-        // Generate mode: collect tokens silently, show a dot progress indicator
-        eprint!("{}", "Thinking ".dimmed());
-        let mut collected = String::new();
-        let mut token_count = 0usize;
-        streaming::stream_tokens(response, anthropic, |token| {
-            collected.push_str(token);
-            token_count += 1;
-            if token_count.is_multiple_of(4) {
-                eprint!("{}", ".".dimmed());
-                let _ = std::io::stderr().flush();
-            }
-        });
-        eprint!("\r\x1b[K"); // clear progress line
-        collected
-    };
+                collected
+            };
 
-    if args.reverse {
-        render_explanation(&description, &raw_content);
-        std::process::exit(0);
-    }
-
-    let command = extract_command(&raw_content);
-
-    // --- Save to cache ---
-    if !args.no_cache {
-        cache::put(&description, &model, &command);
-    }
-
-    // --- Save to history ---
-    history::save_entry(&description, &command, &model);
-
-    // --- Display and confirm ---
-    eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
-
-    // --- Block destructive commands ---
-    if let Some(keyword) = detect_destructive(&command) {
-        eprintln!(
-            "{} Destructive command blocked: `{}` is not allowed.",
-            "blocked:".red().bold(),
-            keyword
-        );
-        std::process::exit(1);
-    }
-
-    // --- Copy-only mode ---
-    if args.copy {
-        copy_to_clipboard(&command);
-        std::process::exit(0);
-    }
-
-    // --- Confirm: Execute / Copy / Abort ---
-    if args.yes {
-        // Skip prompt, execute directly
-    } else {
-        let choices = &["Execute", "Copy to clipboard", "Abort"];
-        let selection = Select::new()
-            .with_prompt("What next?")
-            .items(choices)
-            .default(0)
-            .interact()
-            .unwrap_or(2);
-
-        match selection {
-            0 => {} // execute below
-            1 => {
-                copy_to_clipboard(&command);
+            if args.reverse {
+                render_explanation(&current_description, &raw_content);
                 std::process::exit(0);
             }
-            _ => {
-                eprintln!("{}", "Aborted.".dimmed());
-                std::process::exit(0);
+
+            let cmd = extract_command(&raw_content);
+
+            // --- Save to cache ---
+            if !args.no_cache {
+                cache::put(&current_description, &model, &cmd);
+            }
+
+            cmd
+        };
+
+        // --- Save to history ---
+        history::save_entry(&current_description, &command, &model);
+
+        // --- Display and confirm ---
+        eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
+
+        // --- Block destructive commands ---
+        if let Some(keyword) = detect_destructive(&command) {
+            eprintln!(
+                "{} Destructive command blocked: `{}` is not allowed.",
+                "blocked:".red().bold(),
+                keyword
+            );
+            std::process::exit(1);
+        }
+
+        // --- Copy-only mode ---
+        if args.copy {
+            copy_to_clipboard(&command);
+            std::process::exit(0);
+        }
+
+        // --- Confirm: Execute / Refine / Copy / Abort ---
+        if args.yes {
+            // Skip prompt, execute directly
+        } else {
+            let choices = &["Execute", "Refine", "Copy to clipboard", "Abort"];
+            let selection = Select::new()
+                .with_prompt("What next?")
+                .items(choices)
+                .default(0)
+                .interact()
+                .unwrap_or(3);
+
+            match selection {
+                0 => {} // execute below
+                1 => {
+                    let refinement: String = Input::new()
+                        .with_prompt("Refine your request")
+                        .interact_text()
+                        .unwrap_or_else(|_| {
+                            eprintln!("{}", "Aborted.".dimmed());
+                            std::process::exit(0);
+                        });
+                    current_description =
+                        format!("{}\n\nRefinement: {}", current_description, refinement);
+                    current_user_message = if args.context {
+                        let ctx = context::gather_context();
+                        format!("{}\n\nContext:\n{}", current_description, ctx)
+                    } else {
+                        current_description.clone()
+                    };
+                    continue;
+                }
+                2 => {
+                    copy_to_clipboard(&command);
+                    std::process::exit(0);
+                }
+                _ => {
+                    eprintln!("{}", "Aborted.".dimmed());
+                    std::process::exit(0);
+                }
             }
         }
-    }
 
-    // --- Execute ---
-    let status = Command::new(&shell).arg("-c").arg(&command).status();
+        // --- Execute ---
+        let status = Command::new(&shell).arg("-c").arg(&command).status();
 
-    match status {
-        Ok(s) => std::process::exit(s.code().unwrap_or(1)),
-        Err(e) => {
-            eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
-            std::process::exit(1);
+        match status {
+            Ok(s) => std::process::exit(s.code().unwrap_or(1)),
+            Err(e) => {
+                eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
+                std::process::exit(1);
+            }
         }
     }
 }

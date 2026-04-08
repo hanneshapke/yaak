@@ -117,15 +117,11 @@ fn main() {
     // --- Resolve language and set locale ---
     {
         let config_lang = load_config().language;
-        let lang = args
-            .language
-            .clone()
-            .or(config_lang)
-            .unwrap_or_else(|| {
-                sys_locale::get_locale()
-                    .and_then(|l| l.split(['-', '_']).next().map(String::from))
-                    .unwrap_or_else(|| "en".into())
-            });
+        let lang = args.language.clone().or(config_lang).unwrap_or_else(|| {
+            sys_locale::get_locale()
+                .and_then(|l| l.split(['-', '_']).next().map(String::from))
+                .unwrap_or_else(|| "en".into())
+        });
         let lang = match lang.as_str() {
             "en" | "de" | "es" | "fr" | "pt" | "zh" | "ja" | "ko" => lang,
             _ => "en".into(),
@@ -159,7 +155,11 @@ fn main() {
         let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
         match history::get_last() {
             Some(entry) => {
-                eprintln!("{}{}", t!("label_command").bold(), entry.command.green().bold());
+                eprintln!(
+                    "{}{}",
+                    t!("label_command").bold(),
+                    entry.command.green().bold()
+                );
                 let should_run = args.yes
                     || Confirm::new()
                         .with_prompt(t!("prompt_execute").to_string())
@@ -174,13 +174,21 @@ fn main() {
                 match status {
                     Ok(s) => std::process::exit(s.code().unwrap_or(1)),
                     Err(e) => {
-                        eprintln!("{} {}", t!("error_prefix").red().bold(), t!("error_failed_execute", error = e));
+                        eprintln!(
+                            "{} {}",
+                            t!("error_prefix").red().bold(),
+                            t!("error_failed_execute", error = e)
+                        );
                         std::process::exit(1);
                     }
                 }
             }
             None => {
-                eprintln!("{} {}", t!("info_prefix").dimmed(), t!("no_history_entries"));
+                eprintln!(
+                    "{} {}",
+                    t!("info_prefix").dimmed(),
+                    t!("no_history_entries")
+                );
                 std::process::exit(0);
             }
         }
@@ -387,7 +395,11 @@ fn main() {
             let response = match response {
                 Ok(r) => r,
                 Err(e) => {
-                    eprintln!("{} {}", t!("error_prefix").red().bold(), t!("error_failed_api", error = e));
+                    eprintln!(
+                        "{} {}",
+                        t!("error_prefix").red().bold(),
+                        t!("error_failed_api", error = e)
+                    );
                     std::process::exit(1);
                 }
             };
@@ -535,7 +547,11 @@ fn main() {
         match status {
             Ok(s) => std::process::exit(s.code().unwrap_or(1)),
             Err(e) => {
-                eprintln!("{} {}", t!("error_prefix").red().bold(), t!("error_failed_execute", error = e));
+                eprintln!(
+                    "{} {}",
+                    t!("error_prefix").red().bold(),
+                    t!("error_failed_execute", error = e)
+                );
                 std::process::exit(1);
             }
         }

@@ -99,7 +99,11 @@ pub fn show_history(limit: usize) {
     eprintln!("{}", "─".repeat(60).dimmed());
     eprintln!(
         "  {}",
-        t!("history_entries_total", total = entries.len(), shown = recent.len())
+        t!(
+            "history_entries_total",
+            total = entries.len(),
+            shown = recent.len()
+        )
     );
 }
 
@@ -133,7 +137,11 @@ pub fn search_history(query: &str) {
     }
 
     eprintln!("{}", "─".repeat(60).dimmed());
-    eprintln!("  {} \"{}\"", t!("history_search_results").bold(), query.bold());
+    eprintln!(
+        "  {} \"{}\"",
+        t!("history_search_results").bold(),
+        query.bold()
+    );
     eprintln!("{}", "─".repeat(60).dimmed());
 
     for (idx, entry) in &matches {

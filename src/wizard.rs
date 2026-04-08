@@ -99,7 +99,16 @@ pub const PROVIDERS: &[Provider] = &[
     },
 ];
 
-const LANGUAGE_NAMES: &[&str] = &["English", "Deutsch", "Español", "Français", "Português", "中文", "日本語", "한국어"];
+const LANGUAGE_NAMES: &[&str] = &[
+    "English",
+    "Deutsch",
+    "Español",
+    "Français",
+    "Português",
+    "中文",
+    "日本語",
+    "한국어",
+];
 const LANGUAGE_CODES: &[&str] = &["en", "de", "es", "fr", "pt", "zh", "ja", "ko"];
 
 pub fn run_config_wizard() {
@@ -227,7 +236,11 @@ pub fn run_config_wizard() {
     }
 
     if let Err(e) = std::fs::write(&path, &config_content) {
-        eprintln!("{} {}", t!("error_prefix").red().bold(), t!("wizard_config_write_error", error = e));
+        eprintln!(
+            "{} {}",
+            t!("error_prefix").red().bold(),
+            t!("wizard_config_write_error", error = e)
+        );
         std::process::exit(1);
     }
 
@@ -237,14 +250,19 @@ pub fn run_config_wizard() {
         "✓".green().bold(),
         t!("wizard_config_written", path = path.display())
     );
-    eprintln!("  {} {}", t!("wizard_label_provider").dimmed(), provider.name.bold());
+    eprintln!(
+        "  {} {}",
+        t!("wizard_label_provider").dimmed(),
+        provider.name.bold()
+    );
     eprintln!("  {} {}", t!("wizard_label_model").dimmed(), model.bold());
     if api_key.is_some() {
-        eprintln!("  {} {}", t!("wizard_label_api_key").dimmed(), "••••••••".dimmed());
+        eprintln!(
+            "  {} {}",
+            t!("wizard_label_api_key").dimmed(),
+            "••••••••".dimmed()
+        );
     }
     eprintln!();
-    eprintln!(
-        "{}",
-        t!("wizard_success").green()
-    );
+    eprintln!("{}", t!("wizard_success").green());
 }

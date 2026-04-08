@@ -63,6 +63,16 @@ pub const PROVIDERS: &[Provider] = &[
         ],
     },
     Provider {
+        name: "Doubleword",
+        api_base: "https://api.doubleword.ai/v1",
+        needs_api_key: true,
+        suggested_models: &[
+            "Qwen/Qwen3.5-35B-A3B-FP8",
+            "Qwen/Qwen3.5-9B",
+            "Qwen/Qwen3-14B-FP8",
+        ],
+    },
+    Provider {
         name: "LM Studio",
         api_base: "http://localhost:1234/v1",
         needs_api_key: false,

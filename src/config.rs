@@ -6,6 +6,8 @@ pub struct Config {
     pub api_key: Option<String>,
     pub model: Option<String>,
     pub language: Option<String>,
+    #[serde(default)]
+    pub allow_destructive: bool,
 }
 
 pub fn load_config() -> Config {

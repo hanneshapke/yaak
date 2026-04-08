@@ -22,3 +22,8 @@ model = "claude-sonnet-4-6"
 # UI language (en, de, es, fr, pt, zh, ja, ko)
 # Falls back to system locale if not set.
 # language = "en"
+
+# Allow destructive commands without confirmation (default: false)
+# When true, destructive commands (rm, dd, mkfs, etc.) show a warning
+# but skip the confirmation prompt. Same as passing --force.
+# allow_destructive = false

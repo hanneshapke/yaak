@@ -702,7 +702,7 @@
         <div class="step-code-area">
           <div class="step-code">
             <span class="t-dim">  Command:</span> <span class="t-green">find . -name "*.rs" -mtime -7</span><br>
-            <span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> / Copy / Abort
+            <span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> / Refine / Copy / Abort
           </div>
         </div>
       </div>
@@ -825,7 +825,7 @@ const demos = [
       { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">compress all png files in this directory</span>', delay: 600 },
       { text: '<span class="t-dim">Thinking...</span>', delay: 1000, replace: true },
       { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -maxdepth 1 -name "*.png" -exec pngquant --force --ext .png {} \\;</span>', delay: 1800 },
-      { text: '<span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> <span class="t-dim">/ Copy / Abort</span>', delay: 1200 },
+      { text: '<span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> <span class="t-dim">/ Refine / Copy / Abort</span>', delay: 1200 },
       { text: '<span class="t-dim">  compressed 14 files, saved 2.3 MB</span>', delay: 1000 },
     ]
   },
@@ -834,7 +834,7 @@ const demos = [
       { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">show the 5 largest files in this repo</span>', delay: 600 },
       { text: '<span class="t-dim">Thinking...</span>', delay: 1000, replace: true },
       { text: '<span class="t-dim">  Command:</span> <span class="t-green">find . -type f -exec du -h {} + | sort -rh | head -5</span>', delay: 1800 },
-      { text: '<span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> <span class="t-dim">/ Copy / Abort</span>', delay: 1200 },
+      { text: '<span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> <span class="t-dim">/ Refine / Copy / Abort</span>', delay: 1200 },
       { text: '<span class="t-dim">  12M  ./assets/demo.mp4</span>', delay: 400 },
       { text: '<span class="t-dim">  4.2M ./target/release/yaak</span>', delay: 300 },
       { text: '<span class="t-dim">  1.1M ./docs/screenshot.png</span>', delay: 300 },
@@ -845,7 +845,7 @@ const demos = [
       { text: '<span class="t-green">$</span> <span class="t-bold">yaak</span> <span class="t-dim">kill whatever is using port 3000</span>', delay: 600 },
       { text: '<span class="t-dim">Thinking...</span>', delay: 1000, replace: true },
       { text: '<span class="t-dim">  Command:</span> <span class="t-green">lsof -ti:3000 | xargs kill -9</span>', delay: 1800 },
-      { text: '<span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> <span class="t-dim">/ Copy / Abort</span>', delay: 1200 },
+      { text: '<span class="t-amber">? What next?:</span> <span class="t-bold">Execute</span> <span class="t-dim">/ Refine / Copy / Abort</span>', delay: 1200 },
       { text: '<span class="t-green">$</span> <span class="cursor-blink"></span>', delay: 800 },
     ]
   },

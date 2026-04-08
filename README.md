@@ -6,7 +6,7 @@ Translate natural language into bash commands using any OpenAI-compatible LLM.
 $ yaak list all rust files larger than 1MB
   Thinking ....
   Command: find . -name "*.rs" -size +1M -ls
-? What next?: Execute
+? What next?: Execute / Refine / Copy / Abort
 ```
 
 ## Install
@@ -95,6 +95,7 @@ yaak <description of what you want to do>
 | `--history`             | `-H`  | Show recent command history              |
 | `--last`                | `-l`  | Re-execute the most recent command       |
 | `--search KEYWORD`      | `-s`  | Search command history by keyword        |
+| `--version`             | `-v`  | Print version number                     |
 | `--completions SHELL`   |       | Generate shell completions (bash/zsh/fish)|
 
 ### Examples

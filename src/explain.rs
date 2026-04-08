@@ -1,4 +1,5 @@
 use colored::Colorize;
+use rust_i18n::t;
 
 /// Render a richly formatted explanation of a command in the terminal.
 pub fn render_explanation(command: &str, raw: &str) {
@@ -22,19 +23,19 @@ pub fn render_explanation(command: &str, raw: &str) {
             in_breakdown = false;
             in_examples = false;
         } else if trimmed == "BREAKDOWN:" {
-            eprintln!("  {}", "BREAKDOWN".cyan().bold().underline());
+            eprintln!("  {}", t!("explain_breakdown").cyan().bold().underline());
             in_breakdown = true;
             in_examples = false;
         } else if trimmed == "EXAMPLES:" {
             eprintln!();
-            eprintln!("  {}", "EXAMPLES".cyan().bold().underline());
+            eprintln!("  {}", t!("explain_examples").cyan().bold().underline());
             in_breakdown = false;
             in_examples = true;
         } else if let Some(caution) = trimmed.strip_prefix("CAUTION:") {
             eprintln!();
             eprintln!(
                 "  {} {}",
-                "⚠  CAUTION:".yellow().bold(),
+                format!("⚠  {}", t!("explain_caution")).yellow().bold(),
                 caution.trim().yellow()
             );
             in_breakdown = false;

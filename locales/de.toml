@@ -1,0 +1,65 @@
+# German translations
+
+[_]
+# General
+aborted = "Abgebrochen."
+cached = "(zwischengespeichert)"
+
+# Prefix labels
+error_prefix = "Fehler:"
+warning_prefix = "Warnung:"
+info_prefix = "Info:"
+blocked_prefix = "Blockiert:"
+
+# Main errors
+error_failed_execute = "Ausführung fehlgeschlagen: %{error}"
+error_failed_api = "API nicht erreichbar: %{error}"
+error_api_returned = "API-Antwort %{status} — %{body}"
+error_no_description = "Keine Beschreibung angegeben. Nutze `yaak --help` für Hilfe oder `yaak --config` zur Einrichtung."
+error_no_api_key = "Kein API-Schlüssel gefunden. Setze YAAK_API_KEY, nutze --api-key oder trage ihn in ~/.config/yaak/config.toml ein."
+
+# Main prompts
+prompt_execute = "Ausführen?"
+prompt_what_next = "Was nun?"
+prompt_refine = "Anfrage verfeinern"
+label_command = "  Befehl: "
+label_thinking = "Denke nach "
+choice_execute = "Ausführen"
+choice_refine = "Verfeinern"
+choice_copy = "In Zwischenablage kopieren"
+choice_abort = "Abbrechen"
+no_history_entries = "Noch keine Verlaufseinträge."
+destructive_blocked = "Destruktiver Befehl blockiert: `%{keyword}` ist nicht erlaubt."
+clipboard_copied = "Befehl in Zwischenablage kopiert"
+clipboard_failed = "Kopieren fehlgeschlagen — Befehl wird stattdessen ausgegeben:"
+
+# History
+history_title = "Befehlsverlauf"
+history_empty = "Noch kein Verlauf."
+history_entries_total = "%{total} Einträge gesamt (%{shown} angezeigt)"
+history_search_results = "Suchergebnisse für"
+history_no_matches = "Keine Verlaufseinträge für \"%{query}\""
+history_matches = "%{count} Treffer"
+
+# Wizard
+wizard_title = "yaak Konfigurationsassistent"
+wizard_select_provider = "API-Anbieter auswählen"
+wizard_select_model = "Modell auswählen"
+wizard_enter_model = "Modellnamen eingeben"
+wizard_enter_custom_model = "Eigenen Modellnamen eingeben"
+wizard_enter_api_key = "API-Schlüssel eingeben"
+wizard_api_key_required = "API-Schlüssel wird für %{provider} benötigt"
+wizard_config_dir_error = "Konfigurationsverzeichnis konnte nicht erstellt werden: %{error}"
+wizard_config_write_error = "Konfiguration konnte nicht geschrieben werden: %{error}"
+wizard_config_overwrite = "Konfiguration existiert bereits unter %{path}. Überschreiben?"
+wizard_config_written = "Konfiguration geschrieben nach %{path}"
+wizard_label_provider = "Anbieter:"
+wizard_label_model = "Modell:"
+wizard_label_api_key = "API-Schlüssel:"
+wizard_success = "Fertig! Probiere: yaak Dateien im aktuellen Verzeichnis auflisten"
+wizard_select_language = "Sprache auswählen"
+
+# Explain display labels
+explain_breakdown = "AUFSCHLÜSSELUNG"
+explain_examples = "BEISPIELE"
+explain_caution = "ACHTUNG:"

@@ -5,6 +5,7 @@ pub struct Config {
     pub api_base: Option<String>,
     pub api_key: Option<String>,
     pub model: Option<String>,
+    pub language: Option<String>,
 }
 
 pub fn load_config() -> Config {

@@ -1,5 +1,6 @@
 use colored::Colorize;
 use dialoguer::{Confirm, Input, Password, Select};
+use rust_i18n::t;
 
 use crate::config::config_path;
 
@@ -98,20 +99,37 @@ pub const PROVIDERS: &[Provider] = &[
     },
 ];
 
+const LANGUAGE_NAMES: &[&str] = &["English", "Deutsch", "Español", "Français"];
+const LANGUAGE_CODES: &[&str] = &["en", "de", "es", "fr"];
+
 pub fn run_config_wizard() {
-    eprintln!("{}", "yaak configuration wizard".bold());
+    eprintln!("{}", t!("wizard_title").bold());
     eprintln!("{}", "─".repeat(40).dimmed());
+    eprintln!();
+
+    // 0. Select language
+    let lang_idx = Select::new()
+        .with_prompt(t!("wizard_select_language").to_string())
+        .items(LANGUAGE_NAMES)
+        .default(0)
+        .interact()
+        .unwrap_or_else(|_| {
+            eprintln!("{}", t!("aborted").dimmed());
+            std::process::exit(0);
+        });
+    let language = LANGUAGE_CODES[lang_idx];
+    rust_i18n::set_locale(language);
     eprintln!();
 
     // 1. Select provider
     let provider_names: Vec<&str> = PROVIDERS.iter().map(|p| p.name).collect();
     let provider_idx = Select::new()
-        .with_prompt("Select your API provider")
+        .with_prompt(t!("wizard_select_provider").to_string())
         .items(&provider_names)
         .default(0)
         .interact()
         .unwrap_or_else(|_| {
-            eprintln!("{}", "Aborted.".dimmed());
+            eprintln!("{}", t!("aborted").dimmed());
             std::process::exit(0);
         });
 
@@ -124,24 +142,24 @@ pub fn run_config_wizard() {
         .iter()
         .map(|m| m.to_string())
         .collect();
-    model_options.push("Enter custom model name".to_string());
+    model_options.push(t!("wizard_enter_custom_model").to_string());
 
     let model_idx = Select::new()
-        .with_prompt("Select a model")
+        .with_prompt(t!("wizard_select_model").to_string())
         .items(&model_options)
         .default(0)
         .interact()
         .unwrap_or_else(|_| {
-            eprintln!("{}", "Aborted.".dimmed());
+            eprintln!("{}", t!("aborted").dimmed());
             std::process::exit(0);
         });
 
     let model = if model_idx == model_options.len() - 1 {
         Input::<String>::new()
-            .with_prompt("Enter model name")
+            .with_prompt(t!("wizard_enter_model").to_string())
             .interact_text()
             .unwrap_or_else(|_| {
-                eprintln!("{}", "Aborted.".dimmed());
+                eprintln!("{}", t!("aborted").dimmed());
                 std::process::exit(0);
             })
     } else {
@@ -152,17 +170,17 @@ pub fn run_config_wizard() {
     // 3. API key (if needed)
     let api_key = if provider.needs_api_key {
         let key = Password::new()
-            .with_prompt("Enter your API key")
+            .with_prompt(t!("wizard_enter_api_key").to_string())
             .interact()
             .unwrap_or_else(|_| {
-                eprintln!("{}", "Aborted.".dimmed());
+                eprintln!("{}", t!("aborted").dimmed());
                 std::process::exit(0);
             });
         if key.is_empty() {
             eprintln!(
-                "{} API key is required for {}",
-                "warning:".yellow().bold(),
-                provider.name
+                "{} {}",
+                t!("warning_prefix").yellow().bold(),
+                t!("wizard_api_key_required", provider = provider.name)
             );
             std::process::exit(1);
         }
@@ -180,15 +198,16 @@ pub fn run_config_wizard() {
         config_content.push_str(&format!("api_key = \"{}\"\n", key));
     }
     config_content.push_str(&format!("model = \"{}\"\n", model));
+    config_content.push_str(&format!("language = \"{}\"\n", language));
 
     // Write config file
     let path = config_path();
     if let Some(parent) = path.parent() {
         if let Err(e) = std::fs::create_dir_all(parent) {
             eprintln!(
-                "{} Failed to create config directory: {}",
-                "error:".red().bold(),
-                e
+                "{} {}",
+                t!("error_prefix").red().bold(),
+                t!("wizard_config_dir_error", error = e)
             );
             std::process::exit(1);
         }
@@ -197,38 +216,35 @@ pub fn run_config_wizard() {
     // Warn if overwriting
     if path.exists() {
         let overwrite = Confirm::new()
-            .with_prompt(format!(
-                "Config already exists at {}. Overwrite?",
-                path.display()
-            ))
+            .with_prompt(t!("wizard_config_overwrite", path = path.display()).to_string())
             .default(false)
             .interact()
             .unwrap_or(false);
         if !overwrite {
-            eprintln!("{}", "Aborted.".dimmed());
+            eprintln!("{}", t!("aborted").dimmed());
             std::process::exit(0);
         }
     }
 
     if let Err(e) = std::fs::write(&path, &config_content) {
-        eprintln!("{} Failed to write config: {}", "error:".red().bold(), e);
+        eprintln!("{} {}", t!("error_prefix").red().bold(), t!("wizard_config_write_error", error = e));
         std::process::exit(1);
     }
 
     eprintln!("{}", "─".repeat(40).dimmed());
     eprintln!(
-        "{} Config written to {}",
+        "{} {}",
         "✓".green().bold(),
-        path.display().to_string().bold()
+        t!("wizard_config_written", path = path.display())
     );
-    eprintln!("  {} {}", "Provider:".dimmed(), provider.name.bold());
-    eprintln!("  {} {}", "Model:".dimmed(), model.bold());
+    eprintln!("  {} {}", t!("wizard_label_provider").dimmed(), provider.name.bold());
+    eprintln!("  {} {}", t!("wizard_label_model").dimmed(), model.bold());
     if api_key.is_some() {
-        eprintln!("  {} {}", "API key:".dimmed(), "••••••••".dimmed());
+        eprintln!("  {} {}", t!("wizard_label_api_key").dimmed(), "••••••••".dimmed());
     }
     eprintln!();
     eprintln!(
         "{}",
-        "You're all set! Try: yaak list files in current directory".green()
+        t!("wizard_success").green()
     );
 }

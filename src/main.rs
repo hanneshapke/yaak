@@ -19,9 +19,12 @@ use command::{detect_destructive, extract_command};
 use config::{load_config, resolve};
 use dialoguer::{Confirm, Input, Select};
 use explain::render_explanation;
+use rust_i18n::t;
 use std::env;
 use std::io::Write;
 use std::process::Command;
+
+rust_i18n::i18n!("locales");
 
 /// yaak — translate natural language into bash commands using an OpenAI-compatible LLM
 #[derive(Parser, Debug)]
@@ -97,6 +100,10 @@ struct Args {
     /// Number of history entries to show (default: 20)
     #[arg(long, default_value = "20")]
     limit: usize,
+
+    /// UI language: en, de, es, fr (overrides YAAK_LANGUAGE / config)
+    #[arg(short = 'L', long, env = "YAAK_LANGUAGE")]
+    language: Option<String>,
 }
 
 fn main() {
@@ -105,6 +112,25 @@ fn main() {
     if args.version {
         println!("yaak {}", env!("CARGO_PKG_VERSION"));
         return;
+    }
+
+    // --- Resolve language and set locale ---
+    {
+        let config_lang = load_config().language;
+        let lang = args
+            .language
+            .clone()
+            .or(config_lang)
+            .unwrap_or_else(|| {
+                sys_locale::get_locale()
+                    .and_then(|l| l.split(['-', '_']).next().map(String::from))
+                    .unwrap_or_else(|| "en".into())
+            });
+        let lang = match lang.as_str() {
+            "en" | "de" | "es" | "fr" => lang,
+            _ => "en".into(),
+        };
+        rust_i18n::set_locale(&lang);
     }
 
     if let Some(shell) = args.completions {
@@ -133,28 +159,28 @@ fn main() {
         let shell = env::var("SHELL").unwrap_or_else(|_| "bash".into());
         match history::get_last() {
             Some(entry) => {
-                eprintln!("{}{}", "  Command: ".bold(), entry.command.green().bold());
+                eprintln!("{}{}", t!("label_command").bold(), entry.command.green().bold());
                 let should_run = args.yes
                     || Confirm::new()
-                        .with_prompt("Execute?")
+                        .with_prompt(t!("prompt_execute").to_string())
                         .default(true)
                         .interact()
                         .unwrap_or(false);
                 if !should_run {
-                    eprintln!("{}", "Aborted.".dimmed());
+                    eprintln!("{}", t!("aborted").dimmed());
                     std::process::exit(0);
                 }
                 let status = Command::new(&shell).arg("-c").arg(&entry.command).status();
                 match status {
                     Ok(s) => std::process::exit(s.code().unwrap_or(1)),
                     Err(e) => {
-                        eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
+                        eprintln!("{} {}", t!("error_prefix").red().bold(), t!("error_failed_execute", error = e));
                         std::process::exit(1);
                     }
                 }
             }
             None => {
-                eprintln!("{} No history entries yet.", "info:".dimmed());
+                eprintln!("{} {}", t!("info_prefix").dimmed(), t!("no_history_entries"));
                 std::process::exit(0);
             }
         }
@@ -162,8 +188,9 @@ fn main() {
 
     if args.description.is_empty() {
         eprintln!(
-            "{} No description provided. Run `yaak --help` for usage or `yaak --config` to set up.",
-            "error:".red().bold()
+            "{} {}",
+            t!("error_prefix").red().bold(),
+            t!("error_no_description")
         );
         std::process::exit(1);
     }
@@ -186,8 +213,9 @@ fn main() {
     let needs_api_key = !api_base.contains("localhost") && !api_base.contains("127.0.0.1");
     if needs_api_key && api_key.is_empty() {
         eprintln!(
-            "{} No API key found. Set YAAK_API_KEY, pass --api-key, or add it to ~/.config/yaak/config.toml",
-            "error:".red().bold()
+            "{} {}",
+            t!("error_prefix").red().bold(),
+            t!("error_no_api_key")
         );
         std::process::exit(1);
     }
@@ -200,6 +228,25 @@ fn main() {
     let cwd = env::current_dir()
         .map(|p| p.display().to_string())
         .unwrap_or_else(|_| ".".to_string());
+
+    let locale = rust_i18n::locale().to_string();
+    let lang_name = match locale.as_str() {
+        "de" => "German",
+        "es" => "Spanish",
+        "fr" => "French",
+        _ => "English",
+    };
+    let lang_hint = if locale != "en" {
+        format!(
+            "\n\nThe user's preferred language is {}. \
+             Write all explanatory text (summaries, descriptions, cautions) in {}. \
+             Keep the structural headers (SUMMARY:, BREAKDOWN:, PART:, EXAMPLES:, EXAMPLE:, CAUTION:) \
+             exactly as shown — they are parsing markers.",
+            lang_name, lang_name
+        )
+    } else {
+        String::new()
+    };
 
     let system_prompt = if args.reverse {
         format!(
@@ -217,8 +264,8 @@ fn main() {
              Provide 1-2 short related example variations, each on a line starting with EXAMPLE: <command> | <description>\n\n\
              CAUTION: (only if the command is dangerous or has side effects, otherwise omit this section entirely)\n\
              A short warning about what could go wrong.\n\n\
-             Do NOT use markdown. Do NOT use code fences. Use the exact format above.",
-            shell_name, os_name, cwd
+             Do NOT use markdown. Do NOT use code fences. Use the exact format above.{}",
+            shell_name, os_name, cwd, lang_hint
         )
     } else {
         format!(
@@ -229,8 +276,8 @@ fn main() {
              No explanation, no markdown fences, no commentary — just the raw command. \
              Only use flags and tools available on {}. \
              If multiple commands are needed, join them with && or ;. \
-             Use common, portable tools when possible.",
-            shell_name, os_name, cwd, os_name
+             Use common, portable tools when possible.{}",
+            shell_name, os_name, cwd, os_name, lang_hint
         )
     };
 
@@ -249,7 +296,7 @@ fn main() {
         // --- Check cache (generate mode only) ---
         let command = if !args.reverse && args.cache && !args.no_cache {
             if let Some(cached) = cache::get(&current_description, &model) {
-                eprintln!("{}", "(cached)".dimmed());
+                eprintln!("{}", t!("cached").dimmed());
                 Some(extract_command(&cached.command))
             } else {
                 None
@@ -336,7 +383,7 @@ fn main() {
             let response = match response {
                 Ok(r) => r,
                 Err(e) => {
-                    eprintln!("{} Failed to reach API: {}", "error:".red().bold(), e);
+                    eprintln!("{} {}", t!("error_prefix").red().bold(), t!("error_failed_api", error = e));
                     std::process::exit(1);
                 }
             };
@@ -345,10 +392,9 @@ fn main() {
                 let status = response.status();
                 let body = response.text().unwrap_or_default();
                 eprintln!(
-                    "{} API returned {} — {}",
-                    "error:".red().bold(),
-                    status,
-                    body
+                    "{} {}",
+                    t!("error_prefix").red().bold(),
+                    t!("error_api_returned", status = status, body = body)
                 );
                 std::process::exit(1);
             }
@@ -377,7 +423,7 @@ fn main() {
                 eprintln!();
                 collected
             } else {
-                eprint!("{}", "Thinking ".dimmed());
+                eprint!("{}", t!("label_thinking").dimmed());
                 let mut collected = String::new();
                 let mut token_count = 0usize;
                 streaming::stream_tokens(response, stream_format, |token| {
@@ -411,14 +457,14 @@ fn main() {
         history::save_entry(&current_description, &command, &model);
 
         // --- Display and confirm ---
-        eprintln!("\r{}{}", "  Command: ".bold(), command.green().bold());
+        eprintln!("\r{}{}", t!("label_command").bold(), command.green().bold());
 
         // --- Block destructive commands ---
         if let Some(keyword) = detect_destructive(&command) {
             eprintln!(
-                "{} Destructive command blocked: `{}` is not allowed.",
-                "blocked:".red().bold(),
-                keyword
+                "{} {}",
+                t!("blocked_prefix").red().bold(),
+                t!("destructive_blocked", keyword = keyword)
             );
             std::process::exit(1);
         }
@@ -433,9 +479,14 @@ fn main() {
         if args.yes {
             // Skip prompt, execute directly
         } else {
-            let choices = &["Execute", "Refine", "Copy to clipboard", "Abort"];
+            let choices = &[
+                t!("choice_execute").to_string(),
+                t!("choice_refine").to_string(),
+                t!("choice_copy").to_string(),
+                t!("choice_abort").to_string(),
+            ];
             let selection = Select::new()
-                .with_prompt("What next?")
+                .with_prompt(t!("prompt_what_next").to_string())
                 .items(choices)
                 .default(0)
                 .interact()
@@ -445,10 +496,10 @@ fn main() {
                 0 => {} // execute below
                 1 => {
                     let refinement: String = Input::new()
-                        .with_prompt("Refine your request")
+                        .with_prompt(t!("prompt_refine").to_string())
                         .interact_text()
                         .unwrap_or_else(|_| {
-                            eprintln!("{}", "Aborted.".dimmed());
+                            eprintln!("{}", t!("aborted").dimmed());
                             std::process::exit(0);
                         });
                     current_description = format!(
@@ -468,7 +519,7 @@ fn main() {
                     std::process::exit(0);
                 }
                 _ => {
-                    eprintln!("{}", "Aborted.".dimmed());
+                    eprintln!("{}", t!("aborted").dimmed());
                     std::process::exit(0);
                 }
             }
@@ -480,7 +531,7 @@ fn main() {
         match status {
             Ok(s) => std::process::exit(s.code().unwrap_or(1)),
             Err(e) => {
-                eprintln!("{} Failed to execute: {}", "error:".red().bold(), e);
+                eprintln!("{} {}", t!("error_prefix").red().bold(), t!("error_failed_execute", error = e));
                 std::process::exit(1);
             }
         }
@@ -514,12 +565,13 @@ fn copy_to_clipboard(text: &str) {
 
     match result {
         Ok(status) if status.success() => {
-            eprintln!("{} Command copied to clipboard", "✓".green().bold());
+            eprintln!("{} {}", "✓".green().bold(), t!("clipboard_copied"));
         }
         _ => {
             eprintln!(
-                "{} Failed to copy — printing command instead:",
-                "warning:".yellow().bold()
+                "{} {}",
+                t!("warning_prefix").yellow().bold(),
+                t!("clipboard_failed")
             );
             println!("{}", text);
         }

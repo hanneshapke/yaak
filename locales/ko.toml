@@ -1,0 +1,65 @@
+# Korean translations
+
+[_]
+# General
+aborted = "취소되었습니다."
+cached = "(캐시됨)"
+
+# Prefix labels
+error_prefix = "오류:"
+warning_prefix = "경고:"
+info_prefix = "정보:"
+blocked_prefix = "차단됨:"
+
+# Main errors
+error_failed_execute = "실행 실패: %{error}"
+error_failed_api = "API에 연결할 수 없습니다: %{error}"
+error_api_returned = "API가 %{status}을(를) 반환했습니다 — %{body}"
+error_no_description = "설명이 제공되지 않았습니다. `yaak --help`로 사용법을 확인하거나 `yaak --config`로 설정하세요."
+error_no_api_key = "API 키를 찾을 수 없습니다. YAAK_API_KEY를 설정하거나 --api-key를 사용하거나 ~/.config/yaak/config.toml에 추가하세요."
+
+# Main prompts
+prompt_execute = "실행할까요?"
+prompt_what_next = "다음 작업"
+prompt_refine = "요청 수정"
+label_command = "  명령어: "
+label_thinking = "생각 중 "
+choice_execute = "실행"
+choice_refine = "수정"
+choice_copy = "클립보드에 복사"
+choice_abort = "취소"
+no_history_entries = "아직 기록이 없습니다."
+destructive_blocked = "위험한 명령어가 차단되었습니다: `%{keyword}`은(는) 허용되지 않습니다."
+clipboard_copied = "명령어가 클립보드에 복사되었습니다"
+clipboard_failed = "복사 실패 — 대신 명령어를 출력합니다:"
+
+# History
+history_title = "명령어 기록"
+history_empty = "기록이 없습니다."
+history_entries_total = "전체 %{total}개 항목 (%{shown}개 표시)"
+history_search_results = "검색 결과"
+history_no_matches = "\"%{query}\"에 해당하는 기록이 없습니다"
+history_matches = "%{count}개 일치"
+
+# Wizard
+wizard_title = "yaak 설정 마법사"
+wizard_select_provider = "API 제공자 선택"
+wizard_select_model = "모델 선택"
+wizard_enter_model = "모델 이름 입력"
+wizard_enter_custom_model = "사용자 지정 모델 이름 입력"
+wizard_enter_api_key = "API 키 입력"
+wizard_api_key_required = "%{provider}에는 API 키가 필요합니다"
+wizard_config_dir_error = "설정 디렉터리를 만들 수 없습니다: %{error}"
+wizard_config_write_error = "설정을 저장할 수 없습니다: %{error}"
+wizard_config_overwrite = "설정이 이미 %{path}에 존재합니다. 덮어쓸까요?"
+wizard_config_written = "설정이 %{path}에 저장되었습니다"
+wizard_label_provider = "제공자:"
+wizard_label_model = "모델:"
+wizard_label_api_key = "API 키:"
+wizard_success = "준비 완료! 사용해 보세요: yaak 현재 디렉터리의 파일 목록 표시"
+wizard_select_language = "언어 선택"
+
+# Explain display labels
+explain_breakdown = "명령어 분석"
+explain_examples = "사용 예시"
+explain_caution = "주의:"

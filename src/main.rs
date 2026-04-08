@@ -127,7 +127,7 @@ fn main() {
                     .unwrap_or_else(|| "en".into())
             });
         let lang = match lang.as_str() {
-            "en" | "de" | "es" | "fr" => lang,
+            "en" | "de" | "es" | "fr" | "pt" | "zh" | "ja" | "ko" => lang,
             _ => "en".into(),
         };
         rust_i18n::set_locale(&lang);
@@ -234,6 +234,10 @@ fn main() {
         "de" => "German",
         "es" => "Spanish",
         "fr" => "French",
+        "pt" => "Portuguese",
+        "zh" => "Chinese",
+        "ja" => "Japanese",
+        "ko" => "Korean",
         _ => "English",
     };
     let lang_hint = if locale != "en" {

@@ -1,0 +1,65 @@
+# Japanese translations
+
+[_]
+# General
+aborted = "中止しました。"
+cached = "（キャッシュ）"
+
+# Prefix labels
+error_prefix = "エラー："
+warning_prefix = "警告："
+info_prefix = "情報："
+blocked_prefix = "ブロック："
+
+# Main errors
+error_failed_execute = "実行に失敗しました：%{error}"
+error_failed_api = "APIに接続できません：%{error}"
+error_api_returned = "APIが %{status} を返しました — %{body}"
+error_no_description = "説明が入力されていません。`yaak --help` でヘルプを表示するか、`yaak --config` で設定してください。"
+error_no_api_key = "APIキーが見つかりません。YAAK_API_KEY を設定するか、--api-key を使用するか、~/.config/yaak/config.toml に追加してください。"
+
+# Main prompts
+prompt_execute = "実行しますか？"
+prompt_what_next = "次のアクション"
+prompt_refine = "リクエストを修正"
+label_command = "  コマンド："
+label_thinking = "考え中 "
+choice_execute = "実行"
+choice_refine = "修正"
+choice_copy = "クリップボードにコピー"
+choice_abort = "中止"
+no_history_entries = "履歴がまだありません。"
+destructive_blocked = "危険なコマンドをブロックしました：`%{keyword}` は許可されていません。"
+clipboard_copied = "コマンドをクリップボードにコピーしました"
+clipboard_failed = "コピーに失敗しました——代わりにコマンドを表示します："
+
+# History
+history_title = "コマンド履歴"
+history_empty = "履歴がありません。"
+history_entries_total = "全 %{total} 件（%{shown} 件表示）"
+history_search_results = "検索結果"
+history_no_matches = "\"%{query}\" に一致する履歴がありません"
+history_matches = "%{count} 件一致"
+
+# Wizard
+wizard_title = "yaak 設定ウィザード"
+wizard_select_provider = "APIプロバイダーを選択"
+wizard_select_model = "モデルを選択"
+wizard_enter_model = "モデル名を入力"
+wizard_enter_custom_model = "カスタムモデル名を入力"
+wizard_enter_api_key = "APIキーを入力"
+wizard_api_key_required = "%{provider} にはAPIキーが必要です"
+wizard_config_dir_error = "設定ディレクトリを作成できません：%{error}"
+wizard_config_write_error = "設定を書き込めません：%{error}"
+wizard_config_overwrite = "設定は %{path} に既に存在します。上書きしますか？"
+wizard_config_written = "設定を %{path} に保存しました"
+wizard_label_provider = "プロバイダー："
+wizard_label_model = "モデル："
+wizard_label_api_key = "APIキー："
+wizard_success = "準備完了！試してみてください：yaak カレントディレクトリのファイルを一覧表示"
+wizard_select_language = "言語を選択"
+
+# Explain display labels
+explain_breakdown = "コマンド解析"
+explain_examples = "使用例"
+explain_caution = "注意："

@@ -99,8 +99,8 @@ pub const PROVIDERS: &[Provider] = &[
     },
 ];
 
-const LANGUAGE_NAMES: &[&str] = &["English", "Deutsch", "Español", "Français"];
-const LANGUAGE_CODES: &[&str] = &["en", "de", "es", "fr"];
+const LANGUAGE_NAMES: &[&str] = &["English", "Deutsch", "Español", "Français", "Português", "中文", "日本語", "한국어"];
+const LANGUAGE_CODES: &[&str] = &["en", "de", "es", "fr", "pt", "zh", "ja", "ko"];
 
 pub fn run_config_wizard() {
     eprintln!("{}", t!("wizard_title").bold());

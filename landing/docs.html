@@ -399,7 +399,7 @@
             <tr><td><code>--explain</code></td><td><code>-e</code></td><td>Alias for --reverse</td></tr>
             <tr><td><code>--copy</code></td><td><code>-C</code></td><td>Copy generated command to clipboard</td></tr>
             <tr><td><code>--context</code></td><td></td><td>Include project type and file listing in prompt</td></tr>
-            <tr><td><code>--cache</code></td><td></td><td>Reuse cached result for identical queries</td></tr>
+            <tr><td><code>--cache</code></td><td></td><td>Reuse cached result (exact or BM25 fuzzy match)</td></tr>
             <tr><td><code>--no-cache</code></td><td></td><td>Force fresh API call, ignore cache</td></tr>
             <tr><td><code>--history</code></td><td><code>-H</code></td><td>Show recent command history</td></tr>
             <tr><td><code>--last</code></td><td><code>-l</code></td><td>Re-execute the most recent command</td></tr>
@@ -472,13 +472,18 @@
       <!-- CACHE -->
       <section class="doc-section" id="cache">
         <h2>Cache <em>mode</em></h2>
-        <p>Every generated command is saved to <code>~/.config/yaak/cache.json</code>, keyed by model and description. Use <code>--cache</code> to skip the API call for repeated queries.</p>
+        <p>Every generated command is saved to <code>~/.config/yaak/cache.json</code>, keyed by model and description. Use <code>--cache</code> to skip the API call when a matching entry exists.</p>
+        <p>yaak tries an <strong>exact match</strong> first. If none is found, it falls back to <strong>BM25 fuzzy matching</strong> — a term-frequency ranking algorithm that finds similar cached descriptions even when the wording differs. Stop words are stripped and terms are scored by relevance across all cached entries for the same model.</p>
         <div class="doc-code">
           <span class="t-dim"># First call hits the API</span><br>
           <span class="t-green">$</span> yaak list all docker containers<br><br>
-          <span class="t-dim"># Second identical call returns instantly</span><br>
+          <span class="t-dim"># Exact match — returns instantly</span><br>
           <span class="t-green">$</span> yaak --cache list all docker containers<br>
           <span class="t-dim">(cached)</span><br>
+          <span class="t-dim">  Command:</span> <span class="t-green">docker ps -a</span><br><br>
+          <span class="t-dim"># Fuzzy match — similar wording also hits the cache</span><br>
+          <span class="t-green">$</span> yaak --cache show docker containers<br>
+          <span class="t-dim">(cached) (similar: "list all docker containers")</span><br>
           <span class="t-dim">  Command:</span> <span class="t-green">docker ps -a</span>
         </div>
         <p>Use <code>--no-cache</code> to force a fresh API call and skip saving the result.</p>

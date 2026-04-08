@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.2] — 2026-04-08
 
+### Added
+- `--update` / `-U` flag to self-update yaak to the latest version
+- `--feedback` flag to open a pre-filled GitHub Issue in your browser with version and platform info
+
 ### Changed
 - Cache mode now uses BM25 fuzzy matching — similar descriptions hit the cache even when wording differs
 - Updated landing page, docs, and README with BM25 cache details

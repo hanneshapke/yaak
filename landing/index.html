@@ -598,9 +598,9 @@
     </h1>
     <div class="hero-row">
       <div class="hero-lede">
-        <strong>yaak</strong> (<em>Yet Another AI for the Kommandozeile</em>) is a tiny Rust CLI that translates plain English
-        into the right shell command — using Anthropic, Google Gemini, OpenAI, or any compatible model you choose.
-        Describe what you want, review the command, hit enter. That's it.
+        <strong>yaak</strong> (<em>Yet Another AI for the Kommandozeile</em>) is a tiny Rust CLI that translates natural language
+        into the right shell command &mdash; using Anthropic, Google Gemini, OpenAI, or any compatible model you choose.
+        Supports 8 languages. Describe what you want, review the command, hit enter. That's it.
       </div>
       <div class="hero-divider"></div>
       <div class="hero-install-area">
@@ -682,8 +682,8 @@
       </div>
       <div class="why-cell">
         <span class="cell-number">vi</span>
-        <h3>Reverse mode</h3>
-        <p>Found a cryptic command? Run <code>yaak --reverse</code> to get a visual, token-by-token breakdown. Learn while you work.</p>
+        <h3>8 languages</h3>
+        <p>Use yaak in English, Deutsch, Espa&ntilde;ol, Fran&ccedil;ais, Portugu&ecirc;s, &#20013;&#25991;, &#26085;&#26412;&#35486;, or &#54620;&#44397;&#50612;. Set once with <code>--language</code> or auto-detect from your system locale.</p>
       </div>
     </div>
   </div>
@@ -706,7 +706,7 @@
           <div class="step-name">Describe</div>
         </div>
         <div class="step-desc">
-          Type what you want in plain English after the yaak command. No quoting needed — trailing arguments are joined automatically.
+          Type what you want in any supported language after the yaak command. No quoting needed &mdash; trailing arguments are joined automatically.
         </div>
         <div class="step-code-area">
           <div class="step-code">
@@ -836,20 +836,21 @@ const demos = [
       { text: '<span class="t-bold">yaak configuration wizard</span>', delay: 600 },
       { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 400 },
       { text: '', delay: 200 },
-      { text: '<span class="t-amber">? Select your API provider:</span>', delay: 600 },
-      { text: '  <span class="t-dim">1.</span> OpenAI', delay: 200 },
-      { text: '  <span class="t-dim">2.</span> Anthropic', delay: 200 },
-      { text: '  <span class="t-dim">3.</span> Google Gemini', delay: 200 },
-      { text: '<span class="t-green">❯ 4.</span> <span class="t-bold">Ollama</span>', delay: 200 },
-      { text: '  <span class="t-dim">5.</span> Groq', delay: 200 },
-      { text: '', delay: 800 },
-      { text: '<span class="t-amber">? Select a model:</span> <span class="t-green">gemma3:4b</span>', delay: 1000 },
+      { text: '<span class="t-amber">? Select your language:</span>', delay: 600 },
+      { text: '  <span class="t-dim">1.</span> English', delay: 150 },
+      { text: '  <span class="t-dim">2.</span> Deutsch', delay: 150 },
+      { text: '<span class="t-green">❯ 3.</span> <span class="t-bold">Español</span>', delay: 150 },
+      { text: '  <span class="t-dim">4.</span> Français &nbsp;<span class="t-dim">5.</span> Português &nbsp;<span class="t-dim">6.</span> 中文 &nbsp;<span class="t-dim">7.</span> 日本語 &nbsp;<span class="t-dim">8.</span> 한국어', delay: 300 },
+      { text: '', delay: 600 },
+      { text: '<span class="t-amber">? Selecciona tu proveedor de API:</span>', delay: 600 },
+      { text: '<span class="t-green">❯ 1.</span> <span class="t-bold">Ollama</span>', delay: 400 },
+      { text: '', delay: 600 },
+      { text: '<span class="t-amber">? Selecciona un modelo:</span> <span class="t-green">gemma3:4b</span>', delay: 1000 },
       { text: '', delay: 400 },
       { text: '<span class="t-dim">────────────────────────────────────────</span>', delay: 400 },
-      { text: '<span class="t-green">✓</span> <span class="t-bold">Config written to ~/.config/yaak/config.toml</span>', delay: 800 },
-      { text: '  <span class="t-dim">Provider:</span> <span class="t-bold">Ollama</span>    <span class="t-dim">Model:</span> <span class="t-bold">gemma3:4b</span>', delay: 600 },
+      { text: '<span class="t-green">✓</span> <span class="t-bold">Configuración guardada en ~/.config/yaak/config.toml</span>', delay: 800 },
       { text: '', delay: 400 },
-      { text: '<span class="t-green">You\'re all set! Try: yaak list files in current directory</span>', delay: 800 },
+      { text: '<span class="t-green">¡Listo! Prueba: yaak listar archivos en el directorio actual</span>', delay: 800 },
     ]
   },
   {

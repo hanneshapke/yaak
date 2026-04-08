@@ -1,6 +1,6 @@
 # yaak — Yet Another AI for the Kommandozeile
 
-Translate natural language into bash commands using any OpenAI-compatible LLM.
+Translate natural language into bash commands using any OpenAI-compatible LLM. Supports 8 languages.
 
 ```
 $ yaak list all rust files larger than 1MB
@@ -31,6 +31,12 @@ Run the interactive config wizard:
 $ yaak --config
 yaak configuration wizard
 ────────────────────────────────────────
+
+? Select your language:
+  1. English    5. Português
+  2. Deutsch    6. 中文
+  3. Español    7. 日本語
+❯ 4. Français   8. 한국어
 
 ? Select your API provider:
   1. OpenAI
@@ -70,7 +76,42 @@ On macOS, yaak also checks `~/Library/Application Support/yaak/config.toml`.
 export YAAK_API_BASE="https://api.openai.com/v1"
 export YAAK_API_KEY="sk-..."
 export YAAK_MODEL="gpt-4o-mini"
+export YAAK_LANGUAGE="en"  # en, de, es, fr, pt, zh, ja, ko
 ```
+
+## Multi-language support
+
+yaak supports 8 languages for its UI (prompts, errors, menus, labels):
+
+| Code | Language   |
+|------|------------|
+| `en` | English    |
+| `de` | Deutsch    |
+| `es` | Español    |
+| `fr` | Français   |
+| `pt` | Português  |
+| `zh` | 中文        |
+| `ja` | 日本語      |
+| `ko` | 한국어      |
+
+Language is resolved in this order: `--language` flag → `YAAK_LANGUAGE` env var → `language` in config file → system locale → English.
+
+```bash
+# Set via CLI flag
+yaak -L de list files in current directory
+
+# Set via environment variable
+export YAAK_LANGUAGE=es
+
+# Set via config file
+# Add to ~/.config/yaak/config.toml:
+#   language = "fr"
+
+# The config wizard includes a language selection step
+yaak --config
+```
+
+When a non-English language is selected, yaak also instructs the LLM to respond with explanations in that language (in `--explain` mode), while keeping the structured output format intact.
 
 ## Usage
 
@@ -96,6 +137,7 @@ yaak <description of what you want to do>
 | `--history`             | `-H`  | Show recent command history              |
 | `--last`                | `-l`  | Re-execute the most recent command       |
 | `--search KEYWORD`      | `-s`  | Search command history by keyword        |
+| `--language LANG`       | `-L`  | UI language: en, de, es, fr, pt, zh, ja, ko |
 | `--version`             | `-v`  | Print version number                     |
 | `--completions SHELL`   |       | Generate shell completions (bash/zsh/fish)|
 

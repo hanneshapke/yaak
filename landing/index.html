@@ -576,7 +576,7 @@
     <div class="hero-row">
       <div class="hero-lede">
         <strong>yaak</strong> (<em>Yet Another AI for the Kommandozeile</em>) is a tiny Rust CLI that translates plain English
-        into the right shell command — using Anthropic, OpenAI, or any compatible model you choose.
+        into the right shell command — using Anthropic, Google Gemini, OpenAI, or any compatible model you choose.
         Describe what you want, review the command, hit enter. That's it.
       </div>
       <div class="hero-divider"></div>
@@ -645,7 +645,7 @@
       <div class="why-cell">
         <span class="cell-number">iii</span>
         <h3>Bring your own model</h3>
-        <p>Works with Anthropic, OpenAI, Ollama, Groq, Together, OpenRouter, Doubleword, or any local server. You own the key and pick the model.</p>
+        <p>Works with Anthropic, Google Gemini, OpenAI, Ollama, Groq, Together, OpenRouter, Doubleword, or any local server. You own the key and pick the model.</p>
       </div>
       <div class="why-cell">
         <span class="cell-number">iv</span>
@@ -731,10 +731,11 @@
   <div class="container">
     <div class="reveal">
       <div class="providers-title">Works with <em>every</em> provider.</div>
-      <p class="providers-sub">Native support for Anthropic, plus any endpoint that speaks the OpenAI chat completions protocol.</p>
+      <p class="providers-sub">Native support for Anthropic and Google Gemini, plus any endpoint that speaks the OpenAI chat completions protocol.</p>
     </div>
     <div class="provider-row reveal">
       <span class="provider-tag">Anthropic</span>
+      <span class="provider-tag">Google Gemini</span>
       <span class="provider-tag">OpenAI</span>
       <span class="provider-tag">Ollama</span>
       <span class="provider-tag">Groq</span>
@@ -809,8 +810,9 @@ const demos = [
       { text: '<span class="t-amber">? Select your API provider:</span>', delay: 600 },
       { text: '  <span class="t-dim">1.</span> OpenAI', delay: 200 },
       { text: '  <span class="t-dim">2.</span> Anthropic', delay: 200 },
-      { text: '<span class="t-green">❯ 3.</span> <span class="t-bold">Ollama</span>', delay: 200 },
-      { text: '  <span class="t-dim">4.</span> Groq', delay: 200 },
+      { text: '  <span class="t-dim">3.</span> Google Gemini', delay: 200 },
+      { text: '<span class="t-green">❯ 4.</span> <span class="t-bold">Ollama</span>', delay: 200 },
+      { text: '  <span class="t-dim">5.</span> Groq', delay: 200 },
       { text: '', delay: 800 },
       { text: '<span class="t-amber">? Select a model:</span> <span class="t-green">gemma3:4b</span>', delay: 1000 },
       { text: '', delay: 400 },

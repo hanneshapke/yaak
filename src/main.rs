@@ -58,6 +58,10 @@ struct Args {
     #[arg(short = 'y', long)]
     yes: bool,
 
+    /// Allow destructive commands (bypass safety check)
+    #[arg(short = 'f', long)]
+    force: bool,
+
     /// Reverse mode: explain a command instead of generating one
     #[arg(
         short = 'r',
@@ -475,14 +479,31 @@ fn main() {
         // --- Display and confirm ---
         eprintln!("\r{}{}", t!("label_command").bold(), command.green().bold());
 
-        // --- Block destructive commands ---
+        // --- Destructive command check ---
         if let Some(keyword) = detect_destructive(&command) {
-            eprintln!(
-                "{} {}",
-                t!("blocked_prefix").red().bold(),
-                t!("destructive_blocked", keyword = keyword)
-            );
-            std::process::exit(1);
+            let allow = args.force || config.allow_destructive;
+            if allow {
+                eprintln!(
+                    "{} {}",
+                    t!("warning_prefix").yellow().bold(),
+                    t!("destructive_warning", keyword = keyword)
+                );
+            } else {
+                eprintln!(
+                    "{} {}",
+                    t!("warning_prefix").yellow().bold(),
+                    t!("destructive_warning", keyword = keyword)
+                );
+                let confirmed = Confirm::new()
+                    .with_prompt(t!("destructive_confirm").to_string())
+                    .default(false)
+                    .interact()
+                    .unwrap_or(false);
+                if !confirmed {
+                    eprintln!("{}", t!("aborted").dimmed());
+                    std::process::exit(0);
+                }
+            }
         }
 
         // --- Copy-only mode ---

@@ -1,0 +1,65 @@
+# Portuguese (Brazilian) translations
+
+[_]
+# General
+aborted = "Cancelado."
+cached = "(em cache)"
+
+# Prefix labels
+error_prefix = "erro:"
+warning_prefix = "aviso:"
+info_prefix = "info:"
+blocked_prefix = "bloqueado:"
+
+# Main errors
+error_failed_execute = "Falha ao executar: %{error}"
+error_failed_api = "Não foi possível conectar à API: %{error}"
+error_api_returned = "A API retornou %{status} — %{body}"
+error_no_description = "Nenhuma descrição fornecida. Execute `yaak --help` para ajuda ou `yaak --config` para configurar."
+error_no_api_key = "Nenhuma chave de API encontrada. Defina YAAK_API_KEY, use --api-key ou adicione em ~/.config/yaak/config.toml"
+
+# Main prompts
+prompt_execute = "Executar?"
+prompt_what_next = "O que fazer?"
+prompt_refine = "Refinar solicitação"
+label_command = "  Comando: "
+label_thinking = "Pensando "
+choice_execute = "Executar"
+choice_refine = "Refinar"
+choice_copy = "Copiar para a área de transferência"
+choice_abort = "Cancelar"
+no_history_entries = "Nenhuma entrada no histórico ainda."
+destructive_blocked = "Comando destrutivo bloqueado: `%{keyword}` não é permitido."
+clipboard_copied = "Comando copiado para a área de transferência"
+clipboard_failed = "Falha ao copiar — exibindo o comando:"
+
+# History
+history_title = "Histórico de comandos"
+history_empty = "Nenhum histórico ainda."
+history_entries_total = "%{total} entradas no total (%{shown} exibidas)"
+history_search_results = "Resultados da pesquisa para"
+history_no_matches = "Nenhuma entrada do histórico para \"%{query}\""
+history_matches = "%{count} correspondências"
+
+# Wizard
+wizard_title = "Assistente de configuração do yaak"
+wizard_select_provider = "Selecione seu provedor de API"
+wizard_select_model = "Selecione um modelo"
+wizard_enter_model = "Digite o nome do modelo"
+wizard_enter_custom_model = "Digite nome de modelo personalizado"
+wizard_enter_api_key = "Digite sua chave de API"
+wizard_api_key_required = "Chave de API é necessária para %{provider}"
+wizard_config_dir_error = "Não foi possível criar o diretório de configuração: %{error}"
+wizard_config_write_error = "Não foi possível gravar a configuração: %{error}"
+wizard_config_overwrite = "A configuração já existe em %{path}. Sobrescrever?"
+wizard_config_written = "Configuração salva em %{path}"
+wizard_label_provider = "Provedor:"
+wizard_label_model = "Modelo:"
+wizard_label_api_key = "Chave API:"
+wizard_success = "Tudo pronto! Experimente: yaak listar arquivos no diretório atual"
+wizard_select_language = "Selecione seu idioma"
+
+# Explain display labels
+explain_breakdown = "DETALHAMENTO"
+explain_examples = "EXEMPLOS"
+explain_caution = "CUIDADO:"

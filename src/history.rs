@@ -1,5 +1,6 @@
 use chrono::{DateTime, Local};
 use colored::Colorize;
+use rust_i18n::t;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
@@ -73,7 +74,7 @@ pub fn load_entries() -> Vec<HistoryEntry> {
 pub fn show_history(limit: usize) {
     let entries = load_entries();
     if entries.is_empty() {
-        eprintln!("{}", "No history yet.".dimmed());
+        eprintln!("{}", t!("history_empty").dimmed());
         return;
     }
 
@@ -81,7 +82,7 @@ pub fn show_history(limit: usize) {
     let recent = &entries[start..];
 
     eprintln!("{}", "─".repeat(60).dimmed());
-    eprintln!("  {}", "Command History".bold());
+    eprintln!("  {}", t!("history_title").bold());
     eprintln!("{}", "─".repeat(60).dimmed());
 
     for (i, entry) in recent.iter().enumerate() {
@@ -97,9 +98,12 @@ pub fn show_history(limit: usize) {
     }
     eprintln!("{}", "─".repeat(60).dimmed());
     eprintln!(
-        "  {} entries total ({} shown)",
-        entries.len().to_string().bold(),
-        recent.len()
+        "  {}",
+        t!(
+            "history_entries_total",
+            total = entries.len(),
+            shown = recent.len()
+        )
     );
 }
 
@@ -125,15 +129,19 @@ pub fn search_history(query: &str) {
 
     if matches.is_empty() {
         eprintln!(
-            "{} No history entries matching \"{}\"",
-            "info:".dimmed(),
-            query
+            "{} {}",
+            t!("info_prefix").dimmed(),
+            t!("history_no_matches", query = query)
         );
         return;
     }
 
     eprintln!("{}", "─".repeat(60).dimmed());
-    eprintln!("  {} \"{}\"", "Search results for".bold(), query.bold());
+    eprintln!(
+        "  {} \"{}\"",
+        t!("history_search_results").bold(),
+        query.bold()
+    );
     eprintln!("{}", "─".repeat(60).dimmed());
 
     for (idx, entry) in &matches {
@@ -147,7 +155,7 @@ pub fn search_history(query: &str) {
         eprintln!("        {} {}", "⟩".dimmed(), entry.description.dimmed());
     }
     eprintln!("{}", "─".repeat(60).dimmed());
-    eprintln!("  {} matches", matches.len().to_string().bold());
+    eprintln!("  {}", t!("history_matches", count = matches.len()));
 }
 
 #[cfg(test)]

@@ -1,0 +1,65 @@
+# Chinese Simplified translations
+
+[_]
+# General
+aborted = "已取消。"
+cached = "（缓存）"
+
+# Prefix labels
+error_prefix = "错误："
+warning_prefix = "警告："
+info_prefix = "信息："
+blocked_prefix = "已阻止："
+
+# Main errors
+error_failed_execute = "执行失败：%{error}"
+error_failed_api = "无法连接 API：%{error}"
+error_api_returned = "API 返回 %{status} — %{body}"
+error_no_description = "未提供描述。运行 `yaak --help` 查看用法或 `yaak --config` 进行设置。"
+error_no_api_key = "未找到 API 密钥。请设置 YAAK_API_KEY、使用 --api-key 或将其添加到 ~/.config/yaak/config.toml"
+
+# Main prompts
+prompt_execute = "执行？"
+prompt_what_next = "下一步？"
+prompt_refine = "优化请求"
+label_command = "  命令："
+label_thinking = "思考中 "
+choice_execute = "执行"
+choice_refine = "优化"
+choice_copy = "复制到剪贴板"
+choice_abort = "取消"
+no_history_entries = "暂无历史记录。"
+destructive_blocked = "危险命令已阻止：不允许使用 `%{keyword}`。"
+clipboard_copied = "命令已复制到剪贴板"
+clipboard_failed = "复制失败——改为输出命令："
+
+# History
+history_title = "命令历史"
+history_empty = "暂无历史记录。"
+history_entries_total = "共 %{total} 条记录（显示 %{shown} 条）"
+history_search_results = "搜索结果"
+history_no_matches = "未找到匹配 \"%{query}\" 的历史记录"
+history_matches = "%{count} 条匹配"
+
+# Wizard
+wizard_title = "yaak 配置向导"
+wizard_select_provider = "选择 API 提供商"
+wizard_select_model = "选择模型"
+wizard_enter_model = "输入模型名称"
+wizard_enter_custom_model = "输入自定义模型名称"
+wizard_enter_api_key = "输入 API 密钥"
+wizard_api_key_required = "%{provider} 需要 API 密钥"
+wizard_config_dir_error = "无法创建配置目录：%{error}"
+wizard_config_write_error = "无法写入配置：%{error}"
+wizard_config_overwrite = "配置已存在于 %{path}。是否覆盖？"
+wizard_config_written = "配置已保存到 %{path}"
+wizard_label_provider = "提供商："
+wizard_label_model = "模型："
+wizard_label_api_key = "API 密钥："
+wizard_success = "设置完成！试试：yaak 列出当前目录的文件"
+wizard_select_language = "选择语言"
+
+# Explain display labels
+explain_breakdown = "逐项解析"
+explain_examples = "示例"
+explain_caution = "注意："

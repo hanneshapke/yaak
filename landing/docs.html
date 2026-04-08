@@ -204,6 +204,7 @@
   .doc-section:nth-child(6) { animation-delay: 0.40s; }
   .doc-section:nth-child(7) { animation-delay: 0.45s; }
   .doc-section:nth-child(8) { animation-delay: 0.50s; }
+  .doc-section:nth-child(9) { animation-delay: 0.55s; }
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 768px) {
@@ -276,6 +277,7 @@
         <li class="toc-item"><a href="#config">Configuration</a></li>
         <li class="toc-item"><a href="#usage">Usage</a></li>
         <li class="toc-item"><a href="#flags">All flags</a></li>
+        <li class="toc-item"><a href="#language">Language</a></li>
         <li class="toc-item"><a href="#context">Context mode</a></li>
         <li class="toc-item"><a href="#cache">Cache mode</a></li>
         <li class="toc-item"><a href="#safety">Safety</a></li>
@@ -316,7 +318,7 @@
         <p>yaak resolves settings in this priority order: <strong>CLI flags &rarr; environment variables &rarr; config file &rarr; defaults</strong>.</p>
 
         <h3>Interactive wizard</h3>
-        <p>The fastest way to get started. Run <code>yaak --config</code> to pick a provider, model, and enter your API key.</p>
+        <p>The fastest way to get started. Run <code>yaak --config</code> to pick a language, provider, model, and enter your API key.</p>
         <div class="doc-code">
           <span class="t-green">$</span> yaak --config
         </div>
@@ -327,14 +329,16 @@
           <span class="t-dim"># ~/.config/yaak/config.toml</span><br>
           api_base = <span class="t-green">"https://api.openai.com/v1"</span><br>
           api_key = <span class="t-green">"sk-..."</span><br>
-          model = <span class="t-green">"gpt-4o-mini"</span>
+          model = <span class="t-green">"gpt-4o-mini"</span><br>
+          language = <span class="t-green">"en"</span> <span class="t-dim"># en, de, es, fr, pt, zh, ja, ko</span>
         </div>
 
         <h3>Environment variables</h3>
         <div class="doc-code">
           <span class="t-green">$</span> export YAAK_API_BASE="https://api.openai.com/v1"<br>
           <span class="t-green">$</span> export YAAK_API_KEY="sk-..."<br>
-          <span class="t-green">$</span> export YAAK_MODEL="gpt-4o-mini"
+          <span class="t-green">$</span> export YAAK_MODEL="gpt-4o-mini"<br>
+          <span class="t-green">$</span> export YAAK_LANGUAGE="en" <span class="t-dim"># optional: en, de, es, fr, pt, zh, ja, ko</span>
         </div>
       </section>
 
@@ -399,11 +403,50 @@
             <tr><td><code>--history</code></td><td><code>-H</code></td><td>Show recent command history</td></tr>
             <tr><td><code>--last</code></td><td><code>-l</code></td><td>Re-execute the most recent command</td></tr>
             <tr><td><code>--search</code></td><td><code>-s</code></td><td>Search command history by keyword</td></tr>
+            <tr><td><code>--language</code></td><td><code>-L</code></td><td>UI language: en, de, es, fr, pt, zh, ja, ko</td></tr>
             <tr><td><code>--version</code></td><td><code>-v</code></td><td>Print version number</td></tr>
             <tr><td><code>--completions</code></td><td></td><td>Generate shell completions (bash/zsh/fish)</td></tr>
             <tr><td><code>--limit</code></td><td></td><td>Number of history entries to show (default: 20)</td></tr>
           </tbody>
         </table>
+      </section>
+
+      <!-- LANGUAGE -->
+      <section class="doc-section" id="language">
+        <h2>Multi-<em>language</em> support</h2>
+        <p>yaak supports 8 languages for all UI elements &mdash; prompts, error messages, menus, and labels. The configuration wizard includes a language selection step, or you can set it directly.</p>
+
+        <table class="flag-table">
+          <thead>
+            <tr><th>Code</th><th>Language</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>en</code></td><td>English</td></tr>
+            <tr><td><code>de</code></td><td>Deutsch</td></tr>
+            <tr><td><code>es</code></td><td>Espa&ntilde;ol</td></tr>
+            <tr><td><code>fr</code></td><td>Fran&ccedil;ais</td></tr>
+            <tr><td><code>pt</code></td><td>Portugu&ecirc;s</td></tr>
+            <tr><td><code>zh</code></td><td>&#20013;&#25991; (Chinese)</td></tr>
+            <tr><td><code>ja</code></td><td>&#26085;&#26412;&#35486; (Japanese)</td></tr>
+            <tr><td><code>ko</code></td><td>&#54620;&#44397;&#50612; (Korean)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Setting the language</h3>
+        <p>Language is resolved in priority order: <strong>CLI flag &rarr; environment variable &rarr; config file &rarr; system locale &rarr; English</strong>.</p>
+        <div class="doc-code">
+          <span class="t-dim"># CLI flag</span><br>
+          <span class="t-green">$</span> yaak -L de list files in current directory<br><br>
+          <span class="t-dim"># Environment variable</span><br>
+          <span class="t-green">$</span> export YAAK_LANGUAGE=fr<br><br>
+          <span class="t-dim"># Config file (~/.config/yaak/config.toml)</span><br>
+          language = <span class="t-green">"es"</span><br><br>
+          <span class="t-dim"># Or select during setup</span><br>
+          <span class="t-green">$</span> yaak --config
+        </div>
+
+        <h3>LLM explanations</h3>
+        <p>When a non-English language is active, yaak also instructs the LLM to write explanations, summaries, and cautions in that language (used with <code>--explain</code> mode). The structured output format is preserved for correct parsing.</p>
       </section>
 
       <!-- CONTEXT -->

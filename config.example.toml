@@ -18,3 +18,7 @@ api_key = "sk-ant-..."
 
 # Model to use (defaults: gpt-4o-mini for OpenAI, claude-sonnet-4-6 for Anthropic, gemini-2.5-flash for Gemini)
 model = "claude-sonnet-4-6"
+
+# UI language (en, de, es, fr, pt, zh, ja, ko)
+# Falls back to system locale if not set.
+# language = "en"

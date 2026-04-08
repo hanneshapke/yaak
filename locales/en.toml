@@ -1,0 +1,65 @@
+# English translations (default)
+
+[_]
+# General
+aborted = "Aborted."
+cached = "(cached)"
+
+# Prefix labels
+error_prefix = "error:"
+warning_prefix = "warning:"
+info_prefix = "info:"
+blocked_prefix = "blocked:"
+
+# Main errors
+error_failed_execute = "Failed to execute: %{error}"
+error_failed_api = "Failed to reach API: %{error}"
+error_api_returned = "API returned %{status} — %{body}"
+error_no_description = "No description provided. Run `yaak --help` for usage or `yaak --config` to set up."
+error_no_api_key = "No API key found. Set YAAK_API_KEY, pass --api-key, or add it to ~/.config/yaak/config.toml"
+
+# Main prompts
+prompt_execute = "Execute?"
+prompt_what_next = "What next?"
+prompt_refine = "Refine your request"
+label_command = "  Command: "
+label_thinking = "Thinking "
+choice_execute = "Execute"
+choice_refine = "Refine"
+choice_copy = "Copy to clipboard"
+choice_abort = "Abort"
+no_history_entries = "No history entries yet."
+destructive_blocked = "Destructive command blocked: `%{keyword}` is not allowed."
+clipboard_copied = "Command copied to clipboard"
+clipboard_failed = "Failed to copy — printing command instead:"
+
+# History
+history_title = "Command History"
+history_empty = "No history yet."
+history_entries_total = "%{total} entries total (%{shown} shown)"
+history_search_results = "Search results for"
+history_no_matches = "No history entries matching \"%{query}\""
+history_matches = "%{count} matches"
+
+# Wizard
+wizard_title = "yaak configuration wizard"
+wizard_select_provider = "Select your API provider"
+wizard_select_model = "Select a model"
+wizard_enter_model = "Enter model name"
+wizard_enter_custom_model = "Enter custom model name"
+wizard_enter_api_key = "Enter your API key"
+wizard_api_key_required = "API key is required for %{provider}"
+wizard_config_dir_error = "Failed to create config directory: %{error}"
+wizard_config_write_error = "Failed to write config: %{error}"
+wizard_config_overwrite = "Config already exists at %{path}. Overwrite?"
+wizard_config_written = "Config written to %{path}"
+wizard_label_provider = "Provider:"
+wizard_label_model = "Model:"
+wizard_label_api_key = "API key:"
+wizard_success = "You're all set! Try: yaak list files in current directory"
+wizard_select_language = "Select your language"
+
+# Explain display labels
+explain_breakdown = "BREAKDOWN"
+explain_examples = "EXAMPLES"
+explain_caution = "CAUTION:"

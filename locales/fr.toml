@@ -1,0 +1,65 @@
+# French translations
+
+[_]
+# General
+aborted = "Annulé."
+cached = "(en cache)"
+
+# Prefix labels
+error_prefix = "erreur :"
+warning_prefix = "attention :"
+info_prefix = "info :"
+blocked_prefix = "bloqué :"
+
+# Main errors
+error_failed_execute = "Échec de l'exécution : %{error}"
+error_failed_api = "Impossible de joindre l'API : %{error}"
+error_api_returned = "L'API a renvoyé %{status} — %{body}"
+error_no_description = "Aucune description fournie. Lancez `yaak --help` pour l'aide ou `yaak --config` pour configurer."
+error_no_api_key = "Aucune clé API trouvée. Définissez YAAK_API_KEY, utilisez --api-key ou ajoutez-la dans ~/.config/yaak/config.toml"
+
+# Main prompts
+prompt_execute = "Exécuter ?"
+prompt_what_next = "Et maintenant ?"
+prompt_refine = "Affiner la demande"
+label_command = "  Commande : "
+label_thinking = "Réflexion "
+choice_execute = "Exécuter"
+choice_refine = "Affiner"
+choice_copy = "Copier dans le presse-papiers"
+choice_abort = "Annuler"
+no_history_entries = "Aucune entrée dans l'historique."
+destructive_blocked = "Commande destructive bloquée : `%{keyword}` n'est pas autorisé."
+clipboard_copied = "Commande copiée dans le presse-papiers"
+clipboard_failed = "Échec de la copie — affichage de la commande :"
+
+# History
+history_title = "Historique des commandes"
+history_empty = "Aucun historique."
+history_entries_total = "%{total} entrées au total (%{shown} affichées)"
+history_search_results = "Résultats de recherche pour"
+history_no_matches = "Aucune entrée correspondant à \"%{query}\""
+history_matches = "%{count} correspondances"
+
+# Wizard
+wizard_title = "Assistant de configuration yaak"
+wizard_select_provider = "Sélectionnez votre fournisseur d'API"
+wizard_select_model = "Sélectionnez un modèle"
+wizard_enter_model = "Entrez le nom du modèle"
+wizard_enter_custom_model = "Entrez un nom de modèle personnalisé"
+wizard_enter_api_key = "Entrez votre clé API"
+wizard_api_key_required = "Une clé API est requise pour %{provider}"
+wizard_config_dir_error = "Impossible de créer le répertoire de configuration : %{error}"
+wizard_config_write_error = "Impossible d'écrire la configuration : %{error}"
+wizard_config_overwrite = "La configuration existe déjà à %{path}. Écraser ?"
+wizard_config_written = "Configuration enregistrée dans %{path}"
+wizard_label_provider = "Fournisseur :"
+wizard_label_model = "Modèle :"
+wizard_label_api_key = "Clé API :"
+wizard_success = "C'est prêt ! Essayez : yaak lister les fichiers du répertoire courant"
+wizard_select_language = "Sélectionnez votre langue"
+
+# Explain display labels
+explain_breakdown = "DÉCOMPOSITION"
+explain_examples = "EXEMPLES"
+explain_caution = "ATTENTION :"

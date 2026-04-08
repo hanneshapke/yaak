@@ -108,6 +108,10 @@ struct Args {
     /// UI language: en, de, es, fr (overrides YAAK_LANGUAGE / config)
     #[arg(short = 'L', long, env = "YAAK_LANGUAGE")]
     language: Option<String>,
+
+    /// Open the feedback page in your browser
+    #[arg(long, exclusive = true)]
+    feedback: bool,
 }
 
 fn main() {
@@ -115,6 +119,23 @@ fn main() {
 
     if args.version {
         println!("yaak {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+
+    if args.feedback {
+        let version = env!("CARGO_PKG_VERSION");
+        let os = env::consts::OS;
+        let arch = env::consts::ARCH;
+        let body = format!("yaak v{} on {} {}", version, os, arch);
+        let url = format!(
+            "https://github.com/hanneshapke/yaak/issues/new?labels=feedback&title=Feedback&body={}",
+            urlencoding(&body)
+        );
+        eprintln!(
+            "{} Opening feedback page...",
+            "✓".green().bold()
+        );
+        open_url(&url);
         return;
     }
 
@@ -617,6 +638,38 @@ fn copy_to_clipboard(text: &str) {
             println!("{}", text);
         }
     }
+}
+
+fn urlencoding(s: &str) -> String {
+    let mut result = String::new();
+    for b in s.bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                result.push(b as char);
+            }
+            b' ' => result.push('+'),
+            _ => {
+                result.push('%');
+                result.push_str(&format!("{:02X}", b));
+            }
+        }
+    }
+    result
+}
+
+fn open_url(url: &str) {
+    let (cmd, args): (&str, &[&str]) = if cfg!(target_os = "macos") {
+        ("open", &[])
+    } else if cfg!(target_os = "windows") {
+        ("cmd", &["/C", "start"])
+    } else {
+        ("xdg-open", &[])
+    };
+    let mut command = Command::new(cmd);
+    for arg in args {
+        command.arg(arg);
+    }
+    let _ = command.arg(url).spawn();
 }
 
 #[cfg(test)]

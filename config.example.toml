@@ -6,6 +6,7 @@
 # Examples:
 #   OpenAI:      "https://api.openai.com/v1"
 #   Anthropic:   "https://api.anthropic.com/v1"
+#   Gemini:      "https://generativelanguage.googleapis.com/v1beta"
 #   Ollama:      "http://localhost:11434/v1"
 #   Together:    "https://api.together.xyz/v1"
 #   OpenRouter:  "https://openrouter.ai/api/v1"
@@ -15,5 +16,5 @@ api_base = "https://api.anthropic.com/v1"
 # Your API key
 api_key = "sk-ant-..."
 
-# Model to use (defaults: gpt-4o-mini for OpenAI, claude-sonnet-4-6 for Anthropic)
+# Model to use (defaults: gpt-4o-mini for OpenAI, claude-sonnet-4-6 for Anthropic, gemini-2.5-flash for Gemini)
 model = "claude-sonnet-4-6"

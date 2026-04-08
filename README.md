@@ -35,13 +35,14 @@ yaak configuration wizard
 ? Select your API provider:
   1. OpenAI
   2. Anthropic
-❯ 3. Ollama
-  4. Groq
-  5. Together AI
-  6. OpenRouter
-  7. LM Studio
-  8. vLLM
-  9. LocalAI
+  3. Google Gemini
+❯ 4. Ollama
+  5. Groq
+  6. Together AI
+  7. OpenRouter
+  8. LM Studio
+  9. vLLM
+  10. LocalAI
 
 ? Select a model: gemma3:4b
 
@@ -161,6 +162,14 @@ yaak auto-detects the provider from the API base URL and uses the appropriate re
 
 ```bash
 yaak -u https://api.anthropic.com/v1 -k sk-ant-... find all large log files
+```
+
+**Google Gemini (native Gemini API):**
+
+- **Google Gemini** — `https://generativelanguage.googleapis.com/v1beta`
+
+```bash
+yaak -u https://generativelanguage.googleapis.com/v1beta -k AIza... find all large log files
 ```
 
 **OpenAI-compatible** (`/v1/chat/completions`):

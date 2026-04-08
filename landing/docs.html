@@ -257,7 +257,7 @@
         <h1 class="page-title">Docu<em>mentation</em></h1>
       </div>
       <div class="page-meta">
-        CLI version: 0.0.8<br>
+        CLI version: 0.0.11<br>
         License: Apache-2.0
       </div>
     </div>
@@ -463,6 +463,12 @@
         <p>Detected when the API base contains <code>anthropic.com</code>. Uses the Messages API with streaming.</p>
         <div class="doc-code">
           <span class="t-green">$</span> yaak -u https://api.anthropic.com/v1 -k sk-ant-... find large log files
+        </div>
+
+        <h3>Google Gemini (native Gemini API)</h3>
+        <p>Detected when the API base contains <code>generativelanguage.googleapis.com</code>. Uses the Gemini streaming API with SSE.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak -u https://generativelanguage.googleapis.com/v1beta -k AIza... find large log files
         </div>
 
         <h3>OpenAI-compatible</h3>

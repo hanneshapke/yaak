@@ -8,7 +8,10 @@ mod history;
 mod streaming;
 mod wizard;
 
-use api::{AnthropicRequest, ChatRequest, Message};
+use api::{
+    AnthropicRequest, ChatRequest, GeminiContent, GeminiGenerationConfig, GeminiPart,
+    GeminiRequest, GeminiSystemInstruction, Message,
+};
 use clap::{CommandFactory, Parser};
 use clap_complete::{generate, Shell};
 use colored::Colorize;
@@ -170,8 +173,11 @@ fn main() {
     let api_base = resolve(args.api_base, config.api_base, "https://api.openai.com/v1");
     let api_key = resolve(args.api_key, config.api_key, "");
     let anthropic = api::is_anthropic(&api_base);
+    let gemini = api::is_gemini(&api_base);
     let default_model = if anthropic {
         "claude-sonnet-4-6"
+    } else if gemini {
+        "gemini-2.5-flash"
     } else {
         "gpt-4o-mini"
     };
@@ -276,6 +282,32 @@ fn main() {
                     .header("Content-Type", "application/json")
                     .json(&request_body)
                     .send()
+            } else if gemini {
+                let url = format!(
+                    "{}/models/{}:streamGenerateContent?alt=sse&key={}",
+                    api_base.trim_end_matches('/'),
+                    model,
+                    api_key
+                );
+                let request_body = GeminiRequest {
+                    contents: vec![GeminiContent {
+                        role: "user".into(),
+                        parts: vec![GeminiPart {
+                            text: current_user_message.clone(),
+                        }],
+                    }],
+                    system_instruction: GeminiSystemInstruction {
+                        parts: vec![GeminiPart {
+                            text: system_prompt.clone(),
+                        }],
+                    },
+                    generation_config: GeminiGenerationConfig { temperature: 0.0 },
+                };
+                client
+                    .post(&url)
+                    .header("Content-Type", "application/json")
+                    .json(&request_body)
+                    .send()
             } else {
                 let url = format!("{}/chat/completions", api_base.trim_end_matches('/'));
                 let request_body = ChatRequest {
@@ -322,10 +354,18 @@ fn main() {
             }
 
             // --- Stream and collect tokens ---
+            let stream_format = if anthropic {
+                streaming::StreamFormat::Anthropic
+            } else if gemini {
+                streaming::StreamFormat::Gemini
+            } else {
+                streaming::StreamFormat::OpenAi
+            };
+
             let raw_content = if args.reverse {
                 let mut collected = String::new();
                 let mut first_token = true;
-                streaming::stream_tokens(response, anthropic, |token| {
+                streaming::stream_tokens(response, stream_format, |token| {
                     if first_token {
                         eprint!("\r\x1b[K");
                         first_token = false;
@@ -340,7 +380,7 @@ fn main() {
                 eprint!("{}", "Thinking ".dimmed());
                 let mut collected = String::new();
                 let mut token_count = 0usize;
-                streaming::stream_tokens(response, anthropic, |token| {
+                streaming::stream_tokens(response, stream_format, |token| {
                     collected.push_str(token);
                     token_count += 1;
                     if token_count.is_multiple_of(4) {
@@ -488,41 +528,42 @@ fn copy_to_clipboard(text: &str) {
 
 #[cfg(test)]
 mod tests {
-    use crate::api::is_anthropic;
+    use crate::api::{is_anthropic, is_gemini};
     use crate::config::resolve;
+
+    fn default_model_for(api_base: &str) -> &'static str {
+        if is_anthropic(api_base) {
+            "claude-sonnet-4-6"
+        } else if is_gemini(api_base) {
+            "gemini-2.5-flash"
+        } else {
+            "gpt-4o-mini"
+        }
+    }
 
     #[test]
     fn default_model_for_anthropic() {
-        let api_base = "https://api.anthropic.com/v1";
-        let default_model = if is_anthropic(api_base) {
-            "claude-sonnet-4-6"
-        } else {
-            "gpt-4o-mini"
-        };
-        assert_eq!(resolve(None, None, default_model), "claude-sonnet-4-6");
+        let m = default_model_for("https://api.anthropic.com/v1");
+        assert_eq!(resolve(None, None, m), "claude-sonnet-4-6");
     }
 
     #[test]
     fn default_model_for_openai() {
-        let api_base = "https://api.openai.com/v1";
-        let default_model = if is_anthropic(api_base) {
-            "claude-sonnet-4-6"
-        } else {
-            "gpt-4o-mini"
-        };
-        assert_eq!(resolve(None, None, default_model), "gpt-4o-mini");
+        let m = default_model_for("https://api.openai.com/v1");
+        assert_eq!(resolve(None, None, m), "gpt-4o-mini");
+    }
+
+    #[test]
+    fn default_model_for_gemini() {
+        let m = default_model_for("https://generativelanguage.googleapis.com/v1beta");
+        assert_eq!(resolve(None, None, m), "gemini-2.5-flash");
     }
 
     #[test]
     fn explicit_model_overrides_anthropic_default() {
-        let api_base = "https://api.anthropic.com/v1";
-        let default_model = if is_anthropic(api_base) {
-            "claude-sonnet-4-6"
-        } else {
-            "gpt-4o-mini"
-        };
+        let m = default_model_for("https://api.anthropic.com/v1");
         assert_eq!(
-            resolve(Some("claude-opus-4-6".into()), None, default_model),
+            resolve(Some("claude-opus-4-6".into()), None, m),
             "claude-opus-4-6"
         );
     }

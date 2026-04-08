@@ -47,6 +47,37 @@ pub struct AnthropicRequest {
     pub stream: bool,
 }
 
+// --- Gemini structs ---
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GeminiRequest {
+    pub contents: Vec<GeminiContent>,
+    pub system_instruction: GeminiSystemInstruction,
+    pub generation_config: GeminiGenerationConfig,
+}
+
+#[derive(Serialize)]
+pub struct GeminiContent {
+    pub role: String,
+    pub parts: Vec<GeminiPart>,
+}
+
+#[derive(Serialize)]
+pub struct GeminiSystemInstruction {
+    pub parts: Vec<GeminiPart>,
+}
+
+#[derive(Serialize)]
+pub struct GeminiPart {
+    pub text: String,
+}
+
+#[derive(Serialize)]
+pub struct GeminiGenerationConfig {
+    pub temperature: f32,
+}
+
 // Non-streaming response structs (retained for tests)
 #[cfg(test)]
 #[derive(Deserialize)]
@@ -63,6 +94,11 @@ pub struct AnthropicContent {
 /// Returns true if the API base URL points to Anthropic's API.
 pub fn is_anthropic(api_base: &str) -> bool {
     api_base.contains("anthropic.com")
+}
+
+/// Returns true if the API base URL points to Google's Gemini API.
+pub fn is_gemini(api_base: &str) -> bool {
+    api_base.contains("generativelanguage.googleapis.com")
 }
 
 #[cfg(test)]
@@ -116,6 +152,42 @@ mod tests {
         assert_eq!(resp.content.len(), 2);
         assert_eq!(resp.content[0].text, "first");
         assert_eq!(resp.content[1].text, "second");
+    }
+
+    #[test]
+    fn detects_gemini_provider() {
+        assert!(is_gemini(
+            "https://generativelanguage.googleapis.com/v1beta"
+        ));
+        assert!(!is_gemini("https://api.openai.com/v1"));
+        assert!(!is_gemini("https://api.anthropic.com/v1"));
+        assert!(!is_gemini("http://localhost:11434/v1"));
+    }
+
+    #[test]
+    fn gemini_request_serializes_correctly() {
+        let req = GeminiRequest {
+            contents: vec![GeminiContent {
+                role: "user".into(),
+                parts: vec![GeminiPart {
+                    text: "list files".into(),
+                }],
+            }],
+            system_instruction: GeminiSystemInstruction {
+                parts: vec![GeminiPart {
+                    text: "You are helpful.".into(),
+                }],
+            },
+            generation_config: GeminiGenerationConfig { temperature: 0.0 },
+        };
+        let json = serde_json::to_value(&req).unwrap();
+        assert_eq!(json["contents"][0]["role"], "user");
+        assert_eq!(json["contents"][0]["parts"][0]["text"], "list files");
+        assert_eq!(
+            json["systemInstruction"]["parts"][0]["text"],
+            "You are helpful."
+        );
+        assert_eq!(json["generationConfig"]["temperature"], 0.0);
     }
 
     #[test]

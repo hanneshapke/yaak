@@ -31,11 +31,7 @@ pub const PROVIDERS: &[Provider] = &[
         name: "Google Gemini",
         api_base: "https://generativelanguage.googleapis.com/v1beta",
         needs_api_key: true,
-        suggested_models: &[
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-2.0-flash",
-        ],
+        suggested_models: &["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"],
     },
     Provider {
         name: "Ollama",

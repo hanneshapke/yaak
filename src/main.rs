@@ -338,9 +338,17 @@ fn main() {
     loop {
         // --- Check cache (generate mode only) ---
         let command = if !args.reverse && args.cache && !args.no_cache {
-            if let Some(cached) = cache::get(&current_description, &model) {
-                eprintln!("{}", t!("cached").dimmed());
-                Some(extract_command(&cached.command))
+            if let Some(hit) = cache::get(&current_description, &model) {
+                if let Some(ref matched) = hit.matched_description {
+                    eprintln!(
+                        "{} {}",
+                        t!("cached").dimmed(),
+                        format!("(similar: \"{}\")", matched).dimmed()
+                    );
+                } else {
+                    eprintln!("{}", t!("cached").dimmed());
+                }
+                Some(extract_command(&hit.entry.command))
             } else {
                 None
             }

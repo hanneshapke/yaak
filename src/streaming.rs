@@ -1,10 +1,18 @@
 use serde::Deserialize;
 use std::io::{BufRead, BufReader, Read};
 
+/// Identifies which streaming format to use.
+#[derive(Clone, Copy, PartialEq)]
+pub enum StreamFormat {
+    OpenAi,
+    Anthropic,
+    Gemini,
+}
+
 /// Extract text tokens from an SSE stream (Server-Sent Events).
-/// Works with both OpenAI-compatible and Anthropic streaming formats.
+/// Works with OpenAI-compatible, Anthropic, and Gemini streaming formats.
 /// Calls `on_token` for each text delta received.
-pub fn stream_tokens<R: Read>(reader: R, anthropic: bool, mut on_token: impl FnMut(&str)) {
+pub fn stream_tokens<R: Read>(reader: R, format: StreamFormat, mut on_token: impl FnMut(&str)) {
     let buf = BufReader::new(reader);
 
     for line in buf.lines() {
@@ -22,11 +30,12 @@ pub fn stream_tokens<R: Read>(reader: R, anthropic: bool, mut on_token: impl FnM
             break;
         }
 
-        if anthropic {
-            if let Some(token) = parse_anthropic_delta(data) {
-                on_token(&token);
-            }
-        } else if let Some(token) = parse_openai_delta(data) {
+        let token = match format {
+            StreamFormat::Anthropic => parse_anthropic_delta(data),
+            StreamFormat::Gemini => parse_gemini_delta(data),
+            StreamFormat::OpenAi => parse_openai_delta(data),
+        };
+        if let Some(token) = token {
             on_token(&token);
         }
     }
@@ -82,6 +91,42 @@ fn parse_anthropic_delta(data: &str) -> Option<String> {
     delta.text
 }
 
+// --- Gemini streaming delta ---
+
+#[derive(Deserialize)]
+struct GeminiChunk {
+    candidates: Option<Vec<GeminiCandidate>>,
+}
+
+#[derive(Deserialize)]
+struct GeminiCandidate {
+    content: Option<GeminiCandidateContent>,
+}
+
+#[derive(Deserialize)]
+struct GeminiCandidateContent {
+    parts: Option<Vec<GeminiCandidatePart>>,
+}
+
+#[derive(Deserialize)]
+struct GeminiCandidatePart {
+    text: Option<String>,
+}
+
+fn parse_gemini_delta(data: &str) -> Option<String> {
+    let chunk: GeminiChunk = serde_json::from_str(data).ok()?;
+    chunk
+        .candidates?
+        .first()?
+        .content
+        .as_ref()?
+        .parts
+        .as_ref()?
+        .first()?
+        .text
+        .clone()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -112,6 +157,24 @@ mod tests {
     }
 
     #[test]
+    fn parse_gemini_delta_extracts_text() {
+        let data = r#"{"candidates":[{"content":{"parts":[{"text":"hello"}],"role":"model"}}]}"#;
+        assert_eq!(parse_gemini_delta(data), Some("hello".into()));
+    }
+
+    #[test]
+    fn parse_gemini_delta_handles_empty_candidates() {
+        let data = r#"{"candidates":[]}"#;
+        assert_eq!(parse_gemini_delta(data), None);
+    }
+
+    #[test]
+    fn parse_gemini_delta_handles_missing_parts() {
+        let data = r#"{"candidates":[{"content":{}}]}"#;
+        assert_eq!(parse_gemini_delta(data), None);
+    }
+
+    #[test]
     fn stream_tokens_openai_format() {
         let input = "\
 data: {\"id\":\"x\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"}}]}\n\
@@ -123,7 +186,9 @@ data: {\"id\":\"x\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" -la\"}}]
 data: [DONE]\n";
 
         let mut collected = String::new();
-        stream_tokens(input.as_bytes(), false, |t| collected.push_str(t));
+        stream_tokens(input.as_bytes(), StreamFormat::OpenAi, |t| {
+            collected.push_str(t)
+        });
         assert_eq!(collected, "ls -la");
     }
 
@@ -139,14 +204,34 @@ data: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_d
 data: {\"type\":\"message_stop\"}\n";
 
         let mut collected = String::new();
-        stream_tokens(input.as_bytes(), true, |t| collected.push_str(t));
+        stream_tokens(input.as_bytes(), StreamFormat::Anthropic, |t| {
+            collected.push_str(t)
+        });
         assert_eq!(collected, "find . -name");
+    }
+
+    #[test]
+    fn stream_tokens_gemini_format() {
+        let input = "\
+data: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"ls\"}],\"role\":\"model\"}}]}\n\
+\n\
+data: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\" -la\"}],\"role\":\"model\"}}]}\n\
+\n\
+data: {\"candidates\":[]}\n";
+
+        let mut collected = String::new();
+        stream_tokens(input.as_bytes(), StreamFormat::Gemini, |t| {
+            collected.push_str(t)
+        });
+        assert_eq!(collected, "ls -la");
     }
 
     #[test]
     fn stream_tokens_handles_empty_input() {
         let mut collected = String::new();
-        stream_tokens("".as_bytes(), false, |t| collected.push_str(t));
+        stream_tokens("".as_bytes(), StreamFormat::OpenAi, |t| {
+            collected.push_str(t)
+        });
         assert_eq!(collected, "");
     }
 }

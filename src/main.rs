@@ -131,10 +131,7 @@ fn main() {
             "https://github.com/hanneshapke/yaak/issues/new?labels=feedback&title=Feedback&body={}",
             urlencoding(&body)
         );
-        eprintln!(
-            "{} Opening feedback page...",
-            "✓".green().bold()
-        );
+        eprintln!("{} Opening feedback page...", "✓".green().bold());
         open_url(&url);
         return;
     }

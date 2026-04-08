@@ -5,6 +5,14 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.12] — 2026-04-08
+
+### Added
+- Google Gemini as a native API provider with streaming support and model suggestions
+- Curl install command in the landing page CTA section for easier onboarding
+
+---
+
 ## [0.0.11] — 2026-04-07
 
 ### Added

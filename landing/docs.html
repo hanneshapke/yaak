@@ -282,6 +282,7 @@
         <li class="toc-item"><a href="#cache">Cache mode</a></li>
         <li class="toc-item"><a href="#safety">Safety</a></li>
         <li class="toc-item"><a href="#providers">Providers</a></li>
+        <li class="toc-item"><a href="#troubleshooting">Troubleshooting</a></li>
       </ul>
     </aside>
 
@@ -532,6 +533,27 @@
             <tr><td>LocalAI</td><td><code>http://localhost:8080/v1</code></td><td>No</td></tr>
           </tbody>
         </table>
+      </section>
+
+      <!-- TROUBLESHOOTING -->
+      <section class="doc-section" id="troubleshooting">
+        <h2>Trouble<em>shooting</em></h2>
+
+        <h3>zsh: no matches found: it?</h3>
+        <p>zsh treats <code>?</code>, <code>*</code>, and other characters as glob wildcards. When you type <code>yaak what time is it?</code>, zsh tries to expand <code>it?</code> as a file pattern and fails.</p>
+        <p><strong>Quick fix</strong> — quote your description:</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak "what time is it?"
+        </div>
+        <p><strong>Permanent fix</strong> — add a <code>noglob</code> alias to your <code>~/.zshrc</code>:</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> echo 'alias yaak="noglob yaak"' >> ~/.zshrc<br>
+          <span class="t-green">$</span> source ~/.zshrc
+        </div>
+        <p>The <code>noglob</code> prefix tells zsh to skip glob expansion for yaak, so <code>?</code>, <code>*</code>, and other special characters just work without quoting.</p>
+
+        <h3>bash: similar issues</h3>
+        <p>bash does not expand <code>?</code> if no matching files exist, so this is usually only a problem in zsh. If you do hit issues in bash, quote your description the same way.</p>
       </section>
 
     </main>

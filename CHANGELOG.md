@@ -5,6 +5,14 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] — 2026-04-08
+
+### Added
+- Multi-language support — UI available in English, German, Spanish, French, Portuguese, Chinese, Japanese, and Korean
+- Destructive command override (`--force` / `-f` flag and `allow_destructive` config option) — destructive commands now prompt for confirmation instead of being hard-blocked
+
+---
+
 ## [0.0.12] — 2026-04-08
 
 ### Added

@@ -1,6 +1,7 @@
 use colored::Colorize;
 use dialoguer::{Confirm, Input, Password, Select};
 use rust_i18n::t;
+use std::path::PathBuf;
 
 use crate::config::config_path;
 
@@ -265,4 +266,160 @@ pub fn run_config_wizard() {
     }
     eprintln!();
     eprintln!("{}", t!("wizard_success").green());
+    eprintln!();
+
+    // 5. Offer to create shell alias y -> yaak
+    offer_shell_alias();
+}
+
+/// Detect the user's shell rc file and offer to append `alias y='yaak'`.
+fn offer_shell_alias() {
+    let home = match std::env::var("HOME") {
+        Ok(h) => PathBuf::from(h),
+        Err(_) => return, // no HOME — skip silently
+    };
+
+    let shell = std::env::var("SHELL").unwrap_or_default();
+    let shell_name = shell.rsplit('/').next().unwrap_or("");
+
+    let (rc_path, alias_line) = match shell_name {
+        "zsh" => (home.join(".zshrc"), "alias y='yaak'"),
+        "fish" => (home.join(".config/fish/config.fish"), "alias y 'yaak'"),
+        // bash and anything else
+        _ => (home.join(".bashrc"), "alias y='yaak'"),
+    };
+
+    // Check if the exact alias already exists in the rc file
+    if rc_path.exists() {
+        if let Ok(contents) = std::fs::read_to_string(&rc_path) {
+            if contents.contains(alias_line) {
+                eprintln!(
+                    "{} {}",
+                    "✓".green().bold(),
+                    t!("wizard_alias_already_exists", path = rc_path.display())
+                );
+                return;
+            }
+        }
+    }
+
+    // Check if `y` is already mapped to something else
+    let existing_target = detect_existing_y(&shell, &rc_path, shell_name);
+    if let Some(target) = &existing_target {
+        eprintln!(
+            "{} {}",
+            t!("warning_prefix").yellow().bold(),
+            t!("wizard_alias_conflict", target = target.as_str())
+        );
+        let overwrite = Confirm::new()
+            .with_prompt(t!("wizard_alias_overwrite_prompt").to_string())
+            .default(false)
+            .interact()
+            .unwrap_or(false);
+        if !overwrite {
+            return;
+        }
+    } else {
+        let create_alias = Confirm::new()
+            .with_prompt(t!("wizard_alias_prompt").to_string())
+            .default(true)
+            .interact()
+            .unwrap_or(false);
+        if !create_alias {
+            return;
+        }
+    }
+
+    // Ensure parent directory exists (relevant for fish)
+    if let Some(parent) = rc_path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+
+    // Append alias line
+    let line = format!("\n# yaak shortcut\n{}\n", alias_line);
+    match std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&rc_path)
+    {
+        Ok(mut file) => {
+            use std::io::Write;
+            if let Err(e) = file.write_all(line.as_bytes()) {
+                eprintln!(
+                    "{} {}",
+                    t!("error_prefix").red().bold(),
+                    t!("wizard_alias_write_error", error = e)
+                );
+                return;
+            }
+            eprintln!(
+                "{} {}",
+                "✓".green().bold(),
+                t!("wizard_alias_added", path = rc_path.display())
+            );
+            eprintln!(
+                "  {}",
+                t!("wizard_alias_source_hint", path = rc_path.display()).yellow()
+            );
+        }
+        Err(e) => {
+            eprintln!(
+                "{} {}",
+                t!("error_prefix").red().bold(),
+                t!("wizard_alias_write_error", error = e)
+            );
+        }
+    }
+}
+
+/// Check whether `y` is already defined as an alias (to something other than yaak)
+/// or exists as a command on the system. Returns the existing target if found.
+fn detect_existing_y(shell_path: &str, rc_path: &PathBuf, shell_name: &str) -> Option<String> {
+    // 1. Check rc file for an existing alias definition for `y`
+    if rc_path.exists() {
+        if let Ok(contents) = std::fs::read_to_string(rc_path) {
+            for line in contents.lines() {
+                let trimmed = line.trim();
+                match shell_name {
+                    "fish" => {
+                        // fish: `alias y 'something'` or `alias y "something"` or `alias y something`
+                        if let Some(rest) = trimmed.strip_prefix("alias y ") {
+                            let value = rest.trim().trim_matches(|c| c == '\'' || c == '"');
+                            if value != "yaak" {
+                                return Some(value.to_string());
+                            }
+                        }
+                    }
+                    _ => {
+                        // bash/zsh: `alias y='something'` or `alias y="something"`
+                        if let Some(rest) = trimmed.strip_prefix("alias y=") {
+                            let value = rest.trim_matches(|c| c == '\'' || c == '"');
+                            if value != "yaak" {
+                                return Some(value.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Check if `y` exists as a command on PATH (binary, script, etc.)
+    let check_cmd = match shell_name {
+        "fish" => "command -v y",
+        _ => "command -v y",
+    };
+    if let Ok(output) = std::process::Command::new(shell_path)
+        .args(["-c", check_cmd])
+        .output()
+    {
+        if output.status.success() {
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !path.is_empty() {
+                return Some(path);
+            }
+        }
+    }
+
+    None
 }

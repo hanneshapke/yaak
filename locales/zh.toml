@@ -58,6 +58,13 @@ wizard_label_provider = "提供商："
 wizard_label_model = "模型："
 wizard_label_api_key = "API 密钥："
 wizard_success = "设置完成！试试：yaak 列出当前目录的文件"
+wizard_alias_prompt = "创建一个快捷别名，用 `y` 代替 `yaak`？"
+wizard_alias_already_exists = "别名 y='yaak' 已存在于 %{path}"
+wizard_alias_added = "别名已添加到 %{path}"
+wizard_alias_source_hint = "运行 `source %{path}` 以在当前会话中激活别名。"
+wizard_alias_write_error = "无法写入别名：%{error}"
+wizard_alias_conflict = "`y` 已映射到 `%{target}` — 创建此别名将覆盖它。"
+wizard_alias_overwrite_prompt = "覆盖现有映射？"
 wizard_select_language = "选择语言"
 
 # Explain display labels

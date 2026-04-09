@@ -63,6 +63,8 @@ wizard_alias_already_exists = "L'alias y='yaak' existe déjà dans %{path}"
 wizard_alias_added = "Alias ajouté dans %{path}"
 wizard_alias_source_hint = "Exécutez `source %{path}` pour activer l'alias dans votre session actuelle."
 wizard_alias_write_error = "Impossible d'écrire l'alias : %{error}"
+wizard_alias_conflict = "`y` est déjà associé à `%{target}` — créer cet alias le remplacera."
+wizard_alias_overwrite_prompt = "Remplacer l'association existante ?"
 wizard_select_language = "Sélectionnez votre langue"
 
 # Explain display labels

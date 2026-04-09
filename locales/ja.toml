@@ -63,6 +63,8 @@ wizard_alias_already_exists = "エイリアス y='yaak' は %{path} に既に存
 wizard_alias_added = "エイリアスを %{path} に追加しました"
 wizard_alias_source_hint = "`source %{path}` を実行して、現在のセッションでエイリアスを有効にしてください。"
 wizard_alias_write_error = "エイリアスを書き込めません：%{error}"
+wizard_alias_conflict = "`y` は既に `%{target}` にマッピングされています — このエイリアスを作成すると上書きされます。"
+wizard_alias_overwrite_prompt = "既存のマッピングを上書きしますか？"
 wizard_select_language = "言語を選択"
 
 # Explain display labels

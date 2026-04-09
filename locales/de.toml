@@ -58,6 +58,11 @@ wizard_label_provider = "Anbieter:"
 wizard_label_model = "Modell:"
 wizard_label_api_key = "API-Schlüssel:"
 wizard_success = "Fertig! Probiere: yaak Dateien im aktuellen Verzeichnis auflisten"
+wizard_alias_prompt = "Kurzen Alias erstellen, damit Sie `y` statt `yaak` eingeben können?"
+wizard_alias_already_exists = "Alias y='yaak' existiert bereits in %{path}"
+wizard_alias_added = "Alias hinzugefügt in %{path}"
+wizard_alias_source_hint = "Führen Sie `source %{path}` aus, um den Alias in Ihrer aktuellen Sitzung zu aktivieren."
+wizard_alias_write_error = "Alias konnte nicht geschrieben werden: %{error}"
 wizard_select_language = "Sprache auswählen"
 
 # Explain display labels

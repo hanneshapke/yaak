@@ -1,6 +1,5 @@
 # Korean translations
 
-[_]
 # General
 aborted = "취소되었습니다."
 cached = "(캐시됨)"
@@ -22,7 +21,7 @@ error_no_api_key = "API 키를 찾을 수 없습니다. YAAK_API_KEY를 설정�
 prompt_execute = "실행할까요?"
 prompt_what_next = "다음 작업"
 prompt_refine = "요청 수정"
-label_command = "  명령어: "
+label_command = "\n명령어: "
 label_thinking = "생각 중 "
 choice_execute = "실행"
 choice_refine = "수정"

@@ -1,6 +1,5 @@
 # Japanese translations
 
-[_]
 # General
 aborted = "中止しました。"
 cached = "（キャッシュ）"
@@ -22,7 +21,7 @@ error_no_api_key = "APIキーが見つかりません。YAAK_API_KEY を設定�
 prompt_execute = "実行しますか？"
 prompt_what_next = "次のアクション"
 prompt_refine = "リクエストを修正"
-label_command = "  コマンド："
+label_command = "\nコマンド："
 label_thinking = "考え中 "
 choice_execute = "実行"
 choice_refine = "修正"

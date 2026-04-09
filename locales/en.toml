@@ -1,6 +1,5 @@
 # English translations (default)
 
-[_]
 # General
 aborted = "Aborted."
 cached = "(cached)"
@@ -22,7 +21,7 @@ error_no_api_key = "No API key found. Set YAAK_API_KEY, pass --api-key, or add i
 prompt_execute = "Execute?"
 prompt_what_next = "What next?"
 prompt_refine = "Refine your request"
-label_command = "  Command: "
+label_command = "\nCommand: "
 label_thinking = "Thinking "
 choice_execute = "Execute"
 choice_refine = "Refine"

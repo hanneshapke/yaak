@@ -1,6 +1,5 @@
 # Portuguese (Brazilian) translations
 
-[_]
 # General
 aborted = "Cancelado."
 cached = "(em cache)"
@@ -22,7 +21,7 @@ error_no_api_key = "Nenhuma chave de API encontrada. Defina YAAK_API_KEY, use --
 prompt_execute = "Executar?"
 prompt_what_next = "O que fazer?"
 prompt_refine = "Refinar solicitação"
-label_command = "  Comando: "
+label_command = "\nComando: "
 label_thinking = "Pensando "
 choice_execute = "Executar"
 choice_refine = "Refinar"

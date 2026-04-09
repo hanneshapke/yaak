@@ -1,6 +1,5 @@
 # Chinese Simplified translations
 
-[_]
 # General
 aborted = "已取消。"
 cached = "（缓存）"
@@ -22,7 +21,7 @@ error_no_api_key = "未找到 API 密钥。请设置 YAAK_API_KEY、使用 --api
 prompt_execute = "执行？"
 prompt_what_next = "下一步？"
 prompt_refine = "优化请求"
-label_command = "  命令："
+label_command = "\n命令："
 label_thinking = "思考中 "
 choice_execute = "执行"
 choice_refine = "优化"

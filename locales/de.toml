@@ -1,6 +1,5 @@
 # German translations
 
-[_]
 # General
 aborted = "Abgebrochen."
 cached = "(zwischengespeichert)"
@@ -22,7 +21,7 @@ error_no_api_key = "Kein API-Schlüssel gefunden. Setze YAAK_API_KEY, nutze --ap
 prompt_execute = "Ausführen?"
 prompt_what_next = "Was nun?"
 prompt_refine = "Anfrage verfeinern"
-label_command = "  Befehl: "
+label_command = "\nBefehl: "
 label_thinking = "Denke nach "
 choice_execute = "Ausführen"
 choice_refine = "Verfeinern"

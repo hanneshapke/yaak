@@ -308,6 +308,23 @@
         <div class="doc-code">
           <span class="t-green">$</span> brew install hanneshapke/yaak/yaak
         </div>
+        <h3>Arch Linux (AUR)</h3>
+        <p>Two packages are available on the AUR: <code>yaak</code> builds from source and <code>yaak-bin</code> installs the upstream prebuilt binary.</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yay -S yaak<br>
+          <span class="t-green">$</span> yay -S yaak-bin
+        </div>
+        <h3>Nix / NixOS</h3>
+        <p>yaak ships a flake under <code>packaging/nix</code>. On any flake-enabled system:</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> nix profile install github:hanneshapke/yaak<br>
+          <span class="t-green">$</span> nix run github:hanneshapke/yaak -- --help
+        </div>
+        <h3>Scoop (Windows)</h3>
+        <div class="doc-code">
+          <span class="t-green">$</span> scoop bucket add yaak https://github.com/hanneshapke/scoop-yaak<br>
+          <span class="t-green">$</span> scoop install yaak
+        </div>
         <h3>Cargo</h3>
         <div class="doc-code">
           <span class="t-green">$</span> cargo install yaak

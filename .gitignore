@@ -25,3 +25,7 @@ target
 
 # Generated from CHANGELOG.md at build time
 landing/changelog.html
+
+# Generated from blog/*.md at build time
+landing/blog.html
+landing/blog/

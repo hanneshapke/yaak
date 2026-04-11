@@ -1,5 +1,9 @@
 # yaak — Yet Another AI for the Kommandozeile
 
+[![Crates.io](https://img.shields.io/crates/v/yaak.svg)](https://crates.io/crates/yaak)
+[![License](https://img.shields.io/crates/l/yaak.svg)](https://github.com/hanneshapke/yaak/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/hanneshapke/yaak.svg?style=social)](https://github.com/hanneshapke/yaak/stargazers)
+
 Translate natural language into bash commands using any OpenAI-compatible LLM. Supports 8 languages.
 
 ```

@@ -5,8 +5,10 @@ on:
     branches: [main]
     paths:
       - 'CHANGELOG.md'
+      - 'blog/**'
       - 'landing/**'
       - 'scripts/build_changelog.py'
+      - 'scripts/build_blog.py'
       - '.github/workflows/pages.yml'
   release:
     types: [published]
@@ -33,6 +35,9 @@ jobs:
 
       - name: Build changelog.html
         run: python scripts/build_changelog.py
+
+      - name: Build blog
+        run: python scripts/build_blog.py
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -414,7 +414,7 @@ jobs:
             su builder -c "cd /work/packaging/aur/${{ matrix.pkgname }} && makepkg --printsrcinfo > .SRCINFO"
 
       - name: Publish to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
         with:
           pkgname: ${{ matrix.pkgname }}
           pkgbuild: packaging/aur/${{ matrix.pkgname }}/PKGBUILD
@@ -502,6 +502,7 @@ jobs:
           destination_repo: hanneshapke/scoop-yaak
           destination_folder: .
           destination_branch: main
+          destination_branch_create: main
           user_email: github-actions[bot]@users.noreply.github.com
           user_name: github-actions[bot]
           commit_message: "Update yaak to ${{ steps.version.outputs.tag }}"

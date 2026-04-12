@@ -32,6 +32,10 @@ nix profile install github:hanneshapke/yaak
 # or one-shot:
 nix run github:hanneshapke/yaak -- --help
 
+# Debian / Ubuntu
+curl -LO https://github.com/hanneshapke/yaak/releases/latest/download/yaak_0.1.3_amd64.deb
+sudo dpkg -i yaak_0.1.3_amd64.deb
+
 # Windows (Scoop)
 scoop bucket add yaak https://github.com/hanneshapke/scoop-yaak
 scoop install yaak
@@ -41,7 +45,8 @@ cargo install yaak
 ```
 
 Package definitions for AUR, Nix and Scoop live under
-[`packaging/`](packaging/README.md).
+[`packaging/`](packaging/README.md). A `.deb` package is attached to each
+[GitHub release](https://github.com/hanneshapke/yaak/releases).
 
 ## Quick setup
 

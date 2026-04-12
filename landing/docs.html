@@ -320,6 +320,13 @@
           <span class="t-green">$</span> nix profile install github:hanneshapke/yaak<br>
           <span class="t-green">$</span> nix run github:hanneshapke/yaak -- --help
         </div>
+        <h3>Debian / Ubuntu (.deb)</h3>
+        <p>A <code>.deb</code> package is attached to each <a href="https://github.com/hanneshapke/yaak/releases">GitHub release</a>. Download and install directly:</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> curl -LO https://github.com/hanneshapke/yaak/releases/latest/download/yaak_0.1.3_amd64.deb<br>
+          <span class="t-green">$</span> sudo dpkg -i yaak_0.1.3_amd64.deb
+        </div>
+        <p>Includes bash, zsh and fish shell completions.</p>
         <h3>Scoop (Windows)</h3>
         <div class="doc-code">
           <span class="t-green">$</span> scoop bucket add yaak https://github.com/hanneshapke/scoop-yaak<br>
@@ -329,7 +336,7 @@
         <div class="doc-code">
           <span class="t-green">$</span> cargo install yaak
         </div>
-        <p>Prebuilt binaries are also available on the <a href="https://github.com/hanneshapke/yaak/releases">GitHub Releases</a> page for Linux (x86_64), macOS (x86_64, aarch64), and Windows (x86_64).</p>
+        <p>Prebuilt binaries and <code>.deb</code> packages are also available on the <a href="https://github.com/hanneshapke/yaak/releases">GitHub Releases</a> page for Linux (x86_64), macOS (x86_64, aarch64), and Windows (x86_64).</p>
       </section>
 
       <!-- CONFIG -->

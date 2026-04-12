@@ -2,7 +2,7 @@
 title: "Install yaak Everywhere: AUR, Nix, Scoop, and Beyond"
 date: 2026-04-12
 slug: install-yaak-everywhere
-description: "yaak is now available on AUR for Arch Linux, Nix for declarative systems, and Scoop for Windows — plus Homebrew, Cargo, and curl. Here's how to install it on every platform."
+description: "yaak is now available on AUR for Arch Linux, Nix for declarative systems, Scoop for Windows, and as a .deb for Debian/Ubuntu — plus Homebrew, Cargo, and curl. Here's how to install it on every platform."
 author: yaak team
 ---
 
@@ -71,6 +71,15 @@ Because the flake reads `version` directly from `Cargo.toml` and `Cargo.lock` fr
 
 For NixOS users who manage their system declaratively, you can add the flake as an input to your system configuration and include `yaak` in `environment.systemPackages`.
 
+### Debian / Ubuntu (.deb) -- new
+
+```bash
+curl -LO https://github.com/hanneshapke/yaak/releases/latest/download/yaak_0.1.3_amd64.deb
+sudo dpkg -i yaak_0.1.3_amd64.deb
+```
+
+A `.deb` package is attached to every GitHub release, built automatically via `cargo-deb`. It includes the binary, license, and shell completions for bash, zsh and fish. Works on Debian, Ubuntu, Pop!\_OS, Linux Mint, and any other dpkg-based distribution.
+
 ### Scoop (Windows) -- new
 
 ```powershell
@@ -96,14 +105,15 @@ Builds from source using whatever Rust toolchain you have installed. Works anywh
 Every install method updates automatically when we tag a new version. The CI pipeline:
 
 1. Builds release binaries for Linux (x86_64), macOS (x86_64 + aarch64), and Windows (x86_64).
-2. Publishes them to GitHub Releases with SHA256 checksums.
-3. Pushes to crates.io (`cargo publish`).
-4. Updates the Homebrew formula in `hanneshapke/homebrew-yaak`.
-5. Patches the AUR PKGBUILDs with fresh hashes and pushes to both `yaak` and `yaak-bin` on the AUR.
-6. Generates a Scoop manifest with the correct hash and pushes to `hanneshapke/scoop-yaak`.
-7. Verifies the Nix flake still builds.
+2. Builds a `.deb` package via `cargo-deb` with shell completions baked in.
+3. Publishes everything to GitHub Releases with SHA256 checksums.
+4. Pushes to crates.io (`cargo publish`).
+5. Updates the Homebrew formula in `hanneshapke/homebrew-yaak`.
+6. Patches the AUR PKGBUILDs with fresh hashes and pushes to both `yaak` and `yaak-bin` on the AUR.
+7. Generates a Scoop manifest with the correct hash and pushes to `hanneshapke/scoop-yaak`.
+8. Verifies the Nix flake still builds.
 
-Tag, push, walk away. All six distribution channels update within minutes.
+Tag, push, walk away. All seven distribution channels update within minutes.
 
 ## What's next
 
@@ -112,7 +122,8 @@ A few install methods we're considering:
 - **Snapcraft / Flatpak** — for Linux users who prefer sandboxed packages.
 - **nixpkgs upstream** — so yaak is available via `nix-env -iA nixpkgs.yaak` without adding a flake input.
 - **winget** — the other Windows package manager.
-- **Alpine APK / Debian .deb** — for Docker base images and server installs.
+- **Alpine APK** — for Alpine-based Docker images and lightweight server installs.
+- **APT repository** — so Debian/Ubuntu users can `sudo apt install yaak` and get updates via `apt upgrade` instead of downloading each `.deb` manually.
 
 If there's a package manager you want yaak on, [open an issue](https://github.com/hanneshapke/yaak/issues) and let us know.
 

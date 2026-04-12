@@ -24,3 +24,17 @@ tempfile = { version = "3", optional = true }
 
 [dev-dependencies]
 tempfile = "3"
+
+[package.metadata.deb]
+maintainer = "Hannes Hapke <hannes.hapke@gmail.com>"
+section = "utils"
+priority = "optional"
+depends = "$auto"
+assets = [
+  ["target/release/yaak", "usr/bin/", "755"],
+  ["README.md", "usr/share/doc/yaak/README.md", "644"],
+  ["LICENSE", "usr/share/doc/yaak/copyright", "644"],
+  ["target/completions/yaak.bash", "usr/share/bash-completion/completions/yaak", "644"],
+  ["target/completions/_yaak", "usr/share/zsh/vendor-completions/_yaak", "644"],
+  ["target/completions/yaak.fish", "usr/share/fish/vendor_completions.d/yaak.fish", "644"],
+]

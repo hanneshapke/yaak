@@ -145,6 +145,23 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
+      - name: Generate shell completions and build .deb (Linux x86_64)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        shell: bash
+        run: |
+          # Generate shell completions from the just-built binary
+          YAAK="target/${{ matrix.target }}/release/yaak"
+          mkdir -p target/completions
+          "$YAAK" --completions bash > target/completions/yaak.bash
+          "$YAAK" --completions zsh  > target/completions/_yaak
+          "$YAAK" --completions fish > target/completions/yaak.fish
+
+          # Build .deb package
+          cargo install cargo-deb
+          cargo deb --target ${{ matrix.target }} --no-build
+          DEB=$(find target/${{ matrix.target }}/debian -name '*.deb' | head -1)
+          cp "$DEB" "yaak_${{ steps.version.outputs.version }}_amd64.deb"
+
       - name: Package (unix)
         if: matrix.archive == 'tar.gz'
         shell: bash
@@ -173,6 +190,13 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ env.ASSET }}
 
+      - name: Upload .deb artifact
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: "yaak_${{ steps.version.outputs.version }}_amd64.deb"
+
   # ──────────────────────────────────────────────
   # Release: create GitHub release with all binaries
   # ──────────────────────────────────────────────
@@ -198,7 +222,7 @@ jobs:
         shell: bash
         run: |
           cd artifacts
-          find . -type f \( -name '*.tar.gz' -o -name '*.zip' \) \
+          find . -type f \( -name '*.tar.gz' -o -name '*.zip' -o -name '*.deb' \) \
             -exec sh -c 'sha256sum "$1" >> ../SHA256SUMS.txt' _ {} \;
           cd ..
           cat SHA256SUMS.txt
@@ -210,6 +234,7 @@ jobs:
           files: |
             artifacts/**/*.tar.gz
             artifacts/**/*.zip
+            artifacts/**/*.deb
             SHA256SUMS.txt
 
   # ──────────────────────────────────────────────

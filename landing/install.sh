@@ -59,13 +59,6 @@ case "$ARCH" in
   *)              err "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
-# aarch64 Linux is not yet available
-if [ "$OS" = "Linux" ] && [ "$ARCH_TARGET" = "aarch64" ]; then
-  err "aarch64-linux binaries are not yet available."
-  err "Install via cargo instead: cargo install yaak"
-  exit 1
-fi
-
 TARGET="${ARCH_TARGET}-${OS_TARGET}"
 info "Detected platform: $OS $ARCH ($TARGET)"
 

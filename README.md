@@ -20,12 +20,33 @@ $ yaak list all rust files larger than 1MB
 # Quick install (macOS / Linux)
 curl -fsSL https://getyaak.ai/install.sh | bash
 
-# Homebrew (macOS/Linux)
+# Homebrew (macOS / Linux)
 brew install hanneshapke/yaak/yaak
+
+# Arch Linux (AUR) — build from source or prebuilt binary
+yay -S yaak          # or: paru -S yaak
+yay -S yaak-bin      # prebuilt release binary
+
+# Nix / NixOS (flakes)
+nix profile install github:hanneshapke/yaak
+# or one-shot:
+nix run github:hanneshapke/yaak -- --help
+
+# Debian / Ubuntu
+curl -LO https://github.com/hanneshapke/yaak/releases/latest/download/yaak_0.1.3_amd64.deb
+sudo dpkg -i yaak_0.1.3_amd64.deb
+
+# Windows (Scoop)
+scoop bucket add yaak https://github.com/hanneshapke/scoop-yaak
+scoop install yaak
 
 # Or via Cargo
 cargo install yaak
 ```
+
+Package definitions for AUR, Nix and Scoop live under
+[`packaging/`](packaging/README.md). A `.deb` package is attached to each
+[GitHub release](https://github.com/hanneshapke/yaak/releases).
 
 ## Quick setup
 

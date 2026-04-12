@@ -100,10 +100,9 @@ jobs:
             os: ubuntu-latest
             archive: tar.gz
 
-          # TODO: re-enable once cross-compilation OpenSSL issue is resolved
-          # - target: aarch64-unknown-linux-gnu
-          #   os: ubuntu-latest
-          #   archive: tar.gz
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            archive: tar.gz
 
           - target: x86_64-apple-darwin
             os: macos-latest
@@ -145,6 +144,23 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
+      - name: Generate shell completions and build .deb (Linux x86_64)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        shell: bash
+        run: |
+          # Generate shell completions from the just-built binary
+          YAAK="target/${{ matrix.target }}/release/yaak"
+          mkdir -p target/completions
+          "$YAAK" --completions bash > target/completions/yaak.bash
+          "$YAAK" --completions zsh  > target/completions/_yaak
+          "$YAAK" --completions fish > target/completions/yaak.fish
+
+          # Build .deb package
+          cargo install cargo-deb
+          cargo deb --target ${{ matrix.target }} --no-build
+          DEB=$(find target/${{ matrix.target }}/debian -name '*.deb' | head -1)
+          cp "$DEB" "yaak_${{ steps.version.outputs.version }}_amd64.deb"
+
       - name: Package (unix)
         if: matrix.archive == 'tar.gz'
         shell: bash
@@ -173,6 +189,13 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ env.ASSET }}
 
+      - name: Upload .deb artifact
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: "yaak_${{ steps.version.outputs.version }}_amd64.deb"
+
   # ──────────────────────────────────────────────
   # Release: create GitHub release with all binaries
   # ──────────────────────────────────────────────
@@ -198,7 +221,7 @@ jobs:
         shell: bash
         run: |
           cd artifacts
-          find . -type f \( -name '*.tar.gz' -o -name '*.zip' \) \
+          find . -type f \( -name '*.tar.gz' -o -name '*.zip' -o -name '*.deb' \) \
             -exec sh -c 'sha256sum "$1" >> ../SHA256SUMS.txt' _ {} \;
           cd ..
           cat SHA256SUMS.txt
@@ -210,6 +233,7 @@ jobs:
           files: |
             artifacts/**/*.tar.gz
             artifacts/**/*.zip
+            artifacts/**/*.deb
             SHA256SUMS.txt
 
   # ──────────────────────────────────────────────
@@ -241,10 +265,12 @@ jobs:
           curl -fSL -o x86_64.tar.gz  "${BASE_URL}/yaak-${VERSION}-x86_64-apple-darwin.tar.gz"
           curl -fSL -o aarch64.tar.gz "${BASE_URL}/yaak-${VERSION}-aarch64-apple-darwin.tar.gz"
           curl -fSL -o linux_x86_64.tar.gz "${BASE_URL}/yaak-${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fSL -o linux_aarch64.tar.gz "${BASE_URL}/yaak-${VERSION}-aarch64-unknown-linux-gnu.tar.gz"
 
           echo "sha_mac_x86=$(sha256sum x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
           echo "sha_mac_arm=$(sha256sum aarch64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
           echo "sha_linux_x86=$(sha256sum linux_x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "sha_linux_arm=$(sha256sum linux_aarch64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
 
       - name: Generate Homebrew formula
         shell: bash
@@ -269,7 +295,10 @@ jobs:
             end
 
             on_linux do
-              if Hardware::CPU.intel?
+              if Hardware::CPU.arm?
+                url "https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "${{ steps.sha.outputs.sha_linux_arm }}"
+              else
                 url "https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-x86_64-unknown-linux-gnu.tar.gz"
                 sha256 "${{ steps.sha.outputs.sha_linux_x86 }}"
               end
@@ -300,3 +329,201 @@ jobs:
           user_email: github-actions[bot]@users.noreply.github.com
           user_name: github-actions[bot]
           commit_message: "Update yaak formula to ${{ steps.version.outputs.tag }}"
+
+  # ──────────────────────────────────────────────
+  # AUR: update yaak and yaak-bin on the Arch User Repository
+  # ──────────────────────────────────────────────
+  aur:
+    name: Update AUR packages
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pkgname: yaak
+            # Source package — hash the source tarball from GitHub archive
+            asset_suffix: ""
+          - pkgname: yaak-bin
+            # Binary package — hash the prebuilt Linux x86_64 tarball
+            asset_suffix: "-x86_64-unknown-linux-gnu.tar.gz"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Compute source hash (yaak)
+        if: matrix.pkgname == 'yaak'
+        id: hash_source
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          URL="https://github.com/hanneshapke/yaak/archive/refs/tags/${TAG}.tar.gz"
+          SHA=$(curl -fSL "$URL" | sha256sum | awk '{print $1}')
+          echo "sha256=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Compute binary hash (yaak-bin)
+        if: matrix.pkgname == 'yaak-bin'
+        id: hash_bin
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          URL="https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-x86_64-unknown-linux-gnu.tar.gz"
+          SHA=$(curl -fSL "$URL" | sha256sum | awk '{print $1}')
+          echo "sha256=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Update PKGBUILD
+        shell: bash
+        run: |
+          PKGBUILD="packaging/aur/${{ matrix.pkgname }}/PKGBUILD"
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Update pkgver
+          sed -i "s/^pkgver=.*/pkgver=${VERSION}/" "$PKGBUILD"
+          # Reset pkgrel to 1 on version bump
+          sed -i "s/^pkgrel=.*/pkgrel=1/" "$PKGBUILD"
+
+          # Update sha256sums
+          if [ "${{ matrix.pkgname }}" = "yaak" ]; then
+            SHA="${{ steps.hash_source.outputs.sha256 }}"
+          else
+            SHA="${{ steps.hash_bin.outputs.sha256 }}"
+          fi
+          sed -i "s/^sha256sums=.*/sha256sums=('${SHA}')/" "$PKGBUILD"
+
+          echo "--- Updated PKGBUILD ---"
+          cat "$PKGBUILD"
+
+      - name: Generate .SRCINFO
+        uses: addnab/docker-run-action@v3
+        with:
+          image: archlinux:latest
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            pacman -Syu --noconfirm --needed base-devel
+            useradd -m builder
+            echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
+            chown -R builder:builder /work
+            su builder -c "cd /work/packaging/aur/${{ matrix.pkgname }} && makepkg --printsrcinfo > .SRCINFO"
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        with:
+          pkgname: ${{ matrix.pkgname }}
+          pkgbuild: packaging/aur/${{ matrix.pkgname }}/PKGBUILD
+          commit_username: yaak-bot
+          commit_email: yaak-bot@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ steps.version.outputs.tag }}"
+
+  # ──────────────────────────────────────────────
+  # Scoop: update manifest in the scoop-yaak bucket
+  # ──────────────────────────────────────────────
+  scoop:
+    name: Update Scoop bucket
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Compute Windows binary hash
+        id: hash
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          URL="https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-x86_64-pc-windows-msvc.zip"
+          SHA=$(curl -fSL "$URL" | sha256sum | awk '{print $1}')
+          echo "sha256=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Generate Scoop manifest
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          SHA="${{ steps.hash.outputs.sha256 }}"
+
+          cat > yaak.json <<MANIFEST
+          {
+              "version": "${VERSION}",
+              "description": "Translate natural language to bash commands using any OpenAI-compatible LLM",
+              "homepage": "https://github.com/hanneshapke/yaak",
+              "license": "Apache-2.0",
+              "architecture": {
+                  "64bit": {
+                      "url": "https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-x86_64-pc-windows-msvc.zip",
+                      "hash": "${SHA}",
+                      "extract_dir": "yaak-${TAG}-x86_64-pc-windows-msvc"
+                  }
+              },
+              "bin": "yaak.exe",
+              "checkver": {
+                  "github": "https://github.com/hanneshapke/yaak"
+              },
+              "autoupdate": {
+                  "architecture": {
+                      "64bit": {
+                          "url": "https://github.com/hanneshapke/yaak/releases/download/v\$version/yaak-v\$version-x86_64-pc-windows-msvc.zip",
+                          "extract_dir": "yaak-v\$version-x86_64-pc-windows-msvc"
+                      }
+                  },
+                  "hash": {
+                      "url": "https://github.com/hanneshapke/yaak/releases/download/v\$version/SHA256SUMS.txt"
+                  }
+              }
+          }
+          MANIFEST
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' yaak.json
+          echo "--- Generated manifest ---"
+          cat yaak.json
+
+      - name: Push manifest to Scoop bucket
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+        with:
+          source_file: yaak.json
+          destination_repo: hanneshapke/scoop-yaak
+          destination_folder: .
+          destination_branch: main
+          user_email: github-actions[bot]@users.noreply.github.com
+          user_name: github-actions[bot]
+          commit_message: "Update yaak to ${{ steps.version.outputs.tag }}"
+
+  # ──────────────────────────────────────────────
+  # Nix: verify the flake builds on each tagged release
+  # ──────────────────────────────────────────────
+  nix:
+    name: Verify Nix flake
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Build with Nix
+        working-directory: packaging/nix
+        run: |
+          nix build .#yaak --print-build-logs
+          ./result/bin/yaak --version

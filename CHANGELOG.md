@@ -5,6 +5,16 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] — 2026-04-12
+
+### Added
+- AUR, Nix, and Scoop package definitions for broader package manager support
+- Blog generated from markdown sources
+- Shell alias wizard step to create `y` → `yaak` shortcut for faster invocation
+- Badges section to README (crates.io, CI status, license)
+
+---
+
 ## [0.1.3] — 2026-04-09
 
 ### Fixed

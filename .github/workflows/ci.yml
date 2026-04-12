@@ -100,10 +100,9 @@ jobs:
             os: ubuntu-latest
             archive: tar.gz
 
-          # TODO: re-enable once cross-compilation OpenSSL issue is resolved
-          # - target: aarch64-unknown-linux-gnu
-          #   os: ubuntu-latest
-          #   archive: tar.gz
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            archive: tar.gz
 
           - target: x86_64-apple-darwin
             os: macos-latest
@@ -266,10 +265,12 @@ jobs:
           curl -fSL -o x86_64.tar.gz  "${BASE_URL}/yaak-${VERSION}-x86_64-apple-darwin.tar.gz"
           curl -fSL -o aarch64.tar.gz "${BASE_URL}/yaak-${VERSION}-aarch64-apple-darwin.tar.gz"
           curl -fSL -o linux_x86_64.tar.gz "${BASE_URL}/yaak-${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fSL -o linux_aarch64.tar.gz "${BASE_URL}/yaak-${VERSION}-aarch64-unknown-linux-gnu.tar.gz"
 
           echo "sha_mac_x86=$(sha256sum x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
           echo "sha_mac_arm=$(sha256sum aarch64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
           echo "sha_linux_x86=$(sha256sum linux_x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "sha_linux_arm=$(sha256sum linux_aarch64.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
 
       - name: Generate Homebrew formula
         shell: bash
@@ -294,7 +295,10 @@ jobs:
             end
 
             on_linux do
-              if Hardware::CPU.intel?
+              if Hardware::CPU.arm?
+                url "https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "${{ steps.sha.outputs.sha_linux_arm }}"
+              else
                 url "https://github.com/hanneshapke/yaak/releases/download/${TAG}/yaak-${TAG}-x86_64-unknown-linux-gnu.tar.gz"
                 sha256 "${{ steps.sha.outputs.sha_linux_x86 }}"
               end

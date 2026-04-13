@@ -1,9 +1,13 @@
 # yaak — Yet Another AI for the Kommandozeile
 
 [![Crates.io](https://img.shields.io/crates/v/yaak.svg)](https://crates.io/crates/yaak)
-[![Homebrew](https://img.shields.io/badge/homebrew-hanneshapke%2Fyaak-orange)](https://github.com/hanneshapke/homebrew-yaak)
 [![License](https://img.shields.io/crates/l/yaak.svg)](https://github.com/hanneshapke/yaak/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/hanneshapke/yaak.svg?style=social)](https://github.com/hanneshapke/yaak/stargazers)
+
+[![Homebrew](https://img.shields.io/badge/homebrew-hanneshapke%2Fyaak-orange)](https://github.com/hanneshapke/homebrew-yaak)
+[![AUR](https://img.shields.io/aur/version/yaak-cli)](https://aur.archlinux.org/packages/yaak-cli)
+[![Nix](https://img.shields.io/badge/nix-flake-5277C3)](https://github.com/hanneshapke/yaak#nix--nixos-flakes)
+[![Scoop](https://img.shields.io/badge/scoop-yaak-blue)](https://github.com/hanneshapke/scoop-yaak)
 
 Translate natural language into bash commands using any OpenAI-compatible LLM. Supports 8 languages.
 

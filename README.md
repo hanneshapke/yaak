@@ -24,8 +24,8 @@ curl -fsSL https://getyaak.ai/install.sh | bash
 brew install hanneshapke/yaak/yaak
 
 # Arch Linux (AUR) — build from source or prebuilt binary
-yay -S yaak          # or: paru -S yaak
-yay -S yaak-bin      # prebuilt release binary
+yay -S yaak-cli          # or: paru -S yaak-cli
+yay -S yaak-cli-bin      # prebuilt release binary
 
 # Nix / NixOS (flakes)
 nix profile install github:hanneshapke/yaak

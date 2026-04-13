@@ -331,7 +331,7 @@ jobs:
           commit_message: "Update yaak formula to ${{ steps.version.outputs.tag }}"
 
   # ──────────────────────────────────────────────
-  # AUR: update yaak and yaak-bin on the Arch User Repository
+  # AUR: update yaak-cli and yaak-cli-bin on the Arch User Repository
   # ──────────────────────────────────────────────
   aur:
     name: Update AUR packages
@@ -342,10 +342,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - pkgname: yaak
+          - pkgname: yaak-cli
             # Source package — hash the source tarball from GitHub archive
             asset_suffix: ""
-          - pkgname: yaak-bin
+          - pkgname: yaak-cli-bin
             # Binary package — hash the prebuilt Linux x86_64 tarball
             asset_suffix: "-x86_64-unknown-linux-gnu.tar.gz"
     steps:
@@ -359,8 +359,8 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "version=${TAG#v}" >> $GITHUB_OUTPUT
 
-      - name: Compute source hash (yaak)
-        if: matrix.pkgname == 'yaak'
+      - name: Compute source hash (yaak-cli)
+        if: matrix.pkgname == 'yaak-cli'
         id: hash_source
         shell: bash
         run: |
@@ -369,8 +369,8 @@ jobs:
           SHA=$(curl -fSL "$URL" | sha256sum | awk '{print $1}')
           echo "sha256=$SHA" >> $GITHUB_OUTPUT
 
-      - name: Compute binary hash (yaak-bin)
-        if: matrix.pkgname == 'yaak-bin'
+      - name: Compute binary hash (yaak-cli-bin)
+        if: matrix.pkgname == 'yaak-cli-bin'
         id: hash_bin
         shell: bash
         run: |
@@ -391,7 +391,7 @@ jobs:
           sed -i "s/^pkgrel=.*/pkgrel=1/" "$PKGBUILD"
 
           # Update sha256sums
-          if [ "${{ matrix.pkgname }}" = "yaak" ]; then
+          if [ "${{ matrix.pkgname }}" = "yaak-cli" ]; then
             SHA="${{ steps.hash_source.outputs.sha256 }}"
           else
             SHA="${{ steps.hash_bin.outputs.sha256 }}"

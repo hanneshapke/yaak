@@ -414,14 +414,42 @@ jobs:
             su builder -c "cd /work/packaging/aur/${{ matrix.pkgname }} && makepkg --printsrcinfo > .SRCINFO"
 
       - name: Publish to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-        with:
-          pkgname: ${{ matrix.pkgname }}
-          pkgbuild: packaging/aur/${{ matrix.pkgname }}/PKGBUILD
-          commit_username: yaak-bot
-          commit_email: yaak-bot@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Update to ${{ steps.version.outputs.tag }}"
+        shell: bash
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          # Set up SSH for AUR access
+          mkdir -p ~/.ssh
+          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan -t ed25519,rsa aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
+          cat >> ~/.ssh/config <<CFG
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+          CFG
+
+          # Clone the AUR repo (may be empty for first push)
+          PKGNAME="${{ matrix.pkgname }}"
+          TMPDIR="$(mktemp -d)"
+          git clone "ssh://aur@aur.archlinux.org/${PKGNAME}.git" "$TMPDIR" || {
+            # First push — initialize empty repo
+            git init "$TMPDIR"
+            git -C "$TMPDIR" remote add origin "ssh://aur@aur.archlinux.org/${PKGNAME}.git"
+          }
+
+          # Copy PKGBUILD and .SRCINFO into the AUR repo
+          cp "packaging/aur/${PKGNAME}/PKGBUILD" "$TMPDIR/"
+          cp "packaging/aur/${PKGNAME}/.SRCINFO" "$TMPDIR/" 2>/dev/null || true
+
+          # Commit and push
+          cd "$TMPDIR"
+          git config user.name "yaak-bot"
+          git config user.email "yaak-bot@users.noreply.github.com"
+          git add PKGBUILD .SRCINFO
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Update to ${{ steps.version.outputs.tag }}"
+          git push origin HEAD:master
 
   # ──────────────────────────────────────────────
   # Scoop: update manifest in the scoop-yaak bucket

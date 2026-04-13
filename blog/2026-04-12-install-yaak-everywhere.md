@@ -43,13 +43,15 @@ Two packages, because the Arch community has strong opinions about how software 
 
 ```bash
 # Build from source — the way Tux intended
-yay -S yaak
+yay -S yaak-cli
 
 # Or grab the prebuilt binary — faster, same result
-yay -S yaak-bin
+yay -S yaak-cli-bin
 ```
 
-The source package (`yaak`) downloads the release tarball and runs `cargo build --release` on your machine. The binary package (`yaak-bin`) grabs the prebuilt x86_64 Linux binary from GitHub Releases. Both install shell completions for bash, zsh, and fish.
+(The packages are named `yaak-cli` because `yaak` was already taken on the AUR by an unrelated project. Both packages install the `yaak` binary — the `-cli` is just the AUR package name.)
+
+The source package (`yaak-cli`) downloads the release tarball and runs `cargo build --release` on your machine. The binary package (`yaak-cli-bin`) grabs the prebuilt x86_64 Linux binary from GitHub Releases. Both install shell completions for bash, zsh, and fish.
 
 Works with `yay`, `paru`, `pikaur`, or plain `makepkg -si` if you're a purist.
 

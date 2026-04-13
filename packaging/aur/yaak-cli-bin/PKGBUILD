@@ -1,5 +1,5 @@
 # Maintainer: Hannes Hapke <hannes.hapke@gmail.com>
-pkgname=yaak-bin
+pkgname=yaak-cli-bin
 _pkgname=yaak
 pkgver=0.1.4
 pkgrel=1
@@ -7,8 +7,8 @@ pkgdesc="Translate natural language to bash commands using any OpenAI-compatible
 arch=('x86_64')
 url="https://github.com/hanneshapke/yaak"
 license=('Apache-2.0')
-provides=('yaak')
-conflicts=('yaak')
+provides=('yaak' 'yaak-cli')
+conflicts=('yaak' 'yaak-cli')
 depends=('gcc-libs')
 source=("$_pkgname-$pkgver-x86_64.tar.gz::https://github.com/hanneshapke/yaak/releases/download/v$pkgver/yaak-v$pkgver-x86_64-unknown-linux-gnu.tar.gz")
 # Regenerate with `updpkgsums` after bumping pkgver.

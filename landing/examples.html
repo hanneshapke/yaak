@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>yaak &mdash; examples</title>
+<meta name="description" content="A visual tour through yaak's best features — from interactive setup to context-aware commands and instant cache hits.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ============ HERO ============ */
+  .page-hero {
+    padding: 80px 32px 48px;
+    border-bottom: 3px double var(--rule);
+  }
+
+  .page-hero-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+  }
+
+  .page-kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 16px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(40px, 7vw, 72px);
+    line-height: 0.95;
+    letter-spacing: -2px;
+    animation: fadeIn 0.5s ease 0.05s both;
+  }
+  .page-title em { font-style: italic; font-weight: 400; color: var(--red); }
+
+  .page-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    letter-spacing: 0.5px;
+    line-height: 1.8;
+    animation: fadeIn 0.5s ease 0.1s both;
+  }
+  .page-meta a {
+    color: var(--red);
+    text-decoration: none;
+  }
+  .page-meta a:hover { text-decoration: underline; }
+
+  /* ============ DOCS-STYLE LAYOUT ============ */
+  .examples-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    padding: 48px 32px 100px;
+  }
+
+  .toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    animation: fadeIn 0.5s ease 0.15s both;
+  }
+
+  .toc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--ink-faint);
+    margin-bottom: 16px;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .toc-item a {
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    transition: color 0.2s;
+  }
+  .toc-item a:hover { color: var(--red); }
+  .toc-item:first-child a { border-top: 1px solid var(--rule); }
+
+  /* ============ CONTENT ============ */
+  .examples-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .example-section {
+    border-bottom: 1px solid var(--rule);
+    padding: 40px 0;
+    animation: fadeIn 0.5s ease both;
+  }
+  .example-section:first-child { padding-top: 0; }
+
+  .example-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+  }
+  .example-section h2 em { font-style: italic; font-weight: 400; color: var(--red); }
+
+  .example-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-light);
+    font-weight: 300;
+    max-width: 640px;
+    margin-bottom: 16px;
+  }
+
+  .example-section code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    color: var(--code-green);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .example-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 18px 22px;
+    border-radius: 6px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+
+  .example-section .demo-gif {
+    width: 100%;
+    max-width: 640px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid var(--rule);
+  }
+
+  .example-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+  }
+  .example-section ul li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-light);
+    font-weight: 300;
+  }
+  .example-section ul li::before {
+    content: '\203a';
+    position: absolute;
+    left: 6px;
+    top: -2px;
+    color: var(--red);
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+  .example-section ul li strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .cross-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .cross-link::after { content: '\2192'; transition: transform 0.2s; }
+  .cross-link:hover { color: var(--red); }
+  .cross-link:hover::after { transform: translateX(4px); }
+
+  /* Stagger sections */
+  .example-section:nth-child(1) { animation-delay: 0.15s; }
+  .example-section:nth-child(2) { animation-delay: 0.20s; }
+  .example-section:nth-child(3) { animation-delay: 0.25s; }
+  .example-section:nth-child(4) { animation-delay: 0.30s; }
+  .example-section:nth-child(5) { animation-delay: 0.35s; }
+  .example-section:nth-child(6) { animation-delay: 0.40s; }
+  .example-section:nth-child(7) { animation-delay: 0.45s; }
+  .example-section:nth-child(8) { animation-delay: 0.50s; }
+
+  @media (max-width: 768px) {
+    .examples-layout { grid-template-columns: 1fr; gap: 24px; padding: 24px 16px 60px; }
+    .toc { position: static; }
+    .page-hero-inner { grid-template-columns: 1fr; }
+    .page-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">yaak</a>
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-right">
+    <a href="index.html">Home</a>
+    <a href="docs.html">Docs</a>
+    <a href="examples.html" class="active">Examples</a>
+    <a href="blog.html">Blog</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="https://github.com/hanneshapke/yaak" class="nav-gh">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Star on GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" class="mobile-menu-link">Home</a>
+  <a href="docs.html" class="mobile-menu-link">Docs</a>
+  <a href="examples.html" class="mobile-menu-link active">Examples</a>
+  <a href="blog.html" class="mobile-menu-link">Blog</a>
+  <a href="changelog.html" class="mobile-menu-link">Changelog</a>
+  <a href="https://github.com/hanneshapke/yaak" class="mobile-menu-link nav-gh">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    Star on GitHub
+  </a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-inner">
+      <div>
+        <div class="page-kicker">Learn by doing</div>
+        <h1 class="page-title"><em>Examples</em></h1>
+      </div>
+      <div class="page-meta">
+        7 demos with GIFs<br>
+        <a href="docs.html">Read the docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="container">
+  <div class="examples-layout">
+
+    <!-- TOC -->
+    <aside class="toc">
+      <div class="toc-label">Examples</div>
+      <ul class="toc-list">
+        <li class="toc-item"><a href="#setup-wizard">Setup wizard</a></li>
+        <li class="toc-item"><a href="#kill-processes">Kill processes</a></li>
+        <li class="toc-item"><a href="#docker-services">Docker services</a></li>
+        <li class="toc-item"><a href="#git-queries">Git queries</a></li>
+        <li class="toc-item"><a href="#context-mode">Context mode</a></li>
+        <li class="toc-item"><a href="#explain-commands">Explain commands</a></li>
+        <li class="toc-item"><a href="#cache-results">Cache results</a></li>
+        <li class="toc-item"><a href="#try-it">Try it yourself</a></li>
+      </ul>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="examples-content">
+
+      <section class="example-section" id="setup-wizard">
+        <h2>Interactive setup wizard</h2>
+        <img src="demos/output/01-wizard.gif" alt="yaak config wizard" class="demo-gif">
+        <p>First-time setup shouldn't feel like work. Run <code>yaak --config</code> and you get an interactive wizard that walks you through:</p>
+        <ul>
+          <li><strong>Language selection</strong> &mdash; pick from eight supported languages</li>
+          <li><strong>Model provider</strong> &mdash; Anthropic, Google Gemini, OpenAI, Ollama, Groq, and more</li>
+          <li><strong>Model configuration</strong> &mdash; choose your model and set preferences</li>
+        </ul>
+        <pre class="example-code">$ yaak --config</pre>
+        <p>The wizard detects existing config and lets you update individual settings without starting over. Perfect for when you want to switch models or try a different provider.</p>
+      </section>
+
+      <section class="example-section" id="kill-processes">
+        <h2>Kill processes like a human would ask</h2>
+        <img src="demos/output/02-kill-port.gif" alt="yaak kill port" class="demo-gif">
+        <p>"What's using port 3000?" is the kind of thing you used to Google, copy a <code>lsof</code> command, run it, get a PID, then remember the <code>kill</code> syntax. With yaak, just ask:</p>
+        <pre class="example-code">$ yaak find what's using port 3000
+  Command: lsof -ti:3000 | xargs kill -9
+  Execute? [y/N]</pre>
+        <p>yaak streams the command, waits for confirmation, and you're done. No context switching, no Stack Overflow, no remembering flags.</p>
+      </section>
+
+      <section class="example-section" id="docker-services">
+        <h2>Spin up services without memorizing Docker flags</h2>
+        <img src="demos/output/03-docker-postgres.gif" alt="yaak docker postgres" class="demo-gif">
+        <p>Docker commands are powerful but verbose. Starting a Postgres container with custom password and port? That's a wall of flags you definitely don't have memorized:</p>
+        <pre class="example-code">$ yaak run postgres in docker with password mysecret on port 5433
+  Command: docker run --name postgres -e POSTGRES_PASSWORD=mysecret -p 5433:5432 -d postgres
+  Execute? [y/N]</pre>
+        <p>yaak translates your intent into the right <code>docker run</code> command with all the flags in the right order. Works for any service &mdash; Redis, MongoDB, Nginx, whatever you need.</p>
+      </section>
+
+      <section class="example-section" id="git-queries">
+        <h2>Git log queries that actually make sense</h2>
+        <img src="demos/output/04-git-log.gif" alt="yaak git log" class="demo-gif">
+        <p>Git has incredible power buried under flags you can never remember. Want a brief summary of commits from the last two days?</p>
+        <pre class="example-code">$ yaak show commits from the last 2 days. show a brief summary
+  Command: git log --since="2 days ago" --oneline --no-merges
+  Execute? [y/N]</pre>
+        <p>yaak knows <code>--since</code>, <code>--oneline</code>, <code>--no-merges</code>, and hundreds of other git flags. You just describe what you want to see.</p>
+      </section>
+
+      <section class="example-section" id="context-mode">
+        <h2>Project-aware commands with <em>--context</em></h2>
+        <img src="demos/output/05-context-build.gif" alt="yaak context build" class="demo-gif">
+        <p>Pass <code>--context</code> and yaak reads your project structure &mdash; <code>Cargo.toml</code>, <code>package.json</code>, <code>go.mod</code>, <code>Dockerfile</code>, git branch, directory layout &mdash; and generates commands that understand what kind of project you're in:</p>
+        <pre class="example-code">$ yaak --context build and test the project
+  Command: cargo build &amp;&amp; cargo test
+  Execute? [y/N]</pre>
+        <p>No need to specify "use cargo" or "this is a Rust project." yaak detects it and does the right thing automatically. Works for npm, Go, Python, Docker, and more.</p>
+        <p>Context is opt-in by design. Simple queries stay fast, but when you need project awareness, it's there. See <a href="docs.html#context">context mode</a> in the docs for details.</p>
+      </section>
+
+      <section class="example-section" id="explain-commands">
+        <h2>Explain scary commands before you run them</h2>
+        <img src="demos/output/06-explain.gif" alt="yaak explain" class="demo-gif">
+        <p>Found a Stack Overflow answer with a command you don't fully trust? Use <code>--explain</code> to break it down:</p>
+        <pre class="example-code">$ yaak --explain 'find . -name "*.log" -mtime +30 -delete'</pre>
+        <p>yaak walks through each part of the command, explains what it does, flags destructive operations, and tells you exactly what will happen before you execute anything. Perfect for:</p>
+        <ul>
+          <li><strong>Learning</strong> new commands</li>
+          <li><strong>Code review</strong> of shell scripts</li>
+          <li><strong>Debugging</strong> complex pipelines</li>
+          <li><strong>Safety checks</strong> before running unfamiliar commands</li>
+        </ul>
+        <p>See <a href="docs.html#usage">usage</a> in the docs for more on explain mode.</p>
+      </section>
+
+      <section class="example-section" id="cache-results">
+        <h2>Cache results for instant replay</h2>
+        <img src="demos/output/07-cache.gif" alt="yaak cache" class="demo-gif">
+        <p>How many times have you asked the same question? Weather forecasts, file conversions, database queries &mdash; some things you look up over and over. With <code>--cache</code>, yaak remembers:</p>
+        <pre class="example-code">$ yaak get the weather forecasts for San Francisco, Tokyo, and London. save as json.
+  [15 seconds of API calls and processing]
+
+$ yaak --cache get the weather forecasts for San Francisco, Tokyo, and London. save as json.
+  [instant response from cache]</pre>
+        <p>The first run fetches data and processes it. The second run with <code>--cache</code>? Instant replay. Cache lookup uses exact match first, then fuzzy BM25 matching, so minor variations still hit the cache.</p>
+        <p>See <a href="docs.html#cache">cache mode</a> in the docs for configuration details.</p>
+      </section>
+
+      <section class="example-section" id="try-it">
+        <h2>Try them yourself</h2>
+        <p>Install yaak and run these examples:</p>
+        <pre class="example-code">$ curl -fsSL https://getyaak.ai/install.sh | bash</pre>
+        <p>See the <a href="docs.html#install">installation docs</a> for other options (Homebrew, Nix, AUR, Scoop, Cargo).</p>
+        <p>Set <code>YAAK_API_KEY</code> (or run <code>yaak --config</code> for the wizard), and you're ready to go.</p>
+        <p><a href="docs.html" class="cross-link">Full documentation</a></p>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>yaak &mdash; open source, Apache-2.0 licensed</span>
+  <span>Built with Rust &amp; <a href="https://github.com/hanneshapke/yaak">your favorite LLM</a></span>
+</footer>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('active');
+  hamburger.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+
+mobileMenu.querySelectorAll('.mobile-menu-link').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  });
+});
+</script>
+
+</body>
+</html>

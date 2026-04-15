@@ -518,16 +518,24 @@
       <!-- SAFETY -->
       <section class="doc-section" id="safety">
         <h2>Safe<em>ty</em></h2>
-        <p>yaak blocks destructive commands before execution. The following patterns are detected and rejected, including <code>sudo</code> variants and piped/chained sequences:</p>
+        <p>yaak blocks destructive commands before execution. The following patterns are detected and rejected, including privilege-escalation variants (<code>sudo</code>, <code>doas</code>, <code>pkexec</code> — with flags, <code>env</code> wrappers, etc.) and piped/chained sequences:</p>
         <div class="doc-code">
           rm &nbsp;&bull;&nbsp; rmdir &nbsp;&bull;&nbsp; mkfs &nbsp;&bull;&nbsp; dd &nbsp;&bull;&nbsp; shred &nbsp;&bull;&nbsp; wipefs<br>
           > /dev/ &nbsp;&bull;&nbsp; chmod 000 &nbsp;&bull;&nbsp; :(){ :|:& };:
         </div>
-        <p>If a destructive command is detected, yaak prints a warning and exits without executing.</p>
+        <p>If a destructive command is detected, yaak prints a warning and asks for confirmation before executing.</p>
         <div class="doc-code">
           <span class="t-green">$</span> yaak delete all files in this directory<br>
           <span class="t-dim">  Command:</span> rm -rf ./*<br>
           <span style="color: var(--red-light);">blocked:</span> Destructive command blocked: `rm` is not allowed.
+        </div>
+        <h3>Privilege escalation</h3>
+        <p>Commands using <code>sudo</code>, <code>doas</code>, or <code>pkexec</code> that are not destructive trigger a separate confirmation prompt warning about elevated privileges. This applies even when flags or <code>env</code> wrappers are used (e.g. <code>sudo -u root</code>, <code>sudo env VAR=val</code>).</p>
+        <div class="doc-code">
+          <span class="t-green">$</span> yaak restart nginx<br>
+          <span class="t-dim">  Command:</span> sudo systemctl restart nginx<br>
+          <span style="color: var(--yellow);">warning:</span> ⚠ This command requires elevated privileges (sudo/doas/pkexec)<br>
+          Run with elevated privileges? [y/N]
         </div>
       </section>
 

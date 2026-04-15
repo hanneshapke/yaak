@@ -41,8 +41,26 @@ const ESCALATION_COMMANDS: &[&str] = &["sudo", "doas", "pkexec"];
 
 /// sudo flags that consume the next token as a value argument.
 const SUDO_FLAGS_WITH_VALUE: &[&str] = &[
-    "-u", "--user", "-g", "--group", "-C", "--close-from", "-D", "--chdir", "-R", "--chroot",
-    "-T", "--command-timeout", "-h", "--host", "-p", "--prompt", "-r", "--role", "-t", "--type",
+    "-u",
+    "--user",
+    "-g",
+    "--group",
+    "-C",
+    "--close-from",
+    "-D",
+    "--chdir",
+    "-R",
+    "--chroot",
+    "-T",
+    "--command-timeout",
+    "-h",
+    "--host",
+    "-p",
+    "--prompt",
+    "-r",
+    "--role",
+    "-t",
+    "--type",
 ];
 
 /// Strips privilege-escalation prefixes (sudo, doas, pkexec) and their flags
@@ -199,9 +217,13 @@ mod tests {
     #[test]
     fn detects_privilege_escalation() {
         assert!(requires_privilege_escalation("sudo apt install foo"));
-        assert!(requires_privilege_escalation("doas systemctl restart nginx"));
+        assert!(requires_privilege_escalation(
+            "doas systemctl restart nginx"
+        ));
         assert!(requires_privilege_escalation("pkexec visudo"));
-        assert!(requires_privilege_escalation("echo hello && sudo service restart"));
+        assert!(requires_privilege_escalation(
+            "echo hello && sudo service restart"
+        ));
     }
 
     #[test]

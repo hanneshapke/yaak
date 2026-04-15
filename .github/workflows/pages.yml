@@ -4,12 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'CHANGELOG.md'
-      - 'blog/**'
-      - 'landing/**'
-      - 'scripts/build_changelog.py'
-      - 'scripts/build_blog.py'
-      - '.github/workflows/pages.yml'
+      - "CHANGELOG.md"
+      - "blog/**"
+      - "demos/output/**"
+      - "landing/**"
+      - "scripts/build_changelog.py"
+      - "scripts/build_blog.py"
+      - "scripts/copy_assets.py"
+      - ".github/workflows/pages.yml"
   release:
     types: [published]
 
@@ -31,13 +33,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Build changelog.html
         run: python scripts/build_changelog.py
 
       - name: Build blog
         run: python scripts/build_blog.py
+
+      - name: Copy static assets
+        run: python scripts/copy_assets.py
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

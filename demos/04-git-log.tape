@@ -12,11 +12,11 @@ Enter
 Sleep 500ms
 Show
 
-Type "yaak show commits touching src/auth from the last 7 days"
+Type "yaak show commits from the last 2 days. show a brief summary"
 Enter
-Sleep 3s
+Sleep 5s
 
 # Confirm execution
 Type "y"
 Enter
-Sleep 2s
+Sleep 3s

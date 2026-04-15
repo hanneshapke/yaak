@@ -1,7 +1,7 @@
 # Explain a command in plain language
 Output "06-explain.gif"
 Set Width 800
-Set Height 400
+Set Height 800
 Set FontSize 16
 Set Theme "Catppuccin Mocha"
 Set TypingSpeed 60ms
@@ -16,4 +16,4 @@ Type@60ms "yaak --explain 'find . -name "
 Type@60ms '"*.log" -mtime +30 -delete'
 Type@60ms "'"
 Enter
-Sleep 4s
+Sleep 12s

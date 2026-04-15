@@ -5,14 +5,13 @@ Set Width 800
 Set Height 400
 Set FontSize 16
 Set Theme "Catppuccin Mocha"
-Set TypingSpeed 60ms
+Set TypingSpeed 40ms
 
-Hide
 # Warm the cache (hidden from recording)
-Type "yaak convert video.mp4 to a gif at 10fps"
+Type "yaak get the weather forecasts for San Francisco, Tokyo, and London. save as json."
 Enter
-Sleep 5s
-Type "n"
+Sleep 15s
+Down Down Down
 Enter
 Sleep 1s
 Type "clear"
@@ -20,6 +19,6 @@ Enter
 Sleep 500ms
 Show
 
-Type "yaak --cache convert video.mp4 to a gif at 10fps"
+Type "yaak --cache get the weather forecasts for San Francisco, Tokyo, and London. save as json."
 Enter
 Sleep 3s

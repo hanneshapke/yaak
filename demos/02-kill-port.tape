@@ -13,11 +13,17 @@ Enter
 Sleep 500ms
 Show
 
-Type "yaak find what's using port 3000 and kill it"
+Type "yaak find what\'s using port 3000"
 Enter
-Sleep 3s
+Sleep 2s
 
 # Confirm execution
 Type "y"
+Sleep 500ms
 Enter
+Sleep 500ms
+Hide
+Type "..."
+Enter
+Show
 Sleep 2s

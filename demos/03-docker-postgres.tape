@@ -14,7 +14,7 @@ Show
 
 Type "yaak run postgres in docker with password mysecret on port 5433"
 Enter
-Sleep 3s
+Sleep 1s
 
 # Confirm execution
 Type "y"

@@ -15,9 +15,7 @@ Show
 
 Type "yaak --context build and test the project"
 Enter
-Sleep 4s
+Sleep 2s
 
-# Confirm execution
-Type "y"
 Enter
 Sleep 3s

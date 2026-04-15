@@ -21,13 +21,13 @@ Enter
 Sleep 500ms
 
 # Navigate to Ollama (option 3)
-Down Down Down Down
+Down Down Down
 Sleep 500ms
 Enter
 Sleep 1s
 
 # Type model name
-Down Down Down Down Down Down
+Down Down Down Down
 Sleep 500ms
 Enter
 Sleep 500ms
@@ -38,3 +38,5 @@ Sleep 1s
 # Overwrite
 Sleep 1s
 Type "y"
+
+Sleep 3s

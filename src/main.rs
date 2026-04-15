@@ -15,7 +15,7 @@ use api::{
 use clap::{CommandFactory, Parser};
 use clap_complete::{generate, Shell};
 use colored::Colorize;
-use command::{detect_destructive, extract_command};
+use command::{detect_destructive, extract_command, requires_privilege_escalation};
 use config::{load_config, resolve};
 use dialoguer::{Confirm, Input, Select};
 use explain::render_explanation;
@@ -319,7 +319,11 @@ fn main() {
              No explanation, no markdown fences, no commentary — just the raw command. \
              Only use flags and tools available on {}. \
              If multiple commands are needed, join them with && or ;. \
-             Use common, portable tools when possible.{}",
+             Use common, portable tools when possible. \
+             Only prefix a command with sudo when the operation genuinely requires root privileges \
+             (e.g. package installation, systemd service management, binding privileged ports). \
+             Never use sudo for file operations in the user's home directory or for commands that \
+             do not require elevated privileges.{}",
             shell_name, os_name, cwd, os_name, lang_hint
         )
     };
@@ -532,6 +536,29 @@ fn main() {
                 let confirmed = Confirm::new()
                     .with_prompt(t!("destructive_confirm").to_string())
                     .default(false)
+                    .interact()
+                    .unwrap_or(false);
+                if !confirmed {
+                    eprintln!("{}", t!("aborted").dimmed());
+                    std::process::exit(0);
+                }
+            }
+        }
+
+        // --- Privilege escalation check ---
+        // Always warn and confirm for sudo/doas/pkexec, even with -y
+        if requires_privilege_escalation(&command) && detect_destructive(&command).is_none() {
+            eprintln!(
+                "{} {}",
+                t!("warning_prefix").yellow().bold(),
+                t!("sudo_warning")
+            );
+            if args.yes {
+                // Even with -y, show the warning (but don't block)
+            } else {
+                let confirmed = Confirm::new()
+                    .with_prompt(t!("sudo_confirm").to_string())
+                    .default(true)
                     .interact()
                     .unwrap_or(false);
                 if !confirmed {

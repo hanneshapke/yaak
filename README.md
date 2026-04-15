@@ -223,7 +223,7 @@ yaak --completions fish > ~/.config/fish/completions/yaak.fish
 
 ### Safety
 
-yaak blocks destructive commands (`rm`, `dd`, `mkfs`, `shred`, etc.) from being executed, including `sudo` variants and piped/chained sequences.
+yaak blocks destructive commands (`rm`, `dd`, `mkfs`, `shred`, etc.) from being executed, including privilege-escalation variants (`sudo`, `doas`, `pkexec` — with flags, `env` wrappers, etc.) and piped/chained sequences. Commands that use privilege escalation without being destructive trigger a separate confirmation prompt warning about elevated privileges.
 
 ## Compatible providers
 

@@ -31,6 +31,8 @@ no_history_entries = "Noch keine Verlaufseinträge."
 destructive_blocked = "Destruktiver Befehl blockiert: `%{keyword}` ist nicht erlaubt. Verwenden Sie --force zum Überschreiben."
 destructive_warning = "⚠ Destruktiver Befehl erkannt: `%{keyword}`"
 destructive_confirm = "Sind Sie sicher, dass Sie diesen destruktiven Befehl ausführen möchten?"
+sudo_warning = "⚠ Dieser Befehl erfordert erhöhte Rechte (sudo/doas/pkexec)"
+sudo_confirm = "Mit erhöhten Rechten ausführen?"
 clipboard_copied = "Befehl in Zwischenablage kopiert"
 clipboard_failed = "Kopieren fehlgeschlagen — Befehl wird stattdessen ausgegeben:"
 

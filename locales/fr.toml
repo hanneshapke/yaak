@@ -31,6 +31,8 @@ no_history_entries = "Aucune entrée dans l'historique."
 destructive_blocked = "Commande destructive bloquée : `%{keyword}` n'est pas autorisé. Utilisez --force pour forcer."
 destructive_warning = "⚠ Commande destructive détectée : `%{keyword}`"
 destructive_confirm = "Êtes-vous sûr de vouloir exécuter cette commande destructive ?"
+sudo_warning = "⚠ Cette commande nécessite des privilèges élevés (sudo/doas/pkexec)"
+sudo_confirm = "Exécuter avec des privilèges élevés ?"
 clipboard_copied = "Commande copiée dans le presse-papiers"
 clipboard_failed = "Échec de la copie — affichage de la commande :"
 

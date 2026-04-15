@@ -50,7 +50,7 @@ ShellGPT requires Python, pip, and occasionally a dance with `pipx` on Linux dis
 
 ### Safety by default
 
-yaak blocks destructive commands — `rm`, `dd`, `mkfs`, `shred`, and their `sudo` variants — from being auto-executed. Every command is shown before it runs, and nothing executes without confirmation (unless you pass `-y` when you trust it).
+yaak blocks destructive commands — `rm`, `dd`, `mkfs`, `shred`, and their privilege-escalation variants (`sudo`, `doas`, `pkexec`) — from being auto-executed. Non-destructive commands that require `sudo` get a separate privilege-escalation warning. Every command is shown before it runs, and nothing executes without confirmation (unless you pass `-y` when you trust it).
 
 Copilot CLI has a similar approval flow, but its scope is much wider — it can edit files, run arbitrary scripts, and operate autonomously in "autopilot mode." That power is great for coding tasks, but it's more attack surface than you need for translating English to shell commands.
 

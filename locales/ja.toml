@@ -31,6 +31,8 @@ no_history_entries = "履歴がまだありません。"
 destructive_blocked = "危険なコマンドをブロックしました：`%{keyword}` は許可されていません。--force を使用して上書きできます。"
 destructive_warning = "⚠ 危険なコマンドが検出されました：`%{keyword}`"
 destructive_confirm = "この危険なコマンドを実行してもよろしいですか？"
+sudo_warning = "⚠ このコマンドには昇格された権限が必要です (sudo/doas/pkexec)"
+sudo_confirm = "昇格された権限で実行しますか？"
 clipboard_copied = "コマンドをクリップボードにコピーしました"
 clipboard_failed = "コピーに失敗しました——代わりにコマンドを表示します："
 

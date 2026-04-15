@@ -31,6 +31,8 @@ no_history_entries = "暂无历史记录。"
 destructive_blocked = "危险命令已阻止：不允许使用 `%{keyword}`。使用 --force 强制执行。"
 destructive_warning = "⚠ 检测到危险命令：`%{keyword}`"
 destructive_confirm = "您确定要运行此危险命令吗？"
+sudo_warning = "⚠ 此命令需要提升权限 (sudo/doas/pkexec)"
+sudo_confirm = "以提升的权限运行？"
 clipboard_copied = "命令已复制到剪贴板"
 clipboard_failed = "复制失败——改为输出命令："
 

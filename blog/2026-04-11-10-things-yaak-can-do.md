@@ -95,7 +95,7 @@ The CLI prompts, error messages, and all interaction surfaces are localized — 
 
 ## 8. Safety guards for destructive commands
 
-yaak refuses to auto-execute commands containing `rm`, `dd`, `mkfs`, `shred`, and their `sudo` variants. Even with `-y` (auto-execute), destructive commands always require explicit confirmation. You can review every generated command before it runs, every time.
+yaak refuses to auto-execute commands containing `rm`, `dd`, `mkfs`, `shred`, and their privilege-escalation variants (`sudo`, `doas`, `pkexec` — including flags and `env` wrappers). Even with `-y` (auto-execute), destructive commands always require explicit confirmation. Non-destructive commands that use `sudo` or other escalation tools get a separate privilege warning so you always know when a command will run as root. You can review every generated command before it runs, every time.
 
 It's the safety net you didn't know you wanted until the first time it stops a runaway `rm -rf`.
 

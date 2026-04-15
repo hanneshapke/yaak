@@ -438,6 +438,7 @@ def render_html(releases: list[dict]) -> str:
   <div class="nav-right">
     <a href="index.html">Home</a>
     <a href="docs.html">Docs</a>
+    <a href="examples.html">Examples</a>
     <a href="blog.html">Blog</a>
     <a href="changelog.html" class="active">Changelog</a>
     <a href="https://github.com/hanneshapke/yaak" class="nav-gh">
@@ -451,6 +452,7 @@ def render_html(releases: list[dict]) -> str:
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" class="mobile-menu-link">Home</a>
   <a href="docs.html" class="mobile-menu-link">Docs</a>
+  <a href="examples.html" class="mobile-menu-link">Examples</a>
   <a href="blog.html" class="mobile-menu-link">Blog</a>
   <a href="changelog.html" class="mobile-menu-link">Changelog</a>
   <a href="https://github.com/hanneshapke/yaak" class="mobile-menu-link nav-gh">

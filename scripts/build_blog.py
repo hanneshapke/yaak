@@ -348,6 +348,7 @@ def nav_html(active: str, depth: int = 0) -> str:
     items = [
         ("Home", f"{prefix}index.html"),
         ("Docs", f"{prefix}docs.html"),
+        ("Examples", f"{prefix}examples.html"),
         ("Blog", f"{prefix}blog.html"),
         ("Changelog", f"{prefix}changelog.html"),
     ]

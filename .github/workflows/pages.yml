@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "Cargo.toml"
       - "CHANGELOG.md"
       - "blog/**"
       - "demos/output/**"
@@ -11,6 +12,7 @@ on:
       - "scripts/build_changelog.py"
       - "scripts/build_blog.py"
       - "scripts/copy_assets.py"
+      - "scripts/inject_version.py"
       - ".github/workflows/pages.yml"
   release:
     types: [published]
@@ -43,6 +45,9 @@ jobs:
 
       - name: Copy static assets
         run: python scripts/copy_assets.py
+
+      - name: Inject CLI version
+        run: python scripts/inject_version.py
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

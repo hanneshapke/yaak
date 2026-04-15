@@ -18,7 +18,6 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-
 # ----------------------------- frontmatter ------------------------------ #
 
 
@@ -66,6 +65,7 @@ def _escape(text: str) -> str:
 _INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 _BOLD_RE = re.compile(r"\*\*([^*]+)\*\*")
 _ITALIC_RE = re.compile(r"(?<!\*)\*([^*\n]+)\*(?!\*)")
+_IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
 _LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
 
@@ -84,10 +84,10 @@ def render_inline(text: str) -> str:
     text = _INLINE_CODE_RE.sub(_stash_code, text)
     text = _escape(text)
 
+    # Images must run before links so ![alt](src) isn't consumed by [alt](src).
+    text = _IMAGE_RE.sub(lambda m: f'<img src="{m.group(2)}" alt="{m.group(1)}">', text)
     # Links must run before bold/italic so the URL isn't mangled.
-    text = _LINK_RE.sub(
-        lambda m: f'<a href="{m.group(2)}">{m.group(1)}</a>', text
-    )
+    text = _LINK_RE.sub(lambda m: f'<a href="{m.group(2)}">{m.group(1)}</a>', text)
     text = _BOLD_RE.sub(r"<strong>\1</strong>", text)
     text = _ITALIC_RE.sub(r"<em>\1</em>", text)
 
@@ -127,6 +127,17 @@ def render_markdown(md: str) -> str:
 
     while i < n:
         line = lines[i]
+
+        # Block-level image: a line that is only ![alt](src)
+        img_match = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", line.strip())
+        if img_match:
+            alt = _escape(img_match.group(1))
+            src = img_match.group(2)
+            out.append(
+                f'<figure class="post-figure"><img src="{src}" alt="{alt}"></figure>'
+            )
+            i += 1
+            continue
 
         # Fenced code block
         if line.startswith("```"):
@@ -209,7 +220,11 @@ def render_markdown(md: str) -> str:
 
         # Treat a paragraph that's wrapped entirely in single asterisks as a
         # styled lede / outro.
-        if joined.startswith("*") and joined.endswith("*") and not joined.startswith("**"):
+        if (
+            joined.startswith("*")
+            and joined.endswith("*")
+            and not joined.startswith("**")
+        ):
             inner = joined[1:-1]
             out.append(f'<p class="post-lede">{render_inline(inner)}</p>')
         else:
@@ -311,7 +326,7 @@ GH_SVG = (
     "0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 "
     "2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 "
     "1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 "
-    "2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z\"/></svg>"
+    '2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>'
 )
 
 FONT_LINK = (
@@ -449,7 +464,9 @@ SHARED_STYLES = """\
 """
 
 
-INDEX_STYLES = SHARED_STYLES + """
+INDEX_STYLES = (
+    SHARED_STYLES
+    + """
   /* ============ BLOG INDEX ============ */
   .blog-list {
     padding: 56px 32px 100px;
@@ -539,9 +556,12 @@ INDEX_STYLES = SHARED_STYLES + """
     .page-meta { text-align: left; }
   }
 """
+)
 
 
-POST_STYLES = SHARED_STYLES + """
+POST_STYLES = (
+    SHARED_STYLES
+    + """
   .post-meta-row {
     display: flex;
     gap: 16px;
@@ -728,6 +748,7 @@ POST_STYLES = SHARED_STYLES + """
     .page-meta { text-align: left; }
   }
 """
+)
 
 
 # ----------------------------- index page ------------------------------- #

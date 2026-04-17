@@ -79,7 +79,7 @@ yaak configuration wizard
   9. vLLM
   10. LocalAI
 
-? Select a model: gemma3:4b
+? Select a model: gemma4:e2b
 
 ✓ Config written to ~/.config/yaak/config.toml
 ```

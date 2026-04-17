@@ -39,7 +39,7 @@ pub const PROVIDERS: &[Provider] = &[
         name: "Ollama",
         api_base: "http://localhost:11434/v1",
         needs_api_key: false,
-        suggested_models: &["qwen3.5", "gemma3:4b", "llama3.2", "mistral"],
+        suggested_models: &["qwen3.5", "gemma4:e2b", "llama3.2", "mistral"],
     },
     Provider {
         name: "Groq",
@@ -84,7 +84,7 @@ pub const PROVIDERS: &[Provider] = &[
         name: "LM Studio",
         api_base: "http://localhost:1234/v1",
         needs_api_key: false,
-        suggested_models: &["qwen3.5", "gemma3:4b"],
+        suggested_models: &["qwen3.5", "gemma4:e2b"],
     },
     Provider {
         name: "vLLM",

@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `sudo_warning` and `sudo_confirm` translations across all 8 locales
 - Examples page and recorded VHS demos on the landing site
+- `--shell-init <SHELL>` shell integration (bash/zsh/fish): records the command
+  yaak actually executes into your live shell history, replacing the `yaak ...`
+  entry so the predicted command is available via up-arrow / history search
 
 ---
 

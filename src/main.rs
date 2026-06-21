@@ -89,6 +89,16 @@ struct Args {
     /// Generate shell completions and print to stdout
     #[arg(long, exclusive = true, value_name = "SHELL")]
     completions: Option<Shell>,
+
+    /// Print a shell integration snippet to eval. Records the command yaak
+    /// executes into your shell history (replacing the `yaak ...` entry) so
+    /// it's available via the up-arrow / history search.
+    ///
+    /// Add to your shell rc file, e.g.:
+    ///   bash/zsh:  eval "$(yaak --shell-init bash)"
+    ///   fish:      yaak --shell-init fish | source
+    #[arg(long, exclusive = true, value_name = "SHELL")]
+    shell_init: Option<Shell>,
     /// Show recent command history
     #[arg(short = 'H', long, exclusive = true)]
     history: bool,
@@ -166,6 +176,11 @@ fn main() {
         std::process::exit(0);
     }
 
+    if let Some(shell) = args.shell_init {
+        print!("{}", shell_init_script(shell));
+        std::process::exit(0);
+    }
+
     if args.config {
         wizard::run_config_wizard();
         std::process::exit(0);
@@ -201,6 +216,7 @@ fn main() {
                     eprintln!("{}", t!("aborted").dimmed());
                     std::process::exit(0);
                 }
+                record_executed_command(&entry.command);
                 let status = Command::new(&shell).arg("-c").arg(&entry.command).status();
                 match status {
                     Ok(s) => std::process::exit(s.code().unwrap_or(1)),
@@ -625,6 +641,7 @@ fn main() {
         }
 
         // --- Execute ---
+        record_executed_command(&command);
         let status = Command::new(&shell).arg("-c").arg(&command).status();
 
         match status {
@@ -640,6 +657,83 @@ fn main() {
         }
     }
 }
+
+/// When yaak is launched through its shell integration wrapper, the wrapper
+/// passes a path via the `YAAK_RECORD_FILE` env var. Just before executing the
+/// generated command we write it there so the wrapper can push it into the
+/// live shell history (replacing the `yaak ...` invocation). A no-op when the
+/// env var is unset (i.e. when run without the shell integration).
+fn record_executed_command(command: &str) {
+    if let Ok(path) = env::var("YAAK_RECORD_FILE") {
+        if !path.is_empty() {
+            let _ = std::fs::write(path, command);
+        }
+    }
+}
+
+/// Returns the shell integration snippet for the given shell. The wrapper runs
+/// `yaak` in the current shell, hands it a temp file via `YAAK_RECORD_FILE`,
+/// and — once the binary returns — replaces the `yaak ...` history entry with
+/// the command yaak actually executed.
+fn shell_init_script(shell: Shell) -> String {
+    match shell {
+        Shell::Zsh => ZSH_INIT.to_string(),
+        Shell::Fish => FISH_INIT.to_string(),
+        // Bash is the closest match for any other POSIX-style shell.
+        _ => BASH_INIT.to_string(),
+    }
+}
+
+const BASH_INIT: &str = r#"# yaak shell integration
+yaak() {
+    local _yaak_file
+    _yaak_file="$(mktemp "${TMPDIR:-/tmp}/yaak.XXXXXX")"
+    YAAK_RECORD_FILE="$_yaak_file" command yaak "$@"
+    local _yaak_rc=$?
+    if [ -s "$_yaak_file" ]; then
+        local _yaak_cmd
+        _yaak_cmd="$(cat "$_yaak_file")"
+        # Drop the `yaak ...` line, then record the executed command instead.
+        history -d -1 2>/dev/null
+        history -s -- "$_yaak_cmd"
+    fi
+    rm -f "$_yaak_file"
+    return $_yaak_rc
+}
+"#;
+
+const ZSH_INIT: &str = r#"# yaak shell integration
+yaak() {
+    local _yaak_file
+    _yaak_file="$(mktemp "${TMPDIR:-/tmp}/yaak.XXXXXX")"
+    YAAK_RECORD_FILE="$_yaak_file" command yaak "$@"
+    local _yaak_rc=$?
+    if [[ -s "$_yaak_file" ]]; then
+        local _yaak_cmd
+        _yaak_cmd="$(<"$_yaak_file")"
+        # zsh has no in-memory history delete, so append the executed command
+        # as the newest entry — up-arrow surfaces it ahead of the `yaak ...` line.
+        print -rs -- "$_yaak_cmd"
+    fi
+    rm -f "$_yaak_file"
+    return $_yaak_rc
+}
+"#;
+
+const FISH_INIT: &str = r#"# yaak shell integration
+function yaak
+    set -l _yaak_file (mktemp (string join "" $TMPDIR /yaak.XXXXXX) 2>/dev/null; or mktemp)
+    YAAK_RECORD_FILE=$_yaak_file command yaak $argv
+    set -l _yaak_rc $status
+    if test -s "$_yaak_file"
+        set -l _yaak_cmd (cat "$_yaak_file")
+        builtin history delete --exact --case-sensitive -- "yaak $argv" 2>/dev/null
+        builtin history append -- "$_yaak_cmd"
+    end
+    rm -f "$_yaak_file"
+    return $_yaak_rc
+end
+"#;
 
 fn copy_to_clipboard(text: &str) {
     let (cmd, args): (&str, &[&str]) = if cfg!(target_os = "macos") {
@@ -838,5 +932,33 @@ mod tests {
             resolve(Some("claude-opus-4-6".into()), None, m),
             "claude-opus-4-6"
         );
+    }
+
+    #[test]
+    fn shell_init_emits_wrapper_for_each_shell() {
+        use clap_complete::Shell;
+        for shell in [Shell::Bash, Shell::Zsh, Shell::Fish] {
+            let script = crate::shell_init_script(shell);
+            // Every wrapper must hand yaak a record file and call the real binary.
+            assert!(script.contains("YAAK_RECORD_FILE"));
+            assert!(script.contains("command yaak") || script.contains("command yaak $argv"));
+        }
+        // Bash/zsh define a function; fish uses `function`.
+        assert!(crate::shell_init_script(Shell::Bash).contains("history -s"));
+        assert!(crate::shell_init_script(Shell::Zsh).contains("print -rs"));
+        assert!(crate::shell_init_script(Shell::Fish).contains("builtin history"));
+    }
+
+    #[test]
+    fn record_executed_command_writes_when_env_set() {
+        let dir = std::env::temp_dir().join(format!("yaak-rec-{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&dir);
+        let path = dir.join("rec.txt");
+        // SAFETY: single-threaded test; we set and immediately consume the var.
+        unsafe { std::env::set_var("YAAK_RECORD_FILE", &path) };
+        crate::record_executed_command("echo hi");
+        unsafe { std::env::remove_var("YAAK_RECORD_FILE") };
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "echo hi");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

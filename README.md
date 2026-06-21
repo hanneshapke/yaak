@@ -171,6 +171,7 @@ yaak <description of what you want to do>
 | `--update`              | `-U`  | Update yaak to the latest version        |
 | `--feedback`            |       | Open the feedback page in your browser   |
 | `--completions SHELL`   |       | Generate shell completions (bash/zsh/fish)|
+| `--shell-init SHELL`    |       | Print shell integration to record executed commands in history |
 
 ### Examples
 
@@ -220,6 +221,34 @@ yaak --completions zsh > ~/.zfunc/_yaak
 # Fish
 yaak --completions fish > ~/.config/fish/completions/yaak.fish
 ```
+
+### Shell history integration
+
+By default the command yaak runs is executed in a child shell, so your
+interactive shell records only the `yaak ...` line you typed — the predicted
+command never lands in your history (up-arrow, `Ctrl-R`, etc.).
+
+Enable the shell integration to fix this. It installs a small `yaak` wrapper
+function that replaces the `yaak ...` history entry with the command yaak
+actually executed:
+
+```bash
+# Bash — add to ~/.bashrc
+eval "$(yaak --shell-init bash)"
+
+# Zsh — add to ~/.zshrc
+eval "$(yaak --shell-init zsh)"
+
+# Fish — add to ~/.config/fish/config.fish
+yaak --shell-init fish | source
+```
+
+After reloading your shell, running `yaak list large log files` and choosing
+*Execute* leaves the generated command (e.g. `find . -name "*.log" -size +1M`)
+as your most recent history entry, ready to recall or re-run.
+
+> The integration only records a command when one is actually executed —
+> aborting, copying, or explaining never touches your history.
 
 ### Safety
 

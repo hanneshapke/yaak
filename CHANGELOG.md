@@ -5,9 +5,16 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.5] — 2026-06-21
+
+### Changed
+- Hardened destructive-command detection — `sudo`, `doas`, and `pkexec` prefixes (including flags like `-u root`, `-E`, `--preserve-env`) and `env VAR=val` wrappers are now stripped before matching destructive patterns (`rm`, `dd`, `mkfs`, …)
+- Privilege-escalation commands (`sudo`/`doas`/`pkexec`) now trigger a dedicated warning and confirmation prompt; the system prompt allows `sudo` when genuinely needed (package installs, systemd, privileged ports) instead of forbidding it outright
+- Updated the default Gemma model reference in the setup wizard from `gemma3:4b` to `gemma4:e2b`
 
 ### Added
+- `sudo_warning` and `sudo_confirm` translations across all 8 locales
+- Examples page and recorded VHS demos on the landing site
 - `--shell-init <SHELL>` shell integration (bash/zsh/fish): records the command
   yaak actually executes into your live shell history, replacing the `yaak ...`
   entry so the predicted command is available via up-arrow / history search

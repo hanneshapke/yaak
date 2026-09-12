@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] — 2026-09-12
+
+Release-pipeline fixes. No functional changes to the tool itself; 0.2.0 reached
+GitHub Releases but no package manager, so this is the first 0.2.x release
+available through Homebrew, crates.io, Scoop and the AUR.
+
+### Changed
+- AUR packages renamed from `yaak-cli` and `yaak-cli-bin` to `getyaak` and
+  `getyaak-bin` — Arch now ships an official `extra/yaak-cli` belonging to an
+  unrelated project, which made the previous names unusable
+- Both AUR packages now declare `conflicts=('yaak-cli')` for the shared
+  `/usr/bin/yaak` path, and no longer claim `provides=('yaak')`
+- The AUR upgrade hint from `yaak --update` now suggests `getyaak-bin`
+- crates.io publishing moved to Trusted Publishing (OIDC), replacing the stored
+  `CARGO_REGISTRY_TOKEN`
+- Homebrew tap and Scoop bucket pushes now mint a short-lived GitHub App
+  installation token per run instead of using long-lived personal access tokens
+
+### Fixed
+- Scoop manifest updates, broken since 0.1.5, which left the bucket pinned at
+  0.1.4 — the push step unconditionally created a branch that already existed
+
+---
+
 ## [0.2.0] — 2026-09-12
 
 ### Added

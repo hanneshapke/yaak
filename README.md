@@ -106,6 +106,7 @@ export YAAK_API_BASE="https://api.openai.com/v1"
 export YAAK_API_KEY="sk-..."
 export YAAK_MODEL="gpt-4o-mini"
 export YAAK_LANGUAGE="en"  # en, de, es, fr, pt, zh, ja, ko
+export YAAK_NO_UPDATE_CHECK=1  # disable the daily update check
 ```
 
 ## Multi-language support
@@ -169,6 +170,7 @@ yaak <description of what you want to do>
 | `--language LANG`       | `-L`  | UI language: en, de, es, fr, pt, zh, ja, ko |
 | `--version`             | `-v`  | Print version number                     |
 | `--update`              | `-U`  | Update yaak to the latest version        |
+| `--no-update-check`     |       | Skip the once-a-day check for a new release |
 | `--feedback`            |       | Open the feedback page in your browser   |
 | `--completions SHELL`   |       | Generate shell completions (bash/zsh/fish)|
 | `--shell-init SHELL`    |       | Print shell integration to record executed commands in history |
@@ -249,6 +251,53 @@ as your most recent history entry, ready to recall or re-run.
 
 > The integration only records a command when one is actually executed —
 > aborting, copying, or explaining never touches your history.
+
+### Staying up to date
+
+yaak checks GitHub for a newer release **at most once a day**, in a detached
+background process, so it never adds latency to the command you asked for. The
+result is written to `~/.local/share/yaak/update.json` and surfaced on a later
+run:
+
+```
+↑ yaak v0.1.6 is available (you have v0.1.5)
+Update now? [Y/n]
+```
+
+Answer `n` and yaak remembers — it won't ask again for that version, just shows
+the one-line notice. You can update at any time with:
+
+```bash
+yaak --update
+```
+
+yaak knows how it was installed and picks the matching update path:
+
+| Install method            | What `--update` does                     |
+|---------------------------|------------------------------------------|
+| Install script / binary   | Re-runs the installer, replacing the binary in place |
+| Homebrew                  | Offers to run `brew upgrade hanneshapke/yaak/yaak` |
+| cargo                     | Offers to run `cargo install yaak --force` |
+| Nix                       | Offers to run `nix profile upgrade yaak` |
+| Scoop                     | Offers to run `scoop update yaak`        |
+| AUR (`yay`/`paru`)        | Offers to run `<helper> -S yaak-cli-bin` |
+| Anything else             | Prints the release page to download from |
+
+A package-manager install is never upgraded without asking — yaak prints the
+exact command first and runs it only if you agree.
+
+The check is skipped automatically when stderr isn't a terminal (pipes, scripts)
+and when `CI` is set. To turn it off entirely:
+
+```bash
+export YAAK_NO_UPDATE_CHECK=1     # environment
+yaak --no-update-check <task>     # single run
+```
+
+```toml
+# ~/.config/yaak/config.toml
+check_updates = false
+```
 
 ### Safety
 

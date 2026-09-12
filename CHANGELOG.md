@@ -5,6 +5,21 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- The setup wizard now verifies your API key against the provider before saving it — a rejected key can be retyped instead of silently landing in the config, and an unreachable provider falls back to a "save anyway" prompt so setup still works offline
+- Nine new wizard translations across all 8 locales for the verification and permission messages
+
+### Fixed
+- The generated config is now escaped through the `toml` crate. An API key or custom model name containing a quote or backslash previously produced an unparseable file, which `load_config` silently discarded — leaving "No API key found" with a config file sitting on disk
+- An empty API key now re-prompts instead of exiting
+
+### Security
+- On Unix, the config file is created with `0600` and its directory with `0700`. The file holds an API key in plain text and was previously left at the default umask, typically world-readable. An existing loosely-permissioned file is tightened on write
+
+---
+
 ## [0.1.5] — 2026-06-21
 
 ### Changed

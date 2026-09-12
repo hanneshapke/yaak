@@ -99,6 +99,12 @@ cp config.example.toml ~/.config/yaak/config.toml
 
 On macOS, yaak also checks `~/Library/Application Support/yaak/config.toml`.
 
+The wizard never echoes your API key to the terminal, and sends one minimal
+request to the provider to confirm the key works before saving it. If the
+provider rejects the key you get to retype it; if the provider can't be reached
+at all, you can save the config anyway. On Unix the config file is written with
+`0600` permissions, since it holds the key in plain text.
+
 ### Environment variables
 
 ```bash

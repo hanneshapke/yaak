@@ -5,6 +5,19 @@ All notable changes to yaak will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Daily update check — yaak asks GitHub for the newest release at most once a day, in a detached background process, so it never delays the command you asked for; when a newer version is known yaak prints a one-line notice and offers to update, and declining is remembered per version so you are only asked once
+- `--no-update-check` flag, `YAAK_NO_UPDATE_CHECK` environment variable and `check_updates` config option to turn the check off — it is also skipped automatically when stderr is not a terminal or `CI` is set
+- Install-aware self-update — `yaak --update` detects whether yaak came from the install script, Homebrew, cargo, Nix, Scoop or the AUR, and either replaces the binary in place or offers to run the matching package-manager command
+- `update_*` translations across all 8 locales
+
+### Changed
+- `yaak --update` now queries the GitHub releases API through the existing HTTP client instead of shelling out to `curl`, and no longer pipes the install script over a package-manager install
+
+---
+
 ## [0.1.5] — 2026-06-21
 
 ### Changed

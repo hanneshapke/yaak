@@ -6,6 +6,7 @@ mod context;
 mod explain;
 mod history;
 mod streaming;
+mod update;
 mod wizard;
 
 use api::{
@@ -126,10 +127,42 @@ struct Args {
     /// Update yaak to the latest version
     #[arg(short = 'U', long, exclusive = true)]
     update: bool,
+
+    /// Skip the once-a-day check for a newer yaak release
+    #[arg(long)]
+    no_update_check: bool,
+
+    /// Internal: run the background release check and exit (spawned by yaak itself)
+    #[arg(long, hide = true, exclusive = true)]
+    internal_update_check: bool,
+}
+
+/// Resolve the UI language from the CLI flag, the config file, or the system
+/// locale (in that order) and install it as the active locale.
+fn set_locale(cli_language: Option<String>) {
+    let lang = cli_language
+        .or_else(|| load_config().language)
+        .unwrap_or_else(|| {
+            sys_locale::get_locale()
+                .and_then(|l| l.split(['-', '_']).next().map(String::from))
+                .unwrap_or_else(|| "en".into())
+        });
+    let lang = match lang.as_str() {
+        "en" | "de" | "es" | "fr" | "pt" | "zh" | "ja" | "ko" => lang,
+        _ => "en".into(),
+    };
+    rust_i18n::set_locale(&lang);
 }
 
 fn main() {
     let args = Args::parse();
+
+    // Detached background check spawned by a previous run — record the result
+    // and exit without printing anything.
+    if args.internal_update_check {
+        update::run_background_check();
+        return;
+    }
 
     if args.version {
         println!("yaak {}", env!("CARGO_PKG_VERSION"));
@@ -151,24 +184,15 @@ fn main() {
     }
 
     if args.update {
-        self_update();
+        // The locale isn't resolved yet for this early exit, so do it now —
+        // the update flow talks to the user.
+        set_locale(args.language.clone());
+        update::run_update();
         return;
     }
 
     // --- Resolve language and set locale ---
-    {
-        let config_lang = load_config().language;
-        let lang = args.language.clone().or(config_lang).unwrap_or_else(|| {
-            sys_locale::get_locale()
-                .and_then(|l| l.split(['-', '_']).next().map(String::from))
-                .unwrap_or_else(|| "en".into())
-        });
-        let lang = match lang.as_str() {
-            "en" | "de" | "es" | "fr" | "pt" | "zh" | "ja" | "ko" => lang,
-            _ => "en".into(),
-        };
-        rust_i18n::set_locale(&lang);
-    }
+    set_locale(args.language.clone());
 
     if let Some(shell) = args.completions {
         let mut cmd = Args::command();
@@ -184,6 +208,12 @@ fn main() {
     if args.config {
         wizard::run_config_wizard();
         std::process::exit(0);
+    }
+
+    // --- Daily update check (background; notifies about a check from a
+    // previous run so the user never waits on the network) ---
+    if !args.no_update_check {
+        update::maybe_check_and_notify(&load_config());
     }
 
     // --- History commands (no API key needed) ---
@@ -807,91 +837,6 @@ fn open_url(url: &str) {
     let _ = command.arg(url).spawn();
 }
 
-fn self_update() {
-    let current = env!("CARGO_PKG_VERSION");
-    eprintln!(
-        "{} Current version: {}",
-        "info:".bold(),
-        format!("v{}", current).dimmed()
-    );
-
-    // Check latest version via GitHub redirect
-    eprintln!("{} Checking for updates...", "info:".bold());
-    let output = Command::new("curl")
-        .args([
-            "-fsS",
-            "-o",
-            "/dev/null",
-            "-w",
-            "%{redirect_url}",
-            "https://github.com/hanneshapke/yaak/releases/latest",
-        ])
-        .output();
-
-    let latest = match output {
-        Ok(o) => {
-            let url = String::from_utf8_lossy(&o.stdout).to_string();
-            url.rsplit('/').next().unwrap_or("").to_string()
-        }
-        Err(e) => {
-            eprintln!(
-                "{} Failed to check for updates: {}",
-                "error:".red().bold(),
-                e
-            );
-            std::process::exit(1);
-        }
-    };
-
-    if latest.is_empty() {
-        eprintln!(
-            "{} Could not determine latest version",
-            "error:".red().bold()
-        );
-        std::process::exit(1);
-    }
-
-    let latest_trimmed = latest.trim_start_matches('v');
-    if latest_trimmed == current {
-        eprintln!(
-            "{} Already up to date ({})",
-            "✓".green().bold(),
-            format!("v{}", current).bold()
-        );
-        return;
-    }
-
-    eprintln!(
-        "{} Updating v{} → {}...",
-        "info:".bold(),
-        current,
-        latest.bold()
-    );
-
-    // Run the install script to perform the update
-    let status = Command::new("bash")
-        .args(["-c", "curl -fsSL https://getyaak.ai/install.sh | bash"])
-        .status();
-
-    match status {
-        Ok(s) if s.success() => {
-            eprintln!("{} Updated to {}", "✓".green().bold(), latest.bold());
-        }
-        Ok(s) => {
-            eprintln!(
-                "{} Update failed (exit code {})",
-                "error:".red().bold(),
-                s.code().unwrap_or(1)
-            );
-            std::process::exit(1);
-        }
-        Err(e) => {
-            eprintln!("{} Update failed: {}", "error:".red().bold(), e);
-            std::process::exit(1);
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::api::{is_anthropic, is_gemini};
@@ -947,6 +892,28 @@ mod tests {
         assert!(crate::shell_init_script(Shell::Bash).contains("history -s"));
         assert!(crate::shell_init_script(Shell::Zsh).contains("print -rs"));
         assert!(crate::shell_init_script(Shell::Fish).contains("builtin history"));
+    }
+
+    #[test]
+    fn background_check_flag_matches_the_hidden_cli_flag() {
+        use clap::Parser;
+        // The flag yaak passes to its own detached check must be one it accepts.
+        let args = crate::Args::try_parse_from(["yaak", crate::update::BACKGROUND_CHECK_FLAG])
+            .expect("yaak should accept its own background-check flag");
+        assert!(args.internal_update_check);
+    }
+
+    #[test]
+    fn cli_exposes_the_update_flags() {
+        use clap::Parser;
+        let args = crate::Args::try_parse_from(["yaak", "--no-update-check", "list files"])
+            .expect("--no-update-check should combine with a description");
+        assert!(args.no_update_check);
+        assert!(
+            crate::Args::try_parse_from(["yaak", "--update"])
+                .unwrap()
+                .update
+        );
     }
 
     #[test]

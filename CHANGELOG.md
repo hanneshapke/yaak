@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.2] — 2026-09-12
+
+### Added
+- The setup wizard now verifies your API key against the provider before saving it — a rejected key can be retyped instead of silently landing in the config, and an unreachable provider falls back to a "save anyway" prompt so setup still works offline
+- Nine new wizard translations across all 8 locales for the verification and permission messages
+
+### Fixed
+- The generated config is now escaped through the `toml` crate. An API key or custom model name containing a quote or backslash previously produced an unparseable file, which `load_config` silently discarded — leaving "No API key found" with a config file sitting on disk
+- An empty API key now re-prompts instead of exiting
+
+### Security
+- On Unix, the config file is created with `0600` and its directory with `0700`. The file holds an API key in plain text and was previously left at the default umask, typically world-readable. An existing loosely-permissioned file is tightened on write
+
+---
+
 ## [0.2.1] — 2026-09-12
 
 Release-pipeline fixes. No functional changes to the tool itself; 0.2.0 reached
@@ -36,15 +51,6 @@ available through Homebrew, crates.io, Scoop and the AUR.
 ## [0.2.0] — 2026-09-12
 
 ### Added
-- The setup wizard now verifies your API key against the provider before saving it — a rejected key can be retyped instead of silently landing in the config, and an unreachable provider falls back to a "save anyway" prompt so setup still works offline
-- Nine new wizard translations across all 8 locales for the verification and permission messages
-
-### Fixed
-- The generated config is now escaped through the `toml` crate. An API key or custom model name containing a quote or backslash previously produced an unparseable file, which `load_config` silently discarded — leaving "No API key found" with a config file sitting on disk
-- An empty API key now re-prompts instead of exiting
-
-### Security
-- On Unix, the config file is created with `0600` and its directory with `0700`. The file holds an API key in plain text and was previously left at the default umask, typically world-readable. An existing loosely-permissioned file is tightened on write
 - Daily update check — yaak asks GitHub for the newest release at most once a day, in a detached background process, so it never delays the command you asked for; when a newer version is known yaak prints a one-line notice and offers to update, and declining is remembered per version so you are only asked once
 - `--no-update-check` flag, `YAAK_NO_UPDATE_CHECK` environment variable and `check_updates` config option to turn the check off — it is also skipped automatically when stderr is not a terminal or `CI` is set
 - Install-aware self-update — `yaak --update` detects whether yaak came from the install script, Homebrew, cargo, Nix, Scoop or the AUR, and either replaces the binary in place or offers to run the matching package-manager command

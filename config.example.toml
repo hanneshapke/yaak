@@ -27,3 +27,8 @@ model = "claude-sonnet-4-6"
 # When true, destructive commands (rm, dd, mkfs, etc.) show a warning
 # but skip the confirmation prompt. Same as passing --force.
 # allow_destructive = false
+
+# Check GitHub for a newer yaak release (default: true)
+# Runs at most once a day in a background process, never blocking your command.
+# Set to false to disable, or export YAAK_NO_UPDATE_CHECK=1.
+# check_updates = true

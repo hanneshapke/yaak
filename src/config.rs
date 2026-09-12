@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize)]
 pub struct Config {
     pub api_base: Option<String>,
     pub api_key: Option<String>,
@@ -8,6 +8,26 @@ pub struct Config {
     pub language: Option<String>,
     #[serde(default)]
     pub allow_destructive: bool,
+    /// Check GitHub for a newer release (at most once a day). Default: true.
+    #[serde(default = "default_true")]
+    pub check_updates: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            api_base: None,
+            api_key: None,
+            model: None,
+            language: None,
+            allow_destructive: false,
+            check_updates: true,
+        }
+    }
 }
 
 pub fn load_config() -> Config {

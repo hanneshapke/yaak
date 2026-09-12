@@ -41,17 +41,24 @@ Tracks releases via a custom tap. `brew upgrade yaak` does what you'd expect. Th
 
 Two packages, because the Arch community has strong opinions about how software should arrive:
 
+> **Update, 2026-09-12:** these packages were renamed from `yaak-cli` and
+> `yaak-cli-bin` to `getyaak` and `getyaak-bin`. Arch now ships an official
+> `extra/yaak-cli` package belonging to an unrelated project, which made the old
+> names unusable. The commands below are the current ones.
+
 ```bash
 # Build from source — the way Tux intended
-yay -S yaak-cli
+yay -S getyaak
 
 # Or grab the prebuilt binary — faster, same result
-yay -S yaak-cli-bin
+yay -S getyaak-bin
 ```
 
-(The packages are named `yaak-cli` because `yaak` was already taken on the AUR by an unrelated project. Both packages install the `yaak` binary — the `-cli` is just the AUR package name.)
+(The packages are named after `getyaak.ai` because plain `yaak` on Arch belongs to an unrelated project — a local-first API client. Both of ours still install the `yaak` binary; only the package name differs.)
 
-The source package (`yaak-cli`) downloads the release tarball and runs `cargo build --release` on your machine. The binary package (`yaak-cli-bin`) grabs the prebuilt x86_64 Linux binary from GitHub Releases. Both install shell completions for bash, zsh, and fish.
+The source package (`getyaak`) downloads the release tarball and runs `cargo build --release` on your machine. The binary package (`getyaak-bin`) grabs the prebuilt x86_64 Linux binary from GitHub Releases. Both install shell completions for bash, zsh, and fish.
+
+One caveat: because both install `/usr/bin/yaak`, they conflict with Arch's `extra/yaak-cli`, which claims the same path. Pacman will ask you to pick one.
 
 Works with `yay`, `paru`, `pikaur`, or plain `makepkg -si` if you're a purist.
 

@@ -261,7 +261,7 @@ pub fn strategy_for(method: InstallMethod, has_tool: impl Fn(&str) -> bool) -> U
                 if has_tool(helper) {
                     return UpdateStrategy::Managed {
                         label: "the AUR".into(),
-                        command: format!("{} -S yaak-cli-bin", helper),
+                        command: format!("{} -S getyaak-bin", helper),
                     };
                 }
             }
@@ -694,7 +694,7 @@ mod tests {
             UpdateStrategy::Manual
         );
         match strategy_for(InstallMethod::SystemPackage, |tool| tool == "yay") {
-            UpdateStrategy::Managed { command, .. } => assert_eq!(command, "yay -S yaak-cli-bin"),
+            UpdateStrategy::Managed { command, .. } => assert_eq!(command, "yay -S getyaak-bin"),
             other => panic!("expected a managed strategy, got {:?}", other),
         }
     }

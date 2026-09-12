@@ -64,6 +64,9 @@ jobs:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions:
+      # Required for crates.io Trusted Publishing (OIDC); no stored token.
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -80,9 +83,13 @@ jobs:
             exit 1
           fi
 
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish --allow-dirty
 
   # ──────────────────────────────────────────────
@@ -317,10 +324,19 @@ jobs:
           sed -i 's/^          //' yaak.rb
           cat yaak.rb
 
+      - name: Mint a token for the tap repo
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: hanneshapke
+          repositories: homebrew-yaak
+
       - name: Push formula to Homebrew tap
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          API_TOKEN_GITHUB: ${{ steps.app-token.outputs.token }}
         with:
           source_file: yaak.rb
           destination_repo: hanneshapke/homebrew-yaak
@@ -331,7 +347,7 @@ jobs:
           commit_message: "Update yaak formula to ${{ steps.version.outputs.tag }}"
 
   # ──────────────────────────────────────────────
-  # AUR: update yaak-cli and yaak-cli-bin on the Arch User Repository
+  # AUR: update getyaak and getyaak-bin on the Arch User Repository
   # ──────────────────────────────────────────────
   aur:
     name: Update AUR packages
@@ -342,10 +358,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - pkgname: yaak-cli
+          - pkgname: getyaak
             # Source package — hash the source tarball from GitHub archive
             asset_suffix: ""
-          - pkgname: yaak-cli-bin
+          - pkgname: getyaak-bin
             # Binary package — hash the prebuilt Linux x86_64 tarball
             asset_suffix: "-x86_64-unknown-linux-gnu.tar.gz"
     steps:
@@ -359,8 +375,8 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "version=${TAG#v}" >> $GITHUB_OUTPUT
 
-      - name: Compute source hash (yaak-cli)
-        if: matrix.pkgname == 'yaak-cli'
+      - name: Compute source hash (getyaak)
+        if: matrix.pkgname == 'getyaak'
         id: hash_source
         shell: bash
         run: |
@@ -369,8 +385,8 @@ jobs:
           SHA=$(curl -fSL "$URL" | sha256sum | awk '{print $1}')
           echo "sha256=$SHA" >> $GITHUB_OUTPUT
 
-      - name: Compute binary hash (yaak-cli-bin)
-        if: matrix.pkgname == 'yaak-cli-bin'
+      - name: Compute binary hash (getyaak-bin)
+        if: matrix.pkgname == 'getyaak-bin'
         id: hash_bin
         shell: bash
         run: |
@@ -391,7 +407,7 @@ jobs:
           sed -i "s/^pkgrel=.*/pkgrel=1/" "$PKGBUILD"
 
           # Update sha256sums
-          if [ "${{ matrix.pkgname }}" = "yaak-cli" ]; then
+          if [ "${{ matrix.pkgname }}" = "getyaak" ]; then
             SHA="${{ steps.hash_source.outputs.sha256 }}"
           else
             SHA="${{ steps.hash_bin.outputs.sha256 }}"
@@ -521,16 +537,24 @@ jobs:
           echo "--- Generated manifest ---"
           cat yaak.json
 
+      - name: Mint a token for the bucket repo
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: hanneshapke
+          repositories: scoop-yaak
+
       - name: Push manifest to Scoop bucket
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          API_TOKEN_GITHUB: ${{ steps.app-token.outputs.token }}
         with:
           source_file: yaak.json
           destination_repo: hanneshapke/scoop-yaak
           destination_folder: .
           destination_branch: main
-          destination_branch_create: main
           user_email: github-actions[bot]@users.noreply.github.com
           user_name: github-actions[bot]
           commit_message: "Update yaak to ${{ steps.version.outputs.tag }}"

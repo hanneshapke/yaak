@@ -5,7 +5,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/hanneshapke/yaak.svg?style=social)](https://github.com/hanneshapke/yaak/stargazers)
 
 [![Homebrew](https://img.shields.io/badge/homebrew-hanneshapke%2Fyaak-orange)](https://github.com/hanneshapke/homebrew-yaak)
-[![AUR](https://img.shields.io/aur/version/yaak-cli)](https://aur.archlinux.org/packages/yaak-cli)
+[![AUR](https://img.shields.io/aur/version/getyaak)](https://aur.archlinux.org/packages/getyaak)
 [![Nix](https://img.shields.io/badge/nix-flake-5277C3)](https://github.com/hanneshapke/yaak#nix--nixos-flakes)
 [![Scoop](https://img.shields.io/badge/scoop-yaak-blue)](https://github.com/hanneshapke/scoop-yaak)
 
@@ -28,8 +28,8 @@ curl -fsSL https://getyaak.ai/install.sh | bash
 brew install hanneshapke/yaak/yaak
 
 # Arch Linux (AUR) — build from source or prebuilt binary
-yay -S yaak-cli          # or: paru -S yaak-cli
-yay -S yaak-cli-bin      # prebuilt release binary
+yay -S getyaak           # or: paru -S getyaak
+yay -S getyaak-bin       # prebuilt release binary
 
 # Nix / NixOS (flakes)
 nix profile install github:hanneshapke/yaak
@@ -280,7 +280,7 @@ yaak knows how it was installed and picks the matching update path:
 | cargo                     | Offers to run `cargo install yaak --force` |
 | Nix                       | Offers to run `nix profile upgrade yaak` |
 | Scoop                     | Offers to run `scoop update yaak`        |
-| AUR (`yay`/`paru`)        | Offers to run `<helper> -S yaak-cli-bin` |
+| AUR (`yay`/`paru`)        | Offers to run `<helper> -S getyaak-bin` |
 | Anything else             | Prints the release page to download from |
 
 A package-manager install is never upgraded without asking — yaak prints the

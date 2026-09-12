@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] — 2026-09-12
+
 ### Added
 - Daily update check — yaak asks GitHub for the newest release at most once a day, in a detached background process, so it never delays the command you asked for; when a newer version is known yaak prints a one-line notice and offers to update, and declining is remembered per version so you are only asked once
 - `--no-update-check` flag, `YAAK_NO_UPDATE_CHECK` environment variable and `check_updates` config option to turn the check off — it is also skipped automatically when stderr is not a terminal or `CI` is set
@@ -15,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `yaak --update` now queries the GitHub releases API through the existing HTTP client instead of shelling out to `curl`, and no longer pipes the install script over a package-manager install
+
+### Fixed
+- Corrected an inconsistent test assertion
 
 ---
 

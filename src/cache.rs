@@ -346,7 +346,7 @@ mod tests {
         let score = bm25_score(&doc, &query, avg_dl, 1, &df);
         assert!(
             score >= BM25_THRESHOLD,
-            "near-exact match should exceed threshold: {}",
+            "near-exact match should meet or exceed threshold: {}",
             score
         );
     }
